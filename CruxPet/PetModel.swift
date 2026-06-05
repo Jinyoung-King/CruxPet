@@ -1,8 +1,7 @@
 import Foundation
-import SwiftUI
 import Observation
 
-enum CrownType: Int, Equatable {
+enum CrownType: Int {
     case none, bronze, silver, gold, diamond, constellation
     var symbol: String {
         switch self {
@@ -45,7 +44,7 @@ class PetModel {
         resetDailyCountsIfNeeded()
     }
 
-    func gainCommitExp() {
+    @MainActor func gainCommitExp() {
         let (gained, isCrit) = PetModel.computeGain(base: 15, level: level)
         totalExp += Double(gained)
         todayCommitCount += 1
@@ -53,7 +52,7 @@ class PetModel {
         persist()
     }
 
-    func gainPomodoroExp() {
+    @MainActor func gainPomodoroExp() {
         let (gained, isCrit) = PetModel.computeGain(base: 50, level: level)
         totalExp += Double(gained)
         todayPomodoroCount += 1
@@ -128,7 +127,8 @@ class PetModel {
 
     private func triggerCritical() {
         showCritical = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { [weak self] in
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .seconds(0.8))
             self?.showCritical = false
         }
     }

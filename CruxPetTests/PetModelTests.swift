@@ -88,6 +88,13 @@ final class PetModelTests: XCTestCase {
         XCTAssertEqual(a.crownType, .gold)
     }
 
+    // 레벨 80 → 후광 있음
+    func testAppearanceLevel80HasHalo() {
+        let a = PetModel.appearance(for: 80)
+        XCTAssertTrue(a.hasHalo)
+        XCTAssertEqual(a.crownType, .diamond)
+    }
+
     // 레벨 100 → 성좌관 + isPearl
     func testAppearanceLevel100() {
         let a = PetModel.appearance(for: 100)
