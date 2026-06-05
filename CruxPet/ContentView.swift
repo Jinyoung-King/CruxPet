@@ -88,13 +88,17 @@ struct ContentView: View {
 
     private var pomodoroSection: some View {
         VStack(spacing: 6) {
-            HStack {
+            HStack(spacing: 4) {
                 Image(systemName: "timer")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Text("포모도로")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                Image(systemName: "info.circle")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+                    .help("포모도로 기법: 25분 집중 후 5분 휴식을 반복하는 시간 관리 방법. 1980년대 Francesco Cirillo가 토마토(pomodoro) 모양 타이머로 개발했어요. 🍅")
             }
             Text(pomodoro.displayTime)
                 .font(.system(size: 24, weight: .bold, design: .monospaced))
