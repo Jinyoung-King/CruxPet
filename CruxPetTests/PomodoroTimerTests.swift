@@ -36,7 +36,7 @@ final class PomodoroTimerTests: XCTestCase {
         timer.start()
         timer.reset()
         XCTAssertEqual(timer.state, .idle)
-        XCTAssertEqual(timer.timeRemaining, 25 * 60)
+        XCTAssertEqual(timer.timeRemaining, timer.duration)
     }
 
     func testResetFromPausedGoesBackToIdle() {
@@ -45,7 +45,7 @@ final class PomodoroTimerTests: XCTestCase {
         timer.pause()
         timer.reset()
         XCTAssertEqual(timer.state, .idle)
-        XCTAssertEqual(timer.timeRemaining, 25 * 60)
+        XCTAssertEqual(timer.timeRemaining, timer.duration)
     }
 
     func testDoubleStartIsNoOp() {
