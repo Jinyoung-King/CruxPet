@@ -15,6 +15,7 @@ class EventWatcher {
     var onPomodoro: (() -> Void)?
 
     func start() {
+        guard pollTimer == nil else { return }
         createEventsFileIfNeeded()
         pollTimer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
             Task { @MainActor [weak self] in

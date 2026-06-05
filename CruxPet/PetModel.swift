@@ -140,7 +140,9 @@ class PetModel {
     }
 
     private func resetDailyCountsIfNeeded() {
-        let today = ISO8601DateFormatter().string(from: Date()).prefix(10)
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let today = Substring(formatter.string(from: Date()))
         let stored = UserDefaults.standard.string(forKey: "cruxpet.todayDate") ?? ""
         if stored != today {
             todayCommitCount = 0
