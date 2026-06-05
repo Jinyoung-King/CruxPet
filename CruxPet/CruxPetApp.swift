@@ -1,17 +1,16 @@
-//
-//  CruxPetApp.swift
-//  CruxPet
-//
-//  Created by 진영 on 4/9/26.
-//
-
 import SwiftUI
+import UserNotifications
 
 @main
 struct CruxPetApp: App {
+    init() {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
+    }
+
     var body: some Scene {
-        WindowGroup {
+        MenuBarExtra("CruxPet", systemImage: "pawprint.fill") {
             ContentView()
         }
+        .menuBarExtraStyle(.window)
     }
 }
