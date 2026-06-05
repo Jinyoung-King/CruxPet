@@ -185,3 +185,15 @@ class PetModel {
         }
     }
 }
+
+extension SlimeAppearance {
+    func applying(_ customization: PetCustomization) -> SlimeAppearance {
+        guard customization.useCustomColor else { return self }
+        return SlimeAppearance(
+            bodyHex: customization.customColorHex,
+            size: size, crownType: crownType,
+            sparkleCount: sparkleCount,
+            hasHalo: hasHalo, isRainbow: false, isPearl: isPearl
+        )
+    }
+}

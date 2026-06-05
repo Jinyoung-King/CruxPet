@@ -101,4 +101,24 @@ final class PetModelTests: XCTestCase {
         XCTAssertEqual(a.crownType, .constellation)
         XCTAssertTrue(a.isPearl)
     }
+
+    func testApplyingKeepsLevelColorWhenUseCustomColorFalse() {
+        let base = PetModel.appearance(for: 1)   // bodyHex = #7EC8E3
+        var c = PetCustomization()
+        c.useCustomColor = false
+        c.customColorHex = "#EF5350"
+        let result = base.applying(c)
+        XCTAssertEqual(result.bodyHex, base.bodyHex)
+        XCTAssertEqual(result.isRainbow, base.isRainbow)
+    }
+
+    func testApplyingOverridesColorWhenUseCustomColorTrue() {
+        let base = PetModel.appearance(for: 1)
+        var c = PetCustomization()
+        c.useCustomColor = true
+        c.customColorHex = "#EF5350"
+        let result = base.applying(c)
+        XCTAssertEqual(result.bodyHex, "#EF5350")
+        XCTAssertFalse(result.isRainbow)
+    }
 }

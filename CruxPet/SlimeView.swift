@@ -3,6 +3,7 @@ import SwiftUI
 struct SlimeView: View {
     let appearance: SlimeAppearance
     var isPomodoroActive: Bool = false
+    var accessory: String = ""
 
     private var totalWidth: CGFloat { appearance.size + 32 }
     private var totalHeight: CGFloat { appearance.size + 40 }
@@ -37,6 +38,11 @@ struct SlimeView: View {
 
                 // 반짝이
                 drawSparkles(context: &context, bodyRect: bodyRect, t: t, count: appearance.sparkleCount)
+
+                // 악세서리 (왕관 오른쪽 위)
+                if !accessory.isEmpty {
+                    drawAccessory(context: &context, bodyRect: bodyRect)
+                }
             }
             .frame(width: totalWidth, height: totalHeight)
         }
@@ -113,6 +119,14 @@ struct SlimeView: View {
             let sparkle = sparkleContext.resolve(Text("✦").font(.system(size: 8)))
             sparkleContext.draw(sparkle, at: CGPoint(x: x, y: y), anchor: .center)
         }
+    }
+
+    private func drawAccessory(context: inout GraphicsContext, bodyRect: CGRect) {
+        let size = bodyRect.width * 0.38
+        let resolved = context.resolve(Text(accessory).font(.system(size: size)))
+        let x = bodyRect.maxX - size * 0.1
+        let y = bodyRect.minY - size * 0.1
+        context.draw(resolved, at: CGPoint(x: x, y: y), anchor: .bottomTrailing)
     }
 }
 
