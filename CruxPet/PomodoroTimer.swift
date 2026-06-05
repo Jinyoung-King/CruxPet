@@ -8,6 +8,7 @@ enum PomodoroState: Equatable {
 @MainActor @Observable
 class PomodoroTimer {
     private(set) var state: PomodoroState = .idle
+    private(set) var duration: TimeInterval = 25 * 60
     private(set) var timeRemaining: TimeInterval = 25 * 60
 
     var displayTime: String {
@@ -43,7 +44,12 @@ class PomodoroTimer {
         timer?.invalidate()
         timer = nil
         state = .idle
-        timeRemaining = 25 * 60
+        timeRemaining = duration
+    }
+
+    func setDuration(_ minutes: Int) {
+        duration = TimeInterval(minutes * 60)
+        reset()
     }
 
     @MainActor

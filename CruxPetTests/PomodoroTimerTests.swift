@@ -67,4 +67,19 @@ final class PomodoroTimerTests: XCTestCase {
         timer.onComplete = { called = true }
         XCTAssertNotNil(timer.onComplete)
     }
+
+    func testSetDurationUpdatesTimeRemaining() {
+        let timer = PomodoroTimer()
+        timer.setDuration(15)
+        XCTAssertEqual(timer.timeRemaining, 15 * 60)
+        XCTAssertEqual(timer.state, .idle)
+    }
+
+    func testResetUsesCurrentDuration() {
+        let timer = PomodoroTimer()
+        timer.setDuration(50)
+        timer.start()
+        timer.reset()
+        XCTAssertEqual(timer.timeRemaining, 50 * 60)
+    }
 }
