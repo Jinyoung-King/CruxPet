@@ -21,7 +21,7 @@ struct ContentView: View {
         }
         .padding(12)
         .frame(width: 200)
-        .background(PixelGridBackground())
+        .background(.ultraThinMaterial)
         .onAppear { setupWatcher() }
     }
 
