@@ -19,35 +19,24 @@ struct CruxPetApp: App {
     }
 
     private static func installGitHook() {
-        let home = NSHomeDirectory()
-        let fm = FileManager.default
-
-        let hooksDir = "\(home)/.config/git/hooks"
-        let hookFile = "\(hooksDir)/post-commit"
-        let eventsDir = "\(home)/.cruxpet"
-        let eventsFile = "\(eventsDir)/events.json"
-        let hookLine = #"echo "{\"type\":\"commit\",\"timestamp\":$(date +%s)}" >> "$HOME/.cruxpet/events.json""#
-
-        try? fm.createDirectory(atPath: hooksDir, withIntermediateDirectories: true)
-        try? fm.createDirectory(atPath: eventsDir, withIntermediateDirectories: true)
-        if !fm.fileExists(atPath: eventsFile) { fm.createFile(atPath: eventsFile, contents: nil) }
-
-        if !fm.fileExists(atPath: hookFile) {
-            try? "#!/bin/sh\n\(hookLine)\n".write(toFile: hookFile, atomically: true, encoding: .utf8)
-        } else if let existing = try? String(contentsOfFile: hookFile, encoding: .utf8),
-                  !existing.contains("cruxpet") {
-            if let handle = FileHandle(forWritingAtPath: hookFile) {
-                handle.seekToEndOfFile()
-                handle.write("\n# CruxPet\n\(hookLine)\n".data(using: .utf8)!)
-                handle.closeFile()
-            }
-        }
-
-        try? fm.setAttributes([.posixPermissions: 0o755], ofItemAtPath: hookFile)
-
+        let script = #"""
+            set -e
+            HOOKS_DIR="$HOME/.config/git/hooks"
+            HOOK_FILE="$HOOKS_DIR/post-commit"
+            HOOK_LINE='echo "{\"type\":\"commit\",\"timestamp\":$(date +%s)}" >> "$HOME/.cruxpet/events.json"'
+            mkdir -p "$HOOKS_DIR" "$HOME/.cruxpet"
+            touch "$HOME/.cruxpet/events.json"
+            if [ ! -f "$HOOK_FILE" ]; then
+                printf '#!/bin/sh\n%s\n' "$HOOK_LINE" > "$HOOK_FILE"
+            elif ! grep -qF "cruxpet" "$HOOK_FILE"; then
+                printf '\n# CruxPet\n%s\n' "$HOOK_LINE" >> "$HOOK_FILE"
+            fi
+            chmod +x "$HOOK_FILE"
+            git config --global core.hooksPath "$HOOKS_DIR"
+        """#
         let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/git")
-        process.arguments = ["config", "--global", "core.hooksPath", hooksDir]
+        process.executableURL = URL(fileURLWithPath: "/bin/sh")
+        process.arguments = ["-c", script]
         try? process.run()
         process.waitUntilExit()
     }
