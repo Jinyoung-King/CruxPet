@@ -1,0 +1,152 @@
+<h2>CruxPet 최종 설계 v2</h2>
+<p class="subtitle">EXP 가변 공식 + 슬라임 다단계 진화</p>
+
+<style>
+@keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
+@keyframes shimmer { 0%{background-position:-200px 0} 100%{background-position:200px 0} }
+@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+@keyframes sparkle { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.3;transform:scale(0.5)} }
+.bob { animation: bob 1.2s ease-in-out infinite; display:inline-block; }
+
+.slime-mini { display:inline-grid; gap:1px; image-rendering:pixelated; vertical-align:middle; }
+.p { width:5px; height:5px; display:block; }
+
+.exp-fill {
+  height:100%; border-radius:4px;
+  background: linear-gradient(90deg,#7EC8E3 0%,#A8DADC 40%,#7EC8E3 100%);
+  background-size:200px 100%;
+  animation: shimmer 2s linear infinite;
+}
+
+.sparkle-wrap { position:relative; display:inline-block; }
+.sparkle-wrap .sp {
+  position:absolute; font-size:8px; color:gold;
+  animation: sparkle 1s ease-in-out infinite;
+}
+</style>
+
+<div style="display:flex; gap:20px; flex-wrap:wrap; justify-content:center;">
+
+  <!-- EXP 공식 -->
+  <div style="flex:1; min-width:240px;">
+    <h3>⭐ EXP 획득 공식</h3>
+    <div class="mockup">
+      <div class="mockup-body" style="font-size:12px;">
+        <div style="padding:8px; background:#fffde7; border-radius:6px; margin-bottom:10px; line-height:2;">
+          <div><b>💾 커밋 EXP</b> = round(15 × √Lv)</div>
+          <div><b>🍅 포모도로 EXP</b> = round(50 × √Lv)</div>
+        </div>
+        <table style="width:100%; border-collapse:collapse; font-size:11px;">
+          <tr style="background:#f5f5f5;">
+            <th style="padding:4px 6px;">레벨</th>
+            <th style="padding:4px 6px;">커밋 EXP</th>
+            <th style="padding:4px 6px;">포모도로 EXP</th>
+            <th style="padding:4px 6px;">레벨업 필요</th>
+          </tr>
+          <tr style="border-top:1px solid #eee;"><td style="padding:4px 6px;">Lv 1</td><td style="padding:4px 6px; color:#4CAF50;">+15</td><td style="padding:4px 6px; color:#2196F3;">+50</td><td style="padding:4px 6px; color:#888;">100</td></tr>
+          <tr style="border-top:1px solid #eee;"><td style="padding:4px 6px;">Lv 5</td><td style="padding:4px 6px; color:#4CAF50;">+34</td><td style="padding:4px 6px; color:#2196F3;">+112</td><td style="padding:4px 6px; color:#888;">559</td></tr>
+          <tr style="border-top:1px solid #eee;"><td style="padding:4px 6px;">Lv 10</td><td style="padding:4px 6px; color:#4CAF50;">+47</td><td style="padding:4px 6px; color:#2196F3;">+158</td><td style="padding:4px 6px; color:#888;">3,162</td></tr>
+          <tr style="border-top:1px solid #eee;"><td style="padding:4px 6px;">Lv 20</td><td style="padding:4px 6px; color:#4CAF50;">+67</td><td style="padding:4px 6px; color:#2196F3;">+224</td><td style="padding:4px 6px; color:#888;">17,889</td></tr>
+          <tr style="border-top:1px solid #eee;"><td style="padding:4px 6px;">Lv 50</td><td style="padding:4px 6px; color:#4CAF50;">+106</td><td style="padding:4px 6px; color:#2196F3;">+354</td><td style="padding:4px 6px; color:#888;">353,553</td></tr>
+          <tr style="border-top:1px solid #eee;"><td style="padding:4px 6px;">Lv 100</td><td style="padding:4px 6px; color:#4CAF50;">+150</td><td style="padding:4px 6px; color:#2196F3;">+500</td><td style="padding:4px 6px; color:#888;">∞ 계속</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <h3 style="margin-top:16px;">🏆 레벨업 필요 EXP</h3>
+    <div class="mockup">
+      <div class="mockup-body" style="font-size:11px; padding:8px; background:#fffde7; border-radius:6px; line-height:2; color:#666;">
+        <div><b>필요 EXP(N→N+1)</b> = floor(100 × N^1.5)</div>
+        <div><b>누적 EXP(레벨 N)</b> = Σ floor(100 × k^1.5), k=1…N</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 슬라임 진화 -->
+  <div style="flex:1; min-width:280px;">
+    <h3>🌈 슬라임 진화표</h3>
+    <div class="mockup">
+      <div class="mockup-body" style="font-size:11px;">
+        <table style="width:100%; border-collapse:collapse;">
+          <tr style="background:#f5f5f5; font-size:10px;">
+            <th style="padding:4px;">레벨</th>
+            <th style="padding:4px;">색상</th>
+            <th style="padding:4px;">크기</th>
+            <th style="padding:4px;">왕관</th>
+            <th style="padding:4px;">이펙트</th>
+          </tr>
+          <tr style="border-top:1px solid #eee;">
+            <td style="padding:4px;">1–2</td>
+            <td style="padding:4px;"><span style="color:#7EC8E3;">■</span> 파랑</td>
+            <td style="padding:4px;">S</td><td style="padding:4px;">—</td><td style="padding:4px;">—</td>
+          </tr>
+          <tr style="border-top:1px solid #eee;">
+            <td style="padding:4px;">3–4</td>
+            <td style="padding:4px;"><span style="color:#4FC3F7;">■</span> 밝은파랑</td>
+            <td style="padding:4px;">S</td><td style="padding:4px;">—</td><td style="padding:4px;">—</td>
+          </tr>
+          <tr style="border-top:1px solid #eee;">
+            <td style="padding:4px;">5–7</td>
+            <td style="padding:4px;"><span style="color:#66BB6A;">■</span> 초록</td>
+            <td style="padding:4px;">M</td><td style="padding:4px;">—</td><td style="padding:4px;">—</td>
+          </tr>
+          <tr style="border-top:1px solid #eee;">
+            <td style="padding:4px;">8–9</td>
+            <td style="padding:4px;"><span style="color:#FFEE58;">■</span> 노랑</td>
+            <td style="padding:4px;">M</td><td style="padding:4px;">—</td><td style="padding:4px;">—</td>
+          </tr>
+          <tr style="border-top:1px solid #eee; background:#fff8e1;">
+            <td style="padding:4px;">10–14</td>
+            <td style="padding:4px;"><span style="color:#FFA726;">■</span> 주황</td>
+            <td style="padding:4px;">M</td><td style="padding:4px;">🥉 동관</td><td style="padding:4px;">—</td>
+          </tr>
+          <tr style="border-top:1px solid #eee; background:#fff8e1;">
+            <td style="padding:4px;">15–19</td>
+            <td style="padding:4px;"><span style="color:#EF5350;">■</span> 빨강</td>
+            <td style="padding:4px;">M</td><td style="padding:4px;">🥉 동관</td><td style="padding:4px;">✦ 1개</td>
+          </tr>
+          <tr style="border-top:1px solid #eee; background:#e8f5e9;">
+            <td style="padding:4px;">20–24</td>
+            <td style="padding:4px;"><span style="color:#7E57C2;">■</span> 남색</td>
+            <td style="padding:4px;">L</td><td style="padding:4px;">🥈 은관</td><td style="padding:4px;">✦ 2개</td>
+          </tr>
+          <tr style="border-top:1px solid #eee; background:#e8f5e9;">
+            <td style="padding:4px;">25–29</td>
+            <td style="padding:4px;"><span style="color:#AB47BC;">■</span> 보라</td>
+            <td style="padding:4px;">L</td><td style="padding:4px;">🥈 은관</td><td style="padding:4px;">✦ 3개</td>
+          </tr>
+          <tr style="border-top:1px solid #eee; background:#fff9c4;">
+            <td style="padding:4px;">30–39</td>
+            <td style="padding:4px;"><span style="background:linear-gradient(90deg,red,orange,yellow); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">■■</span> 무지개</td>
+            <td style="padding:4px;">L</td><td style="padding:4px;">👑 금관</td><td style="padding:4px;">✦ 4개</td>
+          </tr>
+          <tr style="border-top:1px solid #eee; background:#fff9c4;">
+            <td style="padding:4px;">40–49</td>
+            <td style="padding:4px;"><span style="background:linear-gradient(90deg,red,orange,yellow); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">■■</span> 무지개</td>
+            <td style="padding:4px;">XL</td><td style="padding:4px;">👑 금관</td><td style="padding:4px;">✦✦ 6개</td>
+          </tr>
+          <tr style="border-top:1px solid #eee; background:#e3f2fd;">
+            <td style="padding:4px;">50–59</td>
+            <td style="padding:4px;"><span style="color:#FFD700;">■</span> 황금</td>
+            <td style="padding:4px;">XL</td><td style="padding:4px;">💎 다이아</td><td style="padding:4px;">✦✦ 8개</td>
+          </tr>
+          <tr style="border-top:1px solid #eee; background:#e3f2fd;">
+            <td style="padding:4px;">60–79</td>
+            <td style="padding:4px;"><span style="color:#E0E0E0;">■</span> 은빛</td>
+            <td style="padding:4px;">XL</td><td style="padding:4px;">💎 다이아</td><td style="padding:4px;">✦✦✦ 10개</td>
+          </tr>
+          <tr style="border-top:1px solid #eee; background:#fce4ec;">
+            <td style="padding:4px;">80–99</td>
+            <td style="padding:4px;"><span style="color:#F48FB1;">■</span> 크리스탈</td>
+            <td style="padding:4px;">XXL</td><td style="padding:4px;">💎 다이아</td><td style="padding:4px;">✦✦✦ + 후광</td>
+          </tr>
+          <tr style="border-top:2px solid #333; background:#1a1a2e; color:#fff;">
+            <td style="padding:4px;">100+</td>
+            <td style="padding:4px;"><span style="background:linear-gradient(90deg,#ff0,#0ff,#f0f); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">■■</span> 초월</td>
+            <td style="padding:4px;">XXL</td><td style="padding:4px;">✨ 성좌관</td><td style="padding:4px;">풀 이펙트</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

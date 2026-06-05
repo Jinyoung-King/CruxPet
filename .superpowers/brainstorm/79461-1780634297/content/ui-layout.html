@@ -1,0 +1,87 @@
+<h2>CruxPet UI 디자인</h2>
+<p class="subtitle">메뉴바 팝업 레이아웃 — 두 가지 안</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">A. 스탯 중심형</div>
+    <div class="mockup-body">
+      <div style="text-align:center; padding: 8px 0;">
+        <div style="font-size: 48px;">🐧</div>
+        <div style="font-size: 12px; color: #888; margin-bottom: 12px;">Crux · Lv.3</div>
+      </div>
+      <div style="padding: 0 4px;">
+        <div style="font-size: 11px; color: #888; margin-bottom: 2px;">😊 행복 (Git 커밋)</div>
+        <div style="background:#eee; border-radius:4px; height:8px; margin-bottom:8px;">
+          <div style="background:#4CAF50; width:70%; height:8px; border-radius:4px;"></div>
+        </div>
+        <div style="font-size: 11px; color: #888; margin-bottom: 2px;">🎯 집중력 (포모도로)</div>
+        <div style="background:#eee; border-radius:4px; height:8px; margin-bottom:12px;">
+          <div style="background:#2196F3; width:45%; height:8px; border-radius:4px;"></div>
+        </div>
+      </div>
+      <div style="background:#f5f5f5; border-radius:8px; padding:8px; text-align:center; margin-bottom:8px;">
+        <div style="font-size: 11px; color: #888;">🍅 포모도로</div>
+        <div style="font-size: 22px; font-weight:bold; font-family:monospace;">24:13</div>
+        <div style="display:flex; gap:4px; justify-content:center; margin-top:4px;">
+          <button class="mock-button" style="font-size:10px; padding:3px 8px;">▶ 시작</button>
+          <button class="mock-button" style="font-size:10px; padding:3px 8px; background:#eee; color:#333;">↺ 리셋</button>
+        </div>
+      </div>
+      <div style="border-top:1px solid #eee; padding-top:6px; text-align:center;">
+        <span style="font-size:11px; color:#aaa;">오늘: 커밋 3회 · 포모도로 2회</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">B. 포모도로 중심형</div>
+    <div class="mockup-body">
+      <div style="text-align:center; padding: 8px 0 4px;">
+        <div style="font-size: 48px;">🐧</div>
+      </div>
+      <div style="background:#f0f7ff; border-radius:10px; padding:10px; text-align:center; margin-bottom:10px;">
+        <div style="font-size: 28px; font-weight:bold; font-family:monospace; color:#1976D2;">24:13</div>
+        <div style="display:flex; gap:6px; justify-content:center; margin-top:6px;">
+          <button class="mock-button" style="font-size:11px;">▶ 시작</button>
+          <button class="mock-button" style="font-size:11px; background:#eee; color:#333;">⏸ 일시정지</button>
+        </div>
+      </div>
+      <div style="padding: 0 4px; font-size:11px; color:#666;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+          <span>😊 행복</span><span>70%</span>
+        </div>
+        <div style="background:#eee; border-radius:4px; height:6px; margin-bottom:6px;">
+          <div style="background:#4CAF50; width:70%; height:6px; border-radius:4px;"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+          <span>🎯 집중력</span><span>45%</span>
+        </div>
+        <div style="background:#eee; border-radius:4px; height:6px; margin-bottom:8px;">
+          <div style="background:#2196F3; width:45%; height:6px; border-radius:4px;"></div>
+        </div>
+      </div>
+      <div style="border-top:1px solid #eee; padding-top:6px; text-align:center;">
+        <span style="font-size:10px; color:#aaa;">커밋 3 · 포모도로 2 완료</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top: 16px;">
+  <div class="options">
+    <div class="option" data-choice="layout-a" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content">
+        <h3>스탯 중심형</h3>
+        <p>스탯 바가 눈에 잘 보이고 포모도로는 보조 역할</p>
+      </div>
+    </div>
+    <div class="option" data-choice="layout-b" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content">
+        <h3>포모도로 중심형</h3>
+        <p>타이머가 크게 강조되고 스탯은 보조 역할</p>
+      </div>
+    </div>
+  </div>
+</div>
