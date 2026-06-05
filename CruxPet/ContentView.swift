@@ -14,10 +14,19 @@ struct ContentView: View {
             pomodoroSection
             activitySection
             Divider()
-            Button("종료") { NSApplication.shared.terminate(nil) }
+            HStack {
+                Button(action: shareCard) {
+                    Label("공유", systemImage: "square.and.arrow.up")
+                        .font(.caption)
+                }
                 .buttonStyle(.plain)
                 .foregroundStyle(.secondary)
-                .font(.caption)
+                Spacer()
+                Button("종료") { NSApplication.shared.terminate(nil) }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(.secondary)
+                    .font(.caption)
+            }
         }
         .padding(12)
         .frame(width: 200)
@@ -147,6 +156,20 @@ struct ContentView: View {
             watcher.appendPomodoro()   // record only — EXP granted below
             pet.gainPomodoroExp()
             sendPomodoroNotification()
+        }
+    }
+
+    private func shareCard() {
+        let card = ShareCardView(pet: pet)
+        let renderer = ImageRenderer(content: card)
+        renderer.scale = 2.0
+        guard let image = renderer.nsImage else { return }
+        let picker = NSSharingServicePicker(items: [image])
+        if let button = NSApp.keyWindow?.contentView?.subviews.first {
+            picker.show(relativeTo: .zero, of: button, preferredEdge: .minY)
+        } else {
+            NSPasteboard.general.clearContents()
+            NSPasteboard.general.writeObjects([image])
         }
     }
 
