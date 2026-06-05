@@ -50,15 +50,17 @@ struct SlimeView: View {
             return
         }
         let path = Path(roundedRect: rect, cornerRadius: rect.width * 0.4)
+        let bodyColor: Color
         if appearance.isRainbow {
             let hue = (t * 0.2).truncatingRemainder(dividingBy: 1.0)
-            context.fill(path, with: .color(Color(hue: hue, saturation: 0.8, brightness: 0.9)))
+            bodyColor = Color(hue: hue, saturation: 0.8, brightness: 0.9)
         } else {
-            context.fill(path, with: .color(Color(hex: appearance.bodyHex)))
+            bodyColor = Color(hex: appearance.bodyHex)
         }
+        context.fill(path, with: .color(bodyColor))
         let shadowRect = CGRect(x: rect.minX + 2, y: rect.maxY - 6, width: rect.width - 4, height: 6)
         let shadowPath = Path(roundedRect: shadowRect, cornerRadius: 3)
-        context.fill(shadowPath, with: .color(Color(hex: appearance.bodyHex).opacity(0.5)))
+        context.fill(shadowPath, with: .color(bodyColor.opacity(0.5)))
 
         if appearance.isPearl {
             let highlightRect = CGRect(x: rect.minX + rect.width * 0.2, y: rect.minY + rect.height * 0.1, width: rect.width * 0.25, height: rect.height * 0.2)
@@ -105,9 +107,11 @@ struct SlimeView: View {
             let x = bodyRect.midX + CGFloat(dx) * bodyRect.width * 0.65
             let y = bodyRect.midY + CGFloat(dy) * bodyRect.height * 0.65
             let phase = Double(i) * 0.7
-            let _ = 0.4 + 0.6 * abs(sin(t * 3 + phase))
-            let sparkle = context.resolve(Text("✦").font(.system(size: 8)))
-            context.draw(sparkle, at: CGPoint(x: x, y: y), anchor: .center)
+            let alpha = 0.4 + 0.6 * abs(sin(t * 3 + phase))
+            var sparkleContext = context
+            sparkleContext.opacity = alpha
+            let sparkle = sparkleContext.resolve(Text("✦").font(.system(size: 8)))
+            sparkleContext.draw(sparkle, at: CGPoint(x: x, y: y), anchor: .center)
         }
     }
 }
