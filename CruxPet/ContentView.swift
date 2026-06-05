@@ -2,6 +2,33 @@ import SwiftUI
 import Observation
 import UserNotifications
 
+private struct PomodoroInfoButton: View {
+    @State private var showPopover = false
+
+    var body: some View {
+        Button {
+            showPopover.toggle()
+        } label: {
+            Image(systemName: "info.circle")
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
+        }
+        .buttonStyle(.plain)
+        .popover(isPresented: $showPopover, arrowEdge: .bottom) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("🍅 포모도로 기법")
+                    .font(.caption.bold())
+                Text("25분 집중 → 5분 휴식을 반복하는\n시간 관리 방법.\n1980년대 Francesco Cirillo가\n토마토 모양 타이머로 개발했어요.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(10)
+            .frame(width: 180)
+        }
+    }
+}
+
 struct ContentView: View {
     @State private var pet = PetModel()
     @State private var pomodoro = PomodoroTimer()
@@ -95,10 +122,7 @@ struct ContentView: View {
                 Text("포모도로")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                Image(systemName: "info.circle")
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
-                    .help("포모도로 기법: 25분 집중 후 5분 휴식을 반복하는 시간 관리 방법. 1980년대 Francesco Cirillo가 토마토(pomodoro) 모양 타이머로 개발했어요. 🍅")
+                PomodoroInfoButton()
             }
             Text(pomodoro.displayTime)
                 .font(.system(size: 24, weight: .bold, design: .monospaced))
