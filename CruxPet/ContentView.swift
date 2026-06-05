@@ -33,31 +33,63 @@ struct ContentView: View {
     @State private var pet = PetModel()
     @State private var pomodoro = PomodoroTimer()
     @State private var watcher = EventWatcher()
+    @State private var customization = PetCustomization.load()
+    @State private var showCustomize = false
 
     var body: some View {
-        VStack(spacing: 10) {
-            characterSection
-            expSection
-            pomodoroSection
-            activitySection
-            Divider()
-            HStack {
-                Button(action: shareCard) {
-                    Label("공유", systemImage: "square.and.arrow.up")
-                        .font(.caption)
-                }
-                .buttonStyle(.plain)
-                .foregroundStyle(.secondary)
-                Spacer()
-                Button("종료") { NSApplication.shared.terminate(nil) }
+        ZStack {
+            // 메인 화면
+            VStack(spacing: 10) {
+                characterSection
+                expSection
+                pomodoroSection
+                activitySection
+                Divider()
+                HStack {
+                    Button(action: shareCard) {
+                        Label("공유", systemImage: "square.and.arrow.up")
+                            .font(.caption)
+                    }
                     .buttonStyle(.plain)
                     .foregroundStyle(.secondary)
-                    .font(.caption)
+                    Spacer()
+                    Button {
+                        showCustomize = true
+                    } label: {
+                        Image(systemName: "gearshape")
+                            .font(.caption)
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(.secondary)
+                    Spacer()
+                    Button("종료") { NSApplication.shared.terminate(nil) }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(.secondary)
+                        .font(.caption)
+                }
+            }
+            .padding(12)
+            .opacity(showCustomize ? 0 : 1)
+
+            // 설정 화면
+            if showCustomize {
+                CustomizeView(
+                    current: customization,
+                    petLevel: pet.level,
+                    onSave: { newCustomization in
+                        customization = newCustomization
+                        customization.save()
+                        pomodoro.setDuration(newCustomization.pomodoroMinutes)
+                        showCustomize = false
+                    },
+                    onCancel: { showCustomize = false }
+                )
+                .transition(.opacity)
             }
         }
-        .padding(12)
         .frame(width: 200)
         .background(.ultraThinMaterial)
+        .animation(.easeInOut(duration: 0.15), value: showCustomize)
         .onAppear { setupWatcher() }
     }
 
@@ -67,8 +99,9 @@ struct ContentView: View {
         VStack(spacing: 2) {
             ZStack {
                 SlimeView(
-                    appearance: pet.slimeAppearance,
-                    isPomodoroActive: pomodoro.state == .running
+                    appearance: pet.slimeAppearance.applying(customization),
+                    isPomodoroActive: pomodoro.state == .running,
+                    accessory: customization.accessory
                 )
                 if pet.showCritical {
                     Text("💥 CRITICAL!")
@@ -79,7 +112,7 @@ struct ContentView: View {
                 }
             }
             .animation(.easeInOut(duration: 0.2), value: pet.showCritical)
-            Text("Lv. \(pet.level)")
+            Text("Lv. \(pet.level) · \(customization.name)")
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(.secondary)
         }
@@ -175,13 +208,11 @@ struct ContentView: View {
     // MARK: - Setup
 
     private func setupWatcher() {
+        pomodoro.setDuration(customization.pomodoroMinutes)
         watcher.onCommit = { pet.gainCommitExp() }
-        // watcher.onPomodoro is intentionally NOT set:
-        // Pomodoro EXP is granted directly in onComplete to avoid
-        // double-counting when appendPomodoro() writes and poll() reads it back.
         watcher.start()
         pomodoro.onComplete = {
-            watcher.appendPomodoro()   // record only — EXP granted below
+            watcher.appendPomodoro()
             pet.gainPomodoroExp()
             sendPomodoroNotification()
         }
