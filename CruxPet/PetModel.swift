@@ -37,11 +37,23 @@ class PetModel {
     var expNeededThisLevel: Double { PetModel.expNeededForLevel(level) }
     var slimeAppearance: SlimeAppearance { PetModel.appearance(for: level) }
 
+    private var passiveTimer: Timer?
+    private static let passiveExpPerMinute: Double = 1.0
+    private static let passiveMaxCatchupMinutes: Double = 8 * 60  // 최대 8시간치 보정
+
     init() {
         totalExp = UserDefaults.standard.double(forKey: "cruxpet.totalExp")
         todayCommitCount = UserDefaults.standard.integer(forKey: "cruxpet.commitCount")
         todayPomodoroCount = UserDefaults.standard.integer(forKey: "cruxpet.pomodoroCount")
         resetDailyCountsIfNeeded()
+        awardPassiveCatchupExp()
+        startPassiveTimer()
+    }
+
+    @MainActor func gainPassiveExp() {
+        let gained = Int(PetModel.passiveExpPerMinute.rounded())
+        totalExp += Double(gained)
+        persist()
     }
 
     @MainActor func gainCommitExp() {
@@ -124,6 +136,27 @@ class PetModel {
     }
 
     // MARK: - Private
+
+    private func awardPassiveCatchupExp() {
+        let lastTimestamp = UserDefaults.standard.double(forKey: "cruxpet.lastPassiveTime")
+        let now = Date().timeIntervalSince1970
+        UserDefaults.standard.set(now, forKey: "cruxpet.lastPassiveTime")
+        guard lastTimestamp > 0 else { return }
+        let elapsedMinutes = min((now - lastTimestamp) / 60, PetModel.passiveMaxCatchupMinutes)
+        guard elapsedMinutes >= 1 else { return }
+        let gained = Int((elapsedMinutes * PetModel.passiveExpPerMinute).rounded())
+        totalExp += Double(gained)
+        persist()
+    }
+
+    private func startPassiveTimer() {
+        passiveTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                self?.gainPassiveExp()
+                UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: "cruxpet.lastPassiveTime")
+            }
+        }
+    }
 
     private func triggerCritical() {
         showCritical = true
