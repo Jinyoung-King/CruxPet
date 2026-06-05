@@ -5,7 +5,7 @@ enum PomodoroState: Equatable {
     case idle, running, paused, completed
 }
 
-@Observable
+@MainActor @Observable
 class PomodoroTimer {
     private(set) var state: PomodoroState = .idle
     private(set) var timeRemaining: TimeInterval = 25 * 60
@@ -30,6 +30,7 @@ class PomodoroTimer {
         guard state == .running else { return }
         state = .paused
         timer?.invalidate()
+        timer = nil
     }
 
     func resume() {
@@ -40,10 +41,12 @@ class PomodoroTimer {
 
     func reset() {
         timer?.invalidate()
+        timer = nil
         state = .idle
         timeRemaining = 25 * 60
     }
 
+    @MainActor
     private func scheduleTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             guard let self else { return }
@@ -51,6 +54,7 @@ class PomodoroTimer {
                 self.timeRemaining -= 1
             } else {
                 self.timer?.invalidate()
+                self.timer = nil
                 self.state = .completed
                 self.onComplete?()
             }

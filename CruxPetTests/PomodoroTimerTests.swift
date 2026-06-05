@@ -1,6 +1,7 @@
 import XCTest
 @testable import CruxPet
 
+@MainActor
 final class PomodoroTimerTests: XCTestCase {
 
     func testInitialStateIsIdle() {
@@ -44,9 +45,10 @@ final class PomodoroTimerTests: XCTestCase {
         timer.pause()
         timer.reset()
         XCTAssertEqual(timer.state, .idle)
+        XCTAssertEqual(timer.timeRemaining, 25 * 60)
     }
 
-    func testStartFromIdleIsNoOpIfAlreadyRunning() {
+    func testDoubleStartIsNoOp() {
         let timer = PomodoroTimer()
         timer.start()
         timer.start()  // 두 번 start해도 running 유지
@@ -57,5 +59,12 @@ final class PomodoroTimerTests: XCTestCase {
         let timer = PomodoroTimer()
         // 25:00 표시
         XCTAssertEqual(timer.displayTime, "25:00")
+    }
+
+    func testOnCompleteCallbackCanBeSet() {
+        let timer = PomodoroTimer()
+        var called = false
+        timer.onComplete = { called = true }
+        XCTAssertNotNil(timer.onComplete)
     }
 }
