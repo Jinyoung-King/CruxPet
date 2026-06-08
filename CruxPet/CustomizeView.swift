@@ -117,6 +117,6 @@ struct CustomizeView: View {
             }
             .padding(12)
         }
-        .frame(width: 200)
+        .frame(width: 200, height: 380)
     }
 }
