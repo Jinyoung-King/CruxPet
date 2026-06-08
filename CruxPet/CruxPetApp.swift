@@ -32,7 +32,7 @@ struct CruxPetApp: App {
 
 
     var body: some Scene {
-        MenuBarExtra("CruxPet", systemImage: "pawprint.fill") {
+        MenuBarExtra {
             ContentView()
                 .environment(pet)
                 .environment(pomodoro)
@@ -42,6 +42,16 @@ struct CruxPetApp: App {
                 Button("🆕 업데이트 설치") {
                     updaterController.updater.checkForUpdates()
                 }
+            }
+        } label: {
+            switch pomodoro.state {
+            case .running:
+                Image(systemName: "timer")
+                    .symbolEffect(.variableColor.iterative, options: .repeating)
+            case .paused:
+                Image(systemName: "timer")
+            default:
+                Image(systemName: pet.emotion == .sleepy ? "zzz" : "pawprint.fill")
             }
         }
         .menuBarExtraStyle(.window)

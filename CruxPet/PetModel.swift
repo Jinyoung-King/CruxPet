@@ -35,6 +35,8 @@ class PetModel {
     private(set) var todayCommitCount: Int = 0
     private(set) var todayPomodoroCount: Int = 0
     private(set) var showCritical: Bool = false
+    private(set) var showLevelUp: Bool = false
+    var pendingLevelUp: Int = 0
     private(set) var streakDays: Int = 0
     var pendingStreakMilestone: Int = 0
     private(set) var emotion: EmotionState = .normal
@@ -71,20 +73,24 @@ class PetModel {
     }
 
     @MainActor func gainCommitExp() {
+        let prevLevel = level
         let (gained, isCrit) = PetModel.computeGain(base: 15, level: level)
         totalExp += Double(gained)
         todayCommitCount += 1
         if isCrit { triggerCritical() }
+        if level > prevLevel { triggerLevelUp(level) }
         updateStreak()
         triggerExcitement()
         persist()
     }
 
     @MainActor func gainPomodoroExp() {
+        let prevLevel = level
         let (gained, isCrit) = PetModel.computeGain(base: 50, level: level)
         totalExp += Double(gained)
         todayPomodoroCount += 1
         if isCrit { triggerCritical() }
+        if level > prevLevel { triggerLevelUp(level) }
         updateStreak()
         triggerExcitement()
         persist()
@@ -181,6 +187,15 @@ class PetModel {
         Task { @MainActor [weak self] in
             try? await Task.sleep(for: .seconds(0.8))
             self?.showCritical = false
+        }
+    }
+
+    private func triggerLevelUp(_ newLevel: Int) {
+        pendingLevelUp = newLevel
+        showLevelUp = true
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .seconds(2))
+            self?.showLevelUp = false
         }
     }
 

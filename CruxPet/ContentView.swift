@@ -132,6 +132,12 @@ struct ContentView: View {
                 showToast(ToastData(emoji: "⚡️", title: "커밋 감지!", subtitle: "EXP를 획득했어요"))
             }
         }
+        .onChange(of: pet.pendingLevelUp) { _, newLevel in
+            guard newLevel > 0 else { return }
+            pet.pendingLevelUp = 0
+            showToast(ToastData(emoji: "🎉", title: "레벨 업! Lv.\(newLevel)",
+                                subtitle: "슬라임이 성장했어요 ✨"))
+        }
         .onChange(of: pet.pendingStreakMilestone) { _, milestone in
             guard milestone > 0 else { return }
             pet.pendingStreakMilestone = 0
@@ -174,8 +180,24 @@ struct ContentView: View {
                         .offset(y: -pet.slimeAppearance.size * 0.8)
                         .transition(.opacity)
                 }
+                if pet.showLevelUp {
+                    Text("🎉 LEVEL UP!")
+                        .font(.system(size: 13, weight: .black, design: .rounded))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(
+                            LinearGradient(colors: [.purple, .pink],
+                                           startPoint: .leading, endPoint: .trailing),
+                            in: Capsule()
+                        )
+                        .shadow(color: .purple.opacity(0.4), radius: 6, y: 2)
+                        .offset(y: -pet.slimeAppearance.size * 1.1)
+                        .transition(.scale.combined(with: .opacity))
+                }
             }
             .animation(.easeInOut(duration: 0.2), value: pet.showCritical)
+            .animation(.spring(duration: 0.4), value: pet.showLevelUp)
             HStack(spacing: 5) {
                 Text("Lv.\(pet.level)")
                     .font(.system(size: 10, weight: .bold))

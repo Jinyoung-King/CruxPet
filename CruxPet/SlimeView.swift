@@ -72,7 +72,7 @@ struct SlimeView: View {
                 drawEyes(context: &tiltCtx, bodyRect: bodyRect,
                          lookX: isWandering ? vxN * 0.18 : 0,
                          lookY: isWandering ? vyN * 0.10 : 0,
-                         emotion: emotion)
+                         emotion: emotion, t: t)
                 if emotion == .sleepy {
                     drawZzz(context: &context, bodyRect: bodyRect, t: t)
                 }
@@ -184,7 +184,18 @@ struct SlimeView: View {
 
     private func drawEyes(context: inout GraphicsContext, bodyRect: CGRect,
                           lookX: CGFloat = 0, lookY: CGFloat = 0,
-                          emotion: EmotionState = .normal) {
+                          emotion: EmotionState = .normal, t: Double = 0) {
+        // 깜빡임 — 3.4s, 6.1s 주기 두 개 조합 (자연스러운 불규칙성)
+        let blinkScale: CGFloat
+        if emotion == .sleepy {
+            blinkScale = 1.0  // sleepy는 자체 눈 처리
+        } else {
+            let b1 = t.truncatingRemainder(dividingBy: 3.4)
+            let b2 = t.truncatingRemainder(dividingBy: 6.1)
+            let bt = b1 < 0.18 ? b1 : (b2 < 0.18 ? b2 : -1)
+            blinkScale = bt >= 0 ? max(0.05, 1 - sin(bt / 0.18 * .pi)) : 1.0
+        }
+
         let eyeY    = bodyRect.minY + bodyRect.height * 0.37
         let spacing = bodyRect.width * 0.22
 
@@ -204,8 +215,9 @@ struct SlimeView: View {
                 // 크게 뜬 눈 + 이중 캐치라이트
                 let eyeSize = bodyRect.width * 0.155
                 let pupilSz = eyeSize * 0.52
-                let whiteRect = CGRect(x: cx - eyeSize/2, y: eyeY - eyeSize/2,
-                                       width: eyeSize, height: eyeSize)
+                let eyeH = eyeSize * blinkScale
+                let whiteRect = CGRect(x: cx - eyeSize/2, y: eyeY - eyeH/2,
+                                       width: eyeSize, height: eyeH)
                 context.fill(Path(ellipseIn: whiteRect), with: .color(.white))
                 let pupilX = cx + eyeSize * lookX
                 let pupilY = eyeY - eyeSize * 0.04 + eyeSize * lookY
@@ -229,8 +241,9 @@ struct SlimeView: View {
                 // normal / happy — 기본 눈 (happy는 동공이 살짝 위)
                 let eyeSize = bodyRect.width * 0.13
                 let pupilSz = eyeSize * 0.56
-                let whiteRect = CGRect(x: cx - eyeSize/2, y: eyeY - eyeSize/2,
-                                       width: eyeSize, height: eyeSize)
+                let eyeH = eyeSize * blinkScale
+                let whiteRect = CGRect(x: cx - eyeSize/2, y: eyeY - eyeH/2,
+                                       width: eyeSize, height: eyeH)
                 context.fill(Path(ellipseIn: whiteRect), with: .color(.white))
                 context.fill(Path(ellipseIn: whiteRect), with: .radialGradient(
                     Gradient(colors: [.clear, .black.opacity(0.10)]),
