@@ -146,7 +146,8 @@ struct ContentView: View {
                 SlimeView(
                     appearance: pet.slimeAppearance.applying(customization),
                     isPomodoroActive: pomodoro.state == .running,
-                    accessory: customization.accessory
+                    accessory: customization.accessory,
+                    isWandering: pomodoro.state != .running
                 )
                 if pet.showCritical {
                     Text("💥 CRITICAL!")
