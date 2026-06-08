@@ -99,10 +99,14 @@ class QuestModel {
                       streakDays: pet.streakDays)
     }
 
-    private static func todayString() -> String {
+    private static let dateFormatter: DateFormatter = {
         let f = DateFormatter()
         f.dateFormat = "yyyy-MM-dd"
-        return f.string(from: Date())
+        return f
+    }()
+
+    private static func todayString() -> String {
+        return dateFormatter.string(from: Date())
     }
 
     static let easyPool: [Quest] = [
