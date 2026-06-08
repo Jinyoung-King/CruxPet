@@ -1,8 +1,13 @@
 import SwiftUI
 import UserNotifications
+import Sparkle
 
 @main
 struct CruxPetApp: App {
+    private let updaterController = SPUStandardUpdaterController(
+        startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil
+    )
+
     init() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
         if !UserDefaults.standard.bool(forKey: "cruxpet.hookInstalled") {
@@ -14,6 +19,10 @@ struct CruxPetApp: App {
     var body: some Scene {
         MenuBarExtra("CruxPet", systemImage: "pawprint.fill") {
             ContentView()
+            Divider()
+            Button("업데이트 확인") {
+                updaterController.updater.checkForUpdates()
+            }
         }
         .menuBarExtraStyle(.window)
     }

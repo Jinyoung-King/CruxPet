@@ -90,6 +90,7 @@
 			);
 			name = CruxPet;
 			packageProductDependencies = (
+				30D70A2B2FD65FE500C4C603 /* Sparkle */,
 			);
 			productName = CruxPet;
 			productReference = 300E65C52F87A36B007F9DEE /* CruxPet.app */;
@@ -146,6 +147,9 @@
 			);
 			mainGroup = 300E65BC2F87A36B007F9DEE;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				30D70A2A2FD65FE500C4C603 /* XCRemoteSwiftPackageReference "Sparkle" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 300E65C62F87A36B007F9DEE /* Products */;
 			projectDirPath = "";
@@ -332,6 +336,8 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_SUFeedURL = "https://raw.githubusercontent.com/Jinyoung-King/CruxPet/main/appcast.xml";
+				INFOPLIST_KEY_SUPublicEDKey = "u2GfBAPwCszf1A3lcPrZg3dsXhStVCCx/0Rqj8SKBqI=";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -363,6 +369,8 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_SUFeedURL = "https://raw.githubusercontent.com/Jinyoung-King/CruxPet/main/appcast.xml";
+				INFOPLIST_KEY_SUPublicEDKey = "u2GfBAPwCszf1A3lcPrZg3dsXhStVCCx/0Rqj8SKBqI=";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -451,6 +459,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		30D70A2A2FD65FE500C4C603 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.9.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		30D70A2B2FD65FE500C4C603 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 30D70A2A2FD65FE500C4C603 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 300E65BD2F87A36B007F9DEE /* Project object */;
 }
