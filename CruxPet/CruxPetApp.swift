@@ -7,6 +7,9 @@ struct CruxPetApp: App {
     private let updaterController = SPUStandardUpdaterController(
         startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil
     )
+    @State private var pet = PetModel()
+    @State private var pomodoro = PomodoroTimer()
+    @State private var watcher = EventWatcher()
 
     init() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
@@ -19,6 +22,9 @@ struct CruxPetApp: App {
     var body: some Scene {
         MenuBarExtra("CruxPet", systemImage: "pawprint.fill") {
             ContentView()
+                .environment(pet)
+                .environment(pomodoro)
+                .environment(watcher)
             Divider()
             Button("업데이트 확인") {
                 updaterController.updater.checkForUpdates()

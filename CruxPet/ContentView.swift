@@ -30,9 +30,9 @@ private struct PomodoroInfoButton: View {
 }
 
 struct ContentView: View {
-    @State private var pet = PetModel()
-    @State private var pomodoro = PomodoroTimer()
-    @State private var watcher = EventWatcher()
+    @Environment(PetModel.self) private var pet
+    @Environment(PomodoroTimer.self) private var pomodoro
+    @Environment(EventWatcher.self) private var watcher
     @State private var customization = PetCustomization.load()
     @State private var showCustomize = false
 
@@ -204,7 +204,9 @@ struct ContentView: View {
     // MARK: - Setup
 
     private func setupWatcher() {
-        pomodoro.setDuration(customization.pomodoroMinutes)
+        if pomodoro.state == .idle {
+            pomodoro.setDuration(customization.pomodoroMinutes)
+        }
         watcher.onCommit = { pet.gainCommitExp() }
         watcher.start()
         pomodoro.onComplete = {
@@ -240,4 +242,7 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .environment(PetModel())
+        .environment(PomodoroTimer())
+        .environment(EventWatcher())
 }
