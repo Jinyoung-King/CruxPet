@@ -1,6 +1,10 @@
 import Foundation
 import Observation
 
+enum EmotionState: Equatable {
+    case normal, happy, excited, sleepy
+}
+
 enum CrownType: Int {
     case none, bronze, silver, gold, diamond, constellation
     var symbol: String {
@@ -33,6 +37,9 @@ class PetModel {
     private(set) var showCritical: Bool = false
     private(set) var streakDays: Int = 0
     var pendingStreakMilestone: Int = 0
+    private(set) var emotion: EmotionState = .normal
+    private var lastActivityDate: Date = .distantPast
+    private var emotionTimer: Timer?
 
     var level: Int { PetModel.levelForExp(totalExp) }
     var expInCurrentLevel: Double { totalExp - PetModel.totalExpAtLevelStart(level) }
@@ -48,9 +55,13 @@ class PetModel {
         todayCommitCount = UserDefaults.standard.integer(forKey: "cruxpet.commitCount")
         todayPomodoroCount = UserDefaults.standard.integer(forKey: "cruxpet.pomodoroCount")
         streakDays = UserDefaults.standard.integer(forKey: "cruxpet.streakDays")
+        let savedActivity = UserDefaults.standard.double(forKey: "cruxpet.lastActivityTime")
+        if savedActivity > 0 { lastActivityDate = Date(timeIntervalSince1970: savedActivity) }
         resetDailyCountsIfNeeded()
         awardPassiveCatchupExp()
         startPassiveTimer()
+        updateEmotion()
+        startEmotionTimer()
     }
 
     @MainActor func gainPassiveExp() {
@@ -65,6 +76,7 @@ class PetModel {
         todayCommitCount += 1
         if isCrit { triggerCritical() }
         updateStreak()
+        triggerExcitement()
         persist()
     }
 
@@ -74,6 +86,7 @@ class PetModel {
         todayPomodoroCount += 1
         if isCrit { triggerCritical() }
         updateStreak()
+        triggerExcitement()
         persist()
     }
 
@@ -171,6 +184,28 @@ class PetModel {
         }
     }
 
+    private func triggerExcitement() {
+        lastActivityDate = Date()
+        emotion = .excited
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .seconds(3))
+            guard let self, self.emotion == .excited else { return }
+            self.emotion = .happy
+        }
+    }
+
+    private func updateEmotion() {
+        guard emotion != .excited else { return }
+        let minutes = Date().timeIntervalSince(lastActivityDate) / 60
+        emotion = minutes < 10 ? .happy : minutes < 45 ? .normal : .sleepy
+    }
+
+    private func startEmotionTimer() {
+        emotionTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
+            Task { @MainActor [weak self] in self?.updateEmotion() }
+        }
+    }
+
     private func updateStreak() {
         let fmt = DateFormatter()
         fmt.dateFormat = "yyyy-MM-dd"
@@ -193,6 +228,7 @@ class PetModel {
         UserDefaults.standard.set(todayCommitCount,  forKey: "cruxpet.commitCount")
         UserDefaults.standard.set(todayPomodoroCount,forKey: "cruxpet.pomodoroCount")
         UserDefaults.standard.set(streakDays,        forKey: "cruxpet.streakDays")
+        UserDefaults.standard.set(lastActivityDate.timeIntervalSince1970, forKey: "cruxpet.lastActivityTime")
     }
 
     private func resetDailyCountsIfNeeded() {

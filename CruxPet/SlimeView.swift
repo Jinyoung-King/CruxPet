@@ -5,6 +5,7 @@ struct SlimeView: View {
     var isPomodoroActive: Bool = false
     var accessory: String = ""
     var isWandering: Bool = false
+    var emotion: EmotionState = .normal
 
     // 배회 시 캔버스를 확장해 클리핑 방지
     private var wanderPad: CGFloat { isWandering ? appearance.size * 0.45 : 0 }
@@ -16,17 +17,20 @@ struct SlimeView: View {
             Canvas { context, size in
                 let t = timeline.date.timeIntervalSinceReferenceDate
 
+                // ── 감정별 속도 배율 ─────────────────────────────
+                let speedMult: Double = emotion == .sleepy ? 0.38 : emotion == .excited ? 1.3 : 1.0
+                let bobAmp:  CGFloat  = emotion == .sleepy ? 1.0  : emotion == .excited ? 2.2 : 1.6
+
                 // ── 배회 / 스쿼시 계산 ──────────────────────────────
-                // 리사주 곡선: x 0.55Hz, y 1.1Hz → 피규어8 경로
                 let wanderAmp: CGFloat = isWandering ? appearance.size * 0.33 : 0
-                let wx: CGFloat = sin(t * 0.55 + .pi / 2) * wanderAmp
-                let wy: CGFloat = sin(t * 1.10)            * wanderAmp * 0.38
+                let wx: CGFloat = sin(t * 0.55 * speedMult + .pi / 2) * wanderAmp
+                let wy: CGFloat = sin(t * 1.10 * speedMult)            * wanderAmp * 0.38
 
                 // 정규화 속도 (-1…1)
-                let vxN: CGFloat = cos(t * 0.55 + .pi / 2)
-                let vyN: CGFloat = cos(t * 1.10)
+                let vxN: CGFloat = cos(t * 0.55 * speedMult + .pi / 2)
+                let vyN: CGFloat = cos(t * 1.10 * speedMult)
 
-                let bobY: CGFloat = sin(t * 2.5) * 2 + wy
+                let bobY: CGFloat = sin(t * 2.5 * speedMult) * bobAmp + wy
 
                 // 이동 방향으로 가로 늘이기 / 세로 납작하기
                 let hStretch: CGFloat = 1 + abs(vxN) * (isWandering ? 0.10 : 0)
@@ -61,9 +65,17 @@ struct SlimeView: View {
                 }
 
                 drawBody(context: &tiltCtx, rect: bodyRect, t: t)
+                if emotion == .happy || emotion == .excited {
+                    drawBlush(context: &tiltCtx, bodyRect: bodyRect,
+                              strong: emotion == .excited)
+                }
                 drawEyes(context: &tiltCtx, bodyRect: bodyRect,
                          lookX: isWandering ? vxN * 0.18 : 0,
-                         lookY: isWandering ? vyN * 0.10 : 0)
+                         lookY: isWandering ? vyN * 0.10 : 0,
+                         emotion: emotion)
+                if emotion == .sleepy {
+                    drawZzz(context: &context, bodyRect: bodyRect, t: t)
+                }
 
                 // 왕관 / 반짝이 / 악세서리는 기울기 없이 원래 컨텍스트 사용
                 if appearance.crownType != .none {
@@ -171,36 +183,105 @@ struct SlimeView: View {
     // MARK: - Eyes
 
     private func drawEyes(context: inout GraphicsContext, bodyRect: CGRect,
-                          lookX: CGFloat = 0, lookY: CGFloat = 0) {
+                          lookX: CGFloat = 0, lookY: CGFloat = 0,
+                          emotion: EmotionState = .normal) {
         let eyeY    = bodyRect.minY + bodyRect.height * 0.37
-        let eyeSize = bodyRect.width * 0.13
-        let pupilSz = eyeSize * 0.56
         let spacing = bodyRect.width * 0.22
 
         for xOffset in [-spacing, spacing] {
             let cx = bodyRect.midX + xOffset
 
-            let whiteRect = CGRect(x: cx - eyeSize/2, y: eyeY - eyeSize/2,
-                                   width: eyeSize, height: eyeSize)
-            context.fill(Path(ellipseIn: whiteRect), with: .color(.white))
-            context.fill(Path(ellipseIn: whiteRect), with: .radialGradient(
-                Gradient(colors: [.clear, .black.opacity(0.10)]),
-                center: CGPoint(x: cx, y: eyeY - eyeSize * 0.05),
-                startRadius: eyeSize * 0.25, endRadius: eyeSize * 0.58
-            ))
+            switch emotion {
+            case .sleepy:
+                // 반쯤 감긴 눈 — 납작한 타원
+                let slitH = bodyRect.width * 0.05
+                let slitW = bodyRect.width * 0.13
+                let slitRect = CGRect(x: cx - slitW/2, y: eyeY - slitH/2 + slitH,
+                                      width: slitW, height: slitH)
+                context.fill(Path(ellipseIn: slitRect), with: .color(Color(white: 0.12)))
 
-            // 동공 — 보는 방향으로 이동
-            let pupilX = cx       + eyeSize * lookX
-            let pupilY = eyeY + eyeSize * 0.07 + eyeSize * lookY
-            let pr = CGRect(x: pupilX - pupilSz/2, y: pupilY - pupilSz/2,
-                            width: pupilSz, height: pupilSz)
-            context.fill(Path(ellipseIn: pr), with: .color(Color(white: 0.08)))
+            case .excited:
+                // 크게 뜬 눈 + 이중 캐치라이트
+                let eyeSize = bodyRect.width * 0.155
+                let pupilSz = eyeSize * 0.52
+                let whiteRect = CGRect(x: cx - eyeSize/2, y: eyeY - eyeSize/2,
+                                       width: eyeSize, height: eyeSize)
+                context.fill(Path(ellipseIn: whiteRect), with: .color(.white))
+                let pupilX = cx + eyeSize * lookX
+                let pupilY = eyeY - eyeSize * 0.04 + eyeSize * lookY
+                let pr = CGRect(x: pupilX - pupilSz/2, y: pupilY - pupilSz/2,
+                                width: pupilSz, height: pupilSz)
+                context.fill(Path(ellipseIn: pr), with: .color(Color(white: 0.08)))
+                // 큰 캐치라이트
+                let cs1 = pupilSz * 0.36
+                context.fill(Path(ellipseIn: CGRect(x: pupilX - pupilSz*0.02,
+                                                     y: pupilY - pupilSz*0.30,
+                                                     width: cs1, height: cs1)),
+                             with: .color(.white.opacity(0.95)))
+                // 작은 캐치라이트
+                let cs2 = pupilSz * 0.18
+                context.fill(Path(ellipseIn: CGRect(x: pupilX + pupilSz*0.18,
+                                                     y: pupilY - pupilSz*0.10,
+                                                     width: cs2, height: cs2)),
+                             with: .color(.white.opacity(0.75)))
 
-            // 캐치라이트
-            let cs = pupilSz * 0.32
-            let cr = CGRect(x: pupilX - pupilSz*0.04, y: pupilY - pupilSz*0.28,
-                            width: cs, height: cs)
-            context.fill(Path(ellipseIn: cr), with: .color(.white.opacity(0.92)))
+            default:
+                // normal / happy — 기본 눈 (happy는 동공이 살짝 위)
+                let eyeSize = bodyRect.width * 0.13
+                let pupilSz = eyeSize * 0.56
+                let whiteRect = CGRect(x: cx - eyeSize/2, y: eyeY - eyeSize/2,
+                                       width: eyeSize, height: eyeSize)
+                context.fill(Path(ellipseIn: whiteRect), with: .color(.white))
+                context.fill(Path(ellipseIn: whiteRect), with: .radialGradient(
+                    Gradient(colors: [.clear, .black.opacity(0.10)]),
+                    center: CGPoint(x: cx, y: eyeY - eyeSize * 0.05),
+                    startRadius: eyeSize * 0.25, endRadius: eyeSize * 0.58
+                ))
+                let happyOffset: CGFloat = emotion == .happy ? -eyeSize * 0.10 : 0
+                let pupilX = cx + eyeSize * lookX
+                let pupilY = eyeY + eyeSize * 0.07 + eyeSize * lookY + happyOffset
+                let pr = CGRect(x: pupilX - pupilSz/2, y: pupilY - pupilSz/2,
+                                width: pupilSz, height: pupilSz)
+                context.fill(Path(ellipseIn: pr), with: .color(Color(white: 0.08)))
+                let cs = pupilSz * 0.32
+                context.fill(Path(ellipseIn: CGRect(x: pupilX - pupilSz*0.04,
+                                                     y: pupilY - pupilSz*0.28,
+                                                     width: cs, height: cs)),
+                             with: .color(.white.opacity(0.92)))
+            }
+        }
+    }
+
+    // MARK: - Blush
+
+    private func drawBlush(context: inout GraphicsContext, bodyRect: CGRect, strong: Bool) {
+        let blushW = bodyRect.width * 0.16
+        let blushH = blushW * 0.55
+        let blushY = bodyRect.minY + bodyRect.height * 0.52
+        let opacity: Double = strong ? 0.45 : 0.28
+        for xOff in [-bodyRect.width * 0.36, bodyRect.width * 0.36] {
+            let r = CGRect(x: bodyRect.midX + xOff - blushW/2,
+                           y: blushY - blushH/2, width: blushW, height: blushH)
+            var ctx = context; ctx.opacity = opacity
+            ctx.fill(Path(ellipseIn: r),
+                     with: .radialGradient(
+                        Gradient(colors: [Color(red: 1, green: 0.35, blue: 0.45), .clear]),
+                        center: CGPoint(x: r.midX, y: r.midY),
+                        startRadius: 0, endRadius: blushW * 0.6))
+        }
+    }
+
+    // MARK: - Zzz
+
+    private func drawZzz(context: inout GraphicsContext, bodyRect: CGRect, t: Double) {
+        // 두 개의 z가 시간차를 두고 떠오름
+        for (offset, size, phaseShift) in [(8.0, 9.0, 0.0), (14.0, 7.0, 0.5)] {
+            let phase = (t * 0.4 + phaseShift).truncatingRemainder(dividingBy: 1.0)
+            let floatY = bodyRect.minY - 4 - CGFloat(phase * 22)
+            let opacity = phase < 0.6 ? phase / 0.6 : (1.0 - phase) / 0.4
+            var ctx = context; ctx.opacity = opacity * 0.75
+            let z = ctx.resolve(Text("z").font(.system(size: size, weight: .bold, design: .rounded)))
+            ctx.draw(z, at: CGPoint(x: bodyRect.midX + CGFloat(offset), y: floatY), anchor: .center)
         }
     }
 
