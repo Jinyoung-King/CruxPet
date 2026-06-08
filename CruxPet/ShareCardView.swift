@@ -247,7 +247,7 @@ struct ShareCardView: View {
                 .padding(.bottom, 16)
             }
         }
-        .frame(width: 300, height: 460)
+        .frame(width: 300, height: 560)
         .clipShape(RoundedRectangle(cornerRadius: 28))
     }
 
