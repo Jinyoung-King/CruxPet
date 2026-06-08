@@ -52,7 +52,8 @@ struct SlimeView: View {
             return
         }
 
-        let path = Path(roundedRect: rect, cornerRadius: rect.width * 0.4)
+        // 원형에 가까운 타원 형태 (더 슬라임다운 모양)
+        let path = Path(ellipseIn: rect)
         let bodyColor: Color
         if appearance.isRainbow {
             let hue = (t * 0.2).truncatingRemainder(dividingBy: 1.0)
@@ -61,64 +62,69 @@ struct SlimeView: View {
             bodyColor = Color(hex: appearance.bodyHex)
         }
 
-        // 1. 기본 몸통
+        // 1. 테두리 (약간 어두운 외곽선 — 작은 사이즈에서 선명도 UP)
+        var outlineCtx = context
+        outlineCtx.opacity = 0.25
+        outlineCtx.stroke(path, with: .color(bodyColor), lineWidth: rect.width * 0.07)
+
+        // 2. 기본 몸통
         context.fill(path, with: .color(bodyColor))
 
-        // 2. 조명 효과: 좌상단에서 오는 빛 (radial gradient 오버레이)
-        let lightCenter = CGPoint(x: rect.minX + rect.width * 0.32, y: rect.minY + rect.height * 0.22)
+        // 3. 조명: 좌상단 radial gradient (더 강하게)
+        let lightCenter = CGPoint(x: rect.minX + rect.width * 0.30, y: rect.minY + rect.height * 0.20)
         context.fill(path, with: .radialGradient(
             Gradient(stops: [
-                .init(color: .white.opacity(0.40), location: 0.0),
-                .init(color: .white.opacity(0.10), location: 0.45),
+                .init(color: .white.opacity(0.55), location: 0.0),
+                .init(color: .white.opacity(0.15), location: 0.50),
                 .init(color: .clear,               location: 1.0),
             ]),
             center: lightCenter,
             startRadius: 0,
-            endRadius: rect.width * 0.85
+            endRadius: rect.width * 0.9
         ))
 
-        // 3. 하단 어둠 (음영)
+        // 4. 하단 어둠
         context.fill(path, with: .linearGradient(
-            Gradient(colors: [.clear, .black.opacity(0.16)]),
-            startPoint: CGPoint(x: rect.midX, y: rect.minY + rect.height * 0.3),
+            Gradient(colors: [.clear, .black.opacity(0.22)]),
+            startPoint: CGPoint(x: rect.midX, y: rect.minY + rect.height * 0.25),
             endPoint:   CGPoint(x: rect.midX, y: rect.maxY)
         ))
 
-        // 4. 광택 스팟 (specular highlight)
+        // 5. 광택 스팟 — 더 크고 선명하게
         let specRect = CGRect(
-            x: rect.minX + rect.width * 0.17,
-            y: rect.minY + rect.height * 0.07,
-            width:  rect.width  * 0.28,
-            height: rect.height * 0.18
+            x: rect.minX + rect.width * 0.15,
+            y: rect.minY + rect.height * 0.06,
+            width:  rect.width  * 0.35,
+            height: rect.height * 0.24
         )
         var specCtx = context
-        specCtx.opacity = 0.65
+        specCtx.opacity = 0.82
         specCtx.fill(Path(ellipseIn: specRect), with: .radialGradient(
             Gradient(colors: [.white, .clear]),
             center: CGPoint(x: specRect.midX, y: specRect.midY),
             startRadius: 0,
-            endRadius: max(specRect.width, specRect.height) * 0.6
+            endRadius: max(specRect.width, specRect.height) * 0.65
         ))
 
-        // 5. 하단 림라이트 (바닥 반사광)
+        // 6. 하단 림라이트
         let rimRect = CGRect(
-            x: rect.minX + rect.width * 0.2,
-            y: rect.maxY - rect.height * 0.18,
-            width:  rect.width  * 0.6,
-            height: rect.height * 0.18
+            x: rect.minX + rect.width * 0.22,
+            y: rect.maxY - rect.height * 0.20,
+            width:  rect.width  * 0.56,
+            height: rect.height * 0.16
         )
         var rimCtx = context
-        rimCtx.opacity = 0.18
+        rimCtx.opacity = 0.22
         rimCtx.fill(
-            Path(roundedRect: rimRect, cornerRadius: rimRect.height / 2),
+            Path(ellipseIn: rimRect),
             with: .linearGradient(
-                Gradient(colors: [.clear, .white.opacity(0.5)]),
+                Gradient(colors: [.clear, .white.opacity(0.6)]),
                 startPoint: CGPoint(x: rimRect.midX, y: rimRect.minY),
                 endPoint:   CGPoint(x: rimRect.midX, y: rimRect.maxY)
             )
         )
 
-        // 6. 펄 광채 (isPearl)
+        // 7. 펄 광채
         if appearance.isPearl {
             var pearlCtx = context
             pearlCtx.opacity = 0.25 + 0.2 * sin(t * 4)
