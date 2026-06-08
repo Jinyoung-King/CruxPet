@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import UserNotifications
 
 struct PetEvent {
     let type: String
@@ -79,11 +80,20 @@ class EventWatcher {
 
         for event in newEvents {
             switch event.type {
-            case "commit":   pendingCommit = true; onCommit?()
+            case "commit":   pendingCommit = true; sendCommitNotification(); onCommit?()
             case "pomodoro": onPomodoro?()
             default: break
             }
         }
+    }
+
+    private func sendCommitNotification() {
+        let content = UNMutableNotificationContent()
+        content.title = "커밋 감지! ⚡️"
+        content.body = "EXP를 획득했어요."
+        content.sound = .default
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+        UNUserNotificationCenter.current().add(request)
     }
 
     private func createEventsFileIfNeeded() {

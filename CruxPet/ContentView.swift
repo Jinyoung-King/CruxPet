@@ -320,7 +320,6 @@ struct ContentView: View {
         }
         watcher.onCommit = {
             pet.gainCommitExp()
-            sendCommitNotification()
         }
         watcher.start()
         pomodoro.onComplete = {
@@ -343,15 +342,6 @@ struct ContentView: View {
             NSPasteboard.general.clearContents()
             NSPasteboard.general.writeObjects([image])
         }
-    }
-
-    private func sendCommitNotification() {
-        let content = UNMutableNotificationContent()
-        content.title = "커밋 감지! ⚡️"
-        content.body = "EXP를 획득했어요."
-        content.sound = .default
-        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
-        UNUserNotificationCenter.current().add(request)
     }
 
     private func sendPomodoroNotification() {
