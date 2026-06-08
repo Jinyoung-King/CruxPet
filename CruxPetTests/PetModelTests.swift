@@ -3,14 +3,14 @@ import XCTest
 
 final class PetModelTests: XCTestCase {
 
-    // 레벨 1에서는 100 EXP 필요
+    // 레벨 1에서는 floor(1³/10 + 1*5) = 5 EXP 필요
     func testExpNeededForLevel1() {
-        XCTAssertEqual(PetModel.expNeededForLevel(1), 100)
+        XCTAssertEqual(PetModel.expNeededForLevel(1), 5)
     }
 
-    // 레벨 2에서는 floor(100 * 2^1.5) = floor(282.84) = 282
+    // 레벨 2에서는 floor(8/10 + 10) = 10 EXP 필요
     func testExpNeededForLevel2() {
-        XCTAssertEqual(PetModel.expNeededForLevel(2), 282)
+        XCTAssertEqual(PetModel.expNeededForLevel(2), 10)
     }
 
     // 총 EXP 0 → 레벨 1
@@ -18,19 +18,19 @@ final class PetModelTests: XCTestCase {
         XCTAssertEqual(PetModel.levelForExp(0), 1)
     }
 
-    // 총 EXP 99 → 레벨 1 (99 < 100이므로 아직 레벨업 불가)
-    func testLevelForExp99() {
-        XCTAssertEqual(PetModel.levelForExp(99), 1)
+    // 총 EXP 4 → 레벨 1 (4 < 5이므로 아직 레벨업 불가)
+    func testLevelForExp4() {
+        XCTAssertEqual(PetModel.levelForExp(4), 1)
     }
 
-    // 총 EXP 100 → 레벨 2
-    func testLevelForExp100() {
-        XCTAssertEqual(PetModel.levelForExp(100), 2)
+    // 총 EXP 5 → 레벨 2 (5 >= expNeeded(1)=5)
+    func testLevelForExp5() {
+        XCTAssertEqual(PetModel.levelForExp(5), 2)
     }
 
-    // 총 EXP 382 (100 + 282) → 레벨 3
-    func testLevelForExp382() {
-        XCTAssertEqual(PetModel.levelForExp(382), 3)
+    // 총 EXP 15 (5 + 10) → 레벨 3
+    func testLevelForExp15() {
+        XCTAssertEqual(PetModel.levelForExp(15), 3)
     }
 
     // 레벨 1 시작점 EXP = 0
@@ -38,9 +38,14 @@ final class PetModelTests: XCTestCase {
         XCTAssertEqual(PetModel.totalExpAtLevelStart(1), 0)
     }
 
-    // 레벨 2 시작점 EXP = 100
+    // 레벨 2 시작점 EXP = 5 (expNeeded(1))
     func testTotalExpAtLevel2() {
-        XCTAssertEqual(PetModel.totalExpAtLevelStart(2), 100)
+        XCTAssertEqual(PetModel.totalExpAtLevelStart(2), 5)
+    }
+
+    // 레벨 3 시작점 EXP = 15 (expNeeded(1) + expNeeded(2) = 5 + 10)
+    func testTotalExpAtLevel3() {
+        XCTAssertEqual(PetModel.totalExpAtLevelStart(3), 15)
     }
 
     // computeGain: 결과가 base*√level*0.8 ~ base*√level*1.2*2 범위 안에 있어야 함
