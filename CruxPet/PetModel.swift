@@ -98,8 +98,11 @@ class PetModel {
 
     // MARK: - Pure static logic (테스트 가능)
 
+    // 포켓몬 Medium Fast 스타일 3차 다항식:
+    // 저레벨 증가폭 ≈ 5, 고레벨 증가폭 ≈ 3n² / 10 (제곱 비례 가속)
     static func expNeededForLevel(_ level: Int) -> Double {
-        floor(100 * pow(Double(level), 1.5))
+        let n = Double(level)
+        return floor(n * n * n / 10 + n * 5)
     }
 
     static func totalExpAtLevelStart(_ level: Int) -> Double {
