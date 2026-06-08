@@ -85,7 +85,6 @@
 				300E65C12F87A36B007F9DEE /* Sources */,
 				300E65C22F87A36B007F9DEE /* Frameworks */,
 				300E65C32F87A36B007F9DEE /* Resources */,
-				AA000001AA000001AA000001 /* Inject Sparkle Info.plist Keys */,
 			);
 			buildRules = (
 			);
@@ -184,22 +183,6 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		AA000001AA000001AA000001 /* Inject Sparkle Info.plist Keys */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Inject Sparkle Info.plist Keys";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "PLIST=\"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n/usr/libexec/PlistBuddy -c \"Add :SUFeedURL string 'https://raw.githubusercontent.com/Jinyoung-King/CruxPet/main/appcast.xml'\" \"$PLIST\" 2>/dev/null || /usr/libexec/PlistBuddy -c \"Set :SUFeedURL 'https://raw.githubusercontent.com/Jinyoung-King/CruxPet/main/appcast.xml'\" \"$PLIST\"\n/usr/libexec/PlistBuddy -c \"Add :SUPublicEDKey string 'u2GfBAPwCszf1A3lcPrZg3dsXhStVCCx/0Rqj8SKBqI='\" \"$PLIST\" 2>/dev/null || /usr/libexec/PlistBuddy -c \"Set :SUPublicEDKey 'u2GfBAPwCszf1A3lcPrZg3dsXhStVCCx/0Rqj8SKBqI='\" \"$PLIST\"\n";
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		300E65C12F87A36B007F9DEE /* Sources */ = {
