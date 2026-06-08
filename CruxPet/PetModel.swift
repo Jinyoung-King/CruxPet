@@ -97,6 +97,13 @@ class PetModel {
         persist()
     }
 
+    @MainActor func gainQuestExp(_ exp: Int) {
+        let prevLevel = level
+        totalExp += Double(exp)
+        if level > prevLevel { triggerLevelUp(level) }
+        persist()
+    }
+
     // MARK: - Pure static logic (테스트 가능)
 
     // 포켓몬 Medium Fast 스타일 3차 다항식:

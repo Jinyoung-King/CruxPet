@@ -86,4 +86,46 @@ final class QuestModelTests: XCTestCase {
         let ids = quests.map(\.id)
         XCTAssertEqual(ids.count, Set(ids).count)
     }
+
+    func testIsCompleted_commit_met() {
+        let q = Quest(id: "commit_2", type: .commit(2), difficulty: .easy)
+        XCTAssertTrue(QuestModel.isCompleted(q, commitCount: 2, pomodoroCount: 0, streakDays: 0))
+    }
+
+    func testIsCompleted_commit_notMet() {
+        let q = Quest(id: "commit_2", type: .commit(2), difficulty: .easy)
+        XCTAssertFalse(QuestModel.isCompleted(q, commitCount: 1, pomodoroCount: 0, streakDays: 0))
+    }
+
+    func testIsCompleted_combo_bothRequired() {
+        let q = Quest(id: "combo_2_2", type: .combo(2, 2), difficulty: .hard)
+        XCTAssertFalse(QuestModel.isCompleted(q, commitCount: 2, pomodoroCount: 1, streakDays: 0))
+        XCTAssertTrue(QuestModel.isCompleted(q,  commitCount: 2, pomodoroCount: 2, streakDays: 0))
+    }
+
+    func testIsCompleted_streak() {
+        let q = Quest(id: "streak_7", type: .streak(7), difficulty: .hard)
+        XCTAssertFalse(QuestModel.isCompleted(q, commitCount: 0, pomodoroCount: 0, streakDays: 6))
+        XCTAssertTrue(QuestModel.isCompleted(q,  commitCount: 0, pomodoroCount: 0, streakDays: 7))
+    }
+
+    func testProgress_commit() {
+        let q = Quest(id: "commit_2", type: .commit(2), difficulty: .easy)
+        let (cur, total) = QuestModel.progress(for: q, commitCount: 1, pomodoroCount: 0, streakDays: 0)
+        XCTAssertEqual(cur, 1)
+        XCTAssertEqual(total, 2)
+    }
+
+    func testProgress_combo() {
+        let q = Quest(id: "combo_2_2", type: .combo(2, 2), difficulty: .hard)
+        let (cur, total) = QuestModel.progress(for: q, commitCount: 1, pomodoroCount: 2, streakDays: 0)
+        XCTAssertEqual(cur, 3)   // min(1,2) + min(2,2) = 1 + 2 = 3
+        XCTAssertEqual(total, 4) // 2 + 2 = 4
+    }
+
+    func testProgress_doesNotExceedTotal() {
+        let q = Quest(id: "commit_2", type: .commit(2), difficulty: .easy)
+        let (cur, total) = QuestModel.progress(for: q, commitCount: 99, pomodoroCount: 0, streakDays: 0)
+        XCTAssertLessThanOrEqual(cur, total)
+    }
 }
