@@ -13,6 +13,7 @@ class EventWatcher {
         .appendingPathComponent(".cruxpet/events.json")
     var onCommit: (() -> Void)?
     var onPomodoro: (() -> Void)?
+    var pendingCommit = false
 
     func start() {
         guard pollTimer == nil else { return }
@@ -73,7 +74,7 @@ class EventWatcher {
 
         for event in newEvents {
             switch event.type {
-            case "commit":   onCommit?()
+            case "commit":   pendingCommit = true; onCommit?()
             case "pomodoro": onPomodoro?()
             default: break
             }

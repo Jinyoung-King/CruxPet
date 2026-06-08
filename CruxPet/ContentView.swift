@@ -114,7 +114,19 @@ struct ContentView: View {
             }
         }
         .animation(.spring(duration: 0.4), value: toast != nil)
-        .onAppear { setupWatcher() }
+        .onAppear {
+            setupWatcher()
+            if watcher.pendingCommit {
+                watcher.pendingCommit = false
+                showToast(ToastData(emoji: "⚡️", title: "커밋 감지!", subtitle: "EXP를 획득했어요"))
+            }
+        }
+        .onChange(of: watcher.pendingCommit) { _, hasPending in
+            if hasPending {
+                watcher.pendingCommit = false
+                showToast(ToastData(emoji: "⚡️", title: "커밋 감지!", subtitle: "EXP를 획득했어요"))
+            }
+        }
     }
 
     // MARK: - Sections
@@ -310,7 +322,6 @@ struct ContentView: View {
         }
         watcher.onCommit = {
             pet.gainCommitExp()
-            showToast(ToastData(emoji: "⚡️", title: "커밋 감지!", subtitle: "EXP를 획득했어요"))
         }
         watcher.start()
         pomodoro.onComplete = {
