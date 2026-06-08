@@ -12,7 +12,7 @@ struct SlimeView: View {
         TimelineView(.animation) { timeline in
             Canvas { context, size in
                 let t = timeline.date.timeIntervalSinceReferenceDate
-                let bobY = sin(t * 2.5) * 3
+                let bobY: CGFloat = sin(t * 2.5) * 3
 
                 // 후광 (Lv 80+)
                 if appearance.hasHalo {
