@@ -100,6 +100,13 @@ struct ContentView: View {
                         }
                     }
                     .padding(.vertical, 2)
+                if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
+                    Text("v\(version)")
+                        .font(.system(size: 9))
+                        .foregroundStyle(.quaternary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.bottom, 2)
+                }
                 }
                 .padding(12)
             }
