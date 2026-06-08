@@ -37,41 +37,7 @@ struct ContentView: View {
     @State private var showCustomize = false
 
     var body: some View {
-        ZStack {
-            // 메인 화면
-            VStack(spacing: 10) {
-                characterSection
-                expSection
-                pomodoroSection
-                activitySection
-                Divider()
-                HStack {
-                    Button(action: shareCard) {
-                        Label("공유", systemImage: "square.and.arrow.up")
-                            .font(.caption)
-                    }
-                    .buttonStyle(.plain)
-                    .foregroundStyle(.secondary)
-                    Spacer()
-                    Button {
-                        showCustomize = true
-                    } label: {
-                        Image(systemName: "gearshape")
-                            .font(.caption)
-                    }
-                    .buttonStyle(.plain)
-                    .foregroundStyle(.secondary)
-                    Spacer()
-                    Button("종료") { NSApplication.shared.terminate(nil) }
-                        .buttonStyle(.plain)
-                        .foregroundStyle(.secondary)
-                        .font(.caption)
-                }
-            }
-            .padding(12)
-            .opacity(showCustomize ? 0 : 1)
-
-            // 설정 화면
+        Group {
             if showCustomize {
                 CustomizeView(
                     current: customization,
@@ -84,7 +50,37 @@ struct ContentView: View {
                     },
                     onCancel: { showCustomize = false }
                 )
-                .transition(.opacity)
+            } else {
+                VStack(spacing: 10) {
+                    characterSection
+                    expSection
+                    pomodoroSection
+                    activitySection
+                    Divider()
+                    HStack {
+                        Button(action: shareCard) {
+                            Label("공유", systemImage: "square.and.arrow.up")
+                                .font(.caption)
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(.secondary)
+                        Spacer()
+                        Button {
+                            showCustomize = true
+                        } label: {
+                            Image(systemName: "gearshape")
+                                .font(.caption)
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(.secondary)
+                        Spacer()
+                        Button("종료") { NSApplication.shared.terminate(nil) }
+                            .buttonStyle(.plain)
+                            .foregroundStyle(.secondary)
+                            .font(.caption)
+                    }
+                }
+                .padding(12)
             }
         }
         .frame(width: 200)
