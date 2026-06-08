@@ -2,6 +2,12 @@ import SwiftUI
 import Observation
 import UserNotifications
 
+private struct ToastData: Equatable {
+    let emoji: String
+    let title: String
+    let subtitle: String
+}
+
 private struct PomodoroInfoButton: View {
     @State private var showPopover = false
 
@@ -35,6 +41,8 @@ struct ContentView: View {
     @Environment(EventWatcher.self) private var watcher
     @State private var customization = PetCustomization.load()
     @State private var showCustomize = false
+    @State private var showQuitConfirm = false
+    @State private var toast: ToastData? = nil
 
     var body: some View {
         Group {
@@ -57,28 +65,40 @@ struct ContentView: View {
                     pomodoroSection
                     activitySection
                     Divider()
-                    HStack {
+                    HStack(spacing: 0) {
                         Button(action: shareCard) {
-                            Label("공유", systemImage: "square.and.arrow.up")
-                                .font(.caption)
+                            Image(systemName: "square.and.arrow.up")
+                                .font(.system(size: 14))
+                                .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.plain)
                         .foregroundStyle(.secondary)
-                        Spacer()
                         Button {
                             showCustomize = true
                         } label: {
-                            Image(systemName: "gearshape")
-                                .font(.caption)
+                            Image(systemName: "gearshape.fill")
+                                .font(.system(size: 14))
+                                .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.plain)
                         .foregroundStyle(.secondary)
-                        Spacer()
-                        Button("종료") { NSApplication.shared.terminate(nil) }
-                            .buttonStyle(.plain)
-                            .foregroundStyle(.secondary)
-                            .font(.caption)
+                        Button {
+                            showQuitConfirm = true
+                        } label: {
+                            Image(systemName: "power")
+                                .font(.system(size: 14))
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(.secondary)
+                        .alert("CruxPet 종료", isPresented: $showQuitConfirm) {
+                            Button("종료", role: .destructive) { NSApplication.shared.terminate(nil) }
+                            Button("취소", role: .cancel) {}
+                        } message: {
+                            Text("슬라임이 잠들어요. 정말 종료할까요?")
+                        }
                     }
+                    .padding(.vertical, 2)
                 }
                 .padding(12)
             }
@@ -86,14 +106,26 @@ struct ContentView: View {
         .frame(width: 220)
         .background(.ultraThinMaterial)
         .animation(.easeInOut(duration: 0.15), value: showCustomize)
+        .overlay(alignment: .top) {
+            if let toast {
+                toastView(toast)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .padding(.top, 8)
+            }
+        }
+        .animation(.spring(duration: 0.4), value: toast != nil)
         .onAppear { setupWatcher() }
     }
 
     // MARK: - Sections
 
     private var characterSection: some View {
-        VStack(spacing: 2) {
+        VStack(spacing: 6) {
             ZStack {
+                Circle()
+                    .fill(Color.blue.opacity(0.06))
+                    .frame(width: 90, height: 90)
+                    .blur(radius: 14)
                 SlimeView(
                     appearance: pet.slimeAppearance.applying(customization),
                     isPomodoroActive: pomodoro.state == .running,
@@ -108,96 +140,165 @@ struct ContentView: View {
                 }
             }
             .animation(.easeInOut(duration: 0.2), value: pet.showCritical)
-            Text("Lv. \(pet.level) · \(customization.name)")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(.secondary)
+            HStack(spacing: 5) {
+                Text("Lv.\(pet.level)")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Color.blue, in: Capsule())
+                Text(customization.name)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(.secondary)
+            }
         }
     }
 
     private var expSection: some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Label("EXP", systemImage: "star.fill")
-                    .font(.caption2)
+                    .font(.caption2.weight(.semibold))
                     .foregroundStyle(.secondary)
                 Spacer()
                 Text("\(Int(pet.expInCurrentLevel)) / \(Int(pet.expNeededThisLevel))")
                     .font(.caption2.monospacedDigit())
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.tertiary)
             }
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color.secondary.opacity(0.2))
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color.blue.gradient)
+                    Capsule()
+                        .fill(Color.secondary.opacity(0.15))
+                    Capsule()
+                        .fill(LinearGradient(
+                            colors: [Color(hue: 0.6, saturation: 0.8, brightness: 0.9),
+                                     Color(hue: 0.72, saturation: 0.8, brightness: 0.85)],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        ))
                         .frame(width: geo.size.width * min(pet.expInCurrentLevel / max(pet.expNeededThisLevel, 1), 1))
                         .animation(.spring(duration: 0.4), value: pet.expInCurrentLevel)
                 }
             }
-            .frame(height: 8)
-            Text("Lv.\(pet.level + 1)까지 \(Int(pet.expNeededThisLevel - pet.expInCurrentLevel)) EXP")
+            .frame(height: 10)
+            Text("다음 레벨까지 \(Int(pet.expNeededThisLevel - pet.expInCurrentLevel)) EXP")
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
         }
     }
 
     private var pomodoroSection: some View {
-        VStack(spacing: 6) {
+        let isRunning = pomodoro.state == .running
+        let accent: Color = isRunning ? .orange : .blue
+        return VStack(spacing: 7) {
             HStack(spacing: 4) {
-                Image(systemName: "timer")
+                Image(systemName: isRunning ? "flame.fill" : "timer")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
-                Text("포모도로")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(isRunning ? .orange : .secondary)
+                Text(isRunning ? "집중 중" : "포모도로")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(isRunning ? .orange : .secondary)
                 PomodoroInfoButton()
             }
             Text(pomodoro.displayTime)
-                .font(.system(size: 24, weight: .bold, design: .monospaced))
-                .foregroundStyle(pomodoro.state == .running ? .primary : .secondary)
+                .font(.system(size: 30, weight: .bold, design: .monospaced))
+                .foregroundStyle(isRunning ? .primary : .secondary)
+                .animation(.none, value: pomodoro.displayTime)
             HStack(spacing: 8) {
                 Group {
                     switch pomodoro.state {
                     case .idle:
-                        Button("▶ 시작") { pomodoro.start() }
+                        Button("▶  시작") { pomodoro.start() }
                             .buttonStyle(.borderedProminent)
                             .controlSize(.small)
                     case .running:
-                        Button("⏸ 일시정지") { pomodoro.pause() }
+                        Button("⏸  일시정지") { pomodoro.pause() }
                             .buttonStyle(.bordered)
                             .controlSize(.small)
                         Button("↺") { pomodoro.reset() }
                             .buttonStyle(.bordered)
                             .controlSize(.small)
                     case .paused:
-                        Button("▶ 계속") { pomodoro.resume() }
+                        Button("▶  계속") { pomodoro.resume() }
                             .buttonStyle(.borderedProminent)
                             .controlSize(.small)
                         Button("↺") { pomodoro.reset() }
                             .buttonStyle(.bordered)
                             .controlSize(.small)
                     case .completed:
-                        Button("↺ 다시") { pomodoro.reset() }
+                        Button("↺  다시") { pomodoro.reset() }
                             .buttonStyle(.borderedProminent)
                             .controlSize(.small)
                     }
                 }
             }
         }
-        .padding(8)
-        .background(Color.blue.opacity(0.07), in: RoundedRectangle(cornerRadius: 8))
+        .padding(.vertical, 10)
+        .padding(.horizontal, 12)
+        .frame(maxWidth: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(accent.opacity(0.08))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .strokeBorder(accent.opacity(0.2), lineWidth: 1)
+                )
+        )
+        .animation(.easeInOut(duration: 0.25), value: isRunning)
     }
 
     private var activitySection: some View {
-        HStack {
-            Label("\(pet.todayCommitCount)회", systemImage: "externaldrive")
-                .font(.caption2)
+        HStack(spacing: 8) {
+            statChip(value: pet.todayCommitCount, icon: "arrow.triangle.branch", label: "오늘 커밋")
+            statChip(value: pet.todayPomodoroCount, icon: "timer", label: "오늘 포모도로")
+        }
+    }
+
+    private func statChip(value: Int, icon: String, label: String) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: icon)
+                .font(.caption)
                 .foregroundStyle(.secondary)
-            Spacer()
-            Label("\(pet.todayPomodoroCount)회", systemImage: "timer")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 1) {
+                Text("\(value)회")
+                    .font(.caption.monospacedDigit().weight(.semibold))
+                    .foregroundStyle(.primary)
+                Text(label)
+                    .font(.system(size: 9))
+                    .foregroundStyle(.tertiary)
+            }
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.secondary.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
+    }
+
+    // MARK: - Toast
+
+    private func toastView(_ data: ToastData) -> some View {
+        HStack(spacing: 8) {
+            Text(data.emoji)
+                .font(.title3)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(data.title)
+                    .font(.caption.weight(.bold))
+                Text(data.subtitle)
+                    .font(.system(size: 10))
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 9)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
+        .shadow(color: .black.opacity(0.12), radius: 8, y: 4)
+    }
+
+    private func showToast(_ data: ToastData) {
+        withAnimation { toast = data }
+        Task {
+            try? await Task.sleep(for: .seconds(3))
+            withAnimation { toast = nil }
         }
     }
 
@@ -207,12 +308,16 @@ struct ContentView: View {
         if pomodoro.state == .idle {
             pomodoro.setDuration(customization.pomodoroMinutes)
         }
-        watcher.onCommit = { pet.gainCommitExp() }
+        watcher.onCommit = {
+            pet.gainCommitExp()
+            showToast(ToastData(emoji: "⚡️", title: "커밋 감지!", subtitle: "EXP를 획득했어요"))
+        }
         watcher.start()
         pomodoro.onComplete = {
             watcher.appendPomodoro()
             pet.gainPomodoroExp()
             sendPomodoroNotification()
+            showToast(ToastData(emoji: "🍅", title: "포모도로 완료!", subtitle: "EXP를 획득했어요 ✨"))
         }
     }
 
