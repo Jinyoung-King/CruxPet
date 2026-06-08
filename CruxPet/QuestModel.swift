@@ -54,4 +54,22 @@ class QuestModel {
         Quest(id: "combo_2_2",  type: .combo(2, 2), difficulty: .hard),
         Quest(id: "streak_7",   type: .streak(7),   difficulty: .hard),
     ]
+
+    static func questsForDate(_ dateString: String) -> [Quest] {
+        let seed = dateString.utf8.reduce(0) { ($0 &* 31) &+ Int($1) }
+        let easy = Array(seededShuffle(easyPool, seed: seed).prefix(3))
+        let hard = Array(seededShuffle(hardPool, seed: seed &+ 1).prefix(2))
+        return easy + hard
+    }
+
+    static func seededShuffle(_ array: [Quest], seed: Int) -> [Quest] {
+        var arr = array
+        var state = seed
+        for i in stride(from: arr.count - 1, through: 1, by: -1) {
+            state = state &* 6364136223846793005 &+ 1442695040888963407
+            let j = abs(state) % (i + 1)
+            arr.swapAt(i, j)
+        }
+        return arr
+    }
 }

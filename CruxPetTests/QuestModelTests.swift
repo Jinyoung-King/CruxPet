@@ -45,4 +45,45 @@ final class QuestModelTests: XCTestCase {
         let allIds = (QuestModel.easyPool + QuestModel.hardPool).map(\.id)
         XCTAssertEqual(allIds.count, Set(allIds).count)
     }
+
+    func testQuestsForDate_returns5() {
+        let quests = QuestModel.questsForDate("2026-06-08")
+        XCTAssertEqual(quests.count, 5)
+    }
+
+    func testQuestsForDate_3Easy2Hard() {
+        let quests = QuestModel.questsForDate("2026-06-08")
+        XCTAssertEqual(quests.filter { $0.difficulty == .easy }.count, 3)
+        XCTAssertEqual(quests.filter { $0.difficulty == .hard }.count, 2)
+    }
+
+    func testQuestsForDate_isDeterministic() {
+        let a = QuestModel.questsForDate("2026-06-08")
+        let b = QuestModel.questsForDate("2026-06-08")
+        XCTAssertEqual(a.map(\.id), b.map(\.id))
+    }
+
+    func testQuestsForDate_differentDates() {
+        let a = QuestModel.questsForDate("2026-06-08").map(\.id)
+        let b = QuestModel.questsForDate("2026-06-09").map(\.id)
+        XCTAssertNotEqual(a, b)
+    }
+
+    func testSeededShuffle_isDeterministic() {
+        let a = QuestModel.seededShuffle(QuestModel.easyPool, seed: 42)
+        let b = QuestModel.seededShuffle(QuestModel.easyPool, seed: 42)
+        XCTAssertEqual(a.map(\.id), b.map(\.id))
+    }
+
+    func testSeededShuffle_differentSeed() {
+        let a = QuestModel.seededShuffle(QuestModel.easyPool, seed: 42)
+        let b = QuestModel.seededShuffle(QuestModel.easyPool, seed: 99)
+        XCTAssertNotEqual(a.map(\.id), b.map(\.id))
+    }
+
+    func testQuestsForDate_idsAreUnique() {
+        let quests = QuestModel.questsForDate("2026-06-08")
+        let ids = quests.map(\.id)
+        XCTAssertEqual(ids.count, Set(ids).count)
+    }
 }
