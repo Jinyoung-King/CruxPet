@@ -2,7 +2,14 @@ import SwiftUI
 import UserNotifications
 import Sparkle
 
-class SparkleDelegate: NSObject, SPUUpdaterDelegate {}
+@Observable
+class SparkleDelegate: NSObject, SPUUpdaterDelegate {
+    var updateAvailable = false
+
+    func updater(_ updater: SPUUpdater, didFindValidUpdate item: SUAppcastItem) {
+        updateAvailable = true
+    }
+}
 
 @main
 struct CruxPetApp: App {
@@ -30,9 +37,11 @@ struct CruxPetApp: App {
                 .environment(pet)
                 .environment(pomodoro)
                 .environment(watcher)
-            Divider()
-            Button("업데이트 확인") {
-                updaterController.updater.checkForUpdates()
+            if sparkleDelegate.updateAvailable {
+                Divider()
+                Button("🆕 업데이트 설치") {
+                    updaterController.updater.checkForUpdates()
+                }
             }
         }
         .menuBarExtraStyle(.window)

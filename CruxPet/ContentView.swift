@@ -108,10 +108,10 @@ struct ContentView: View {
                         .padding(.bottom, 2)
                 }
                 }
-                .padding(12)
+                .padding(8)
             }
         }
-        .frame(width: 200)
+        .frame(width: 220)
         .background(.ultraThinMaterial)
         .animation(.easeInOut(duration: 0.15), value: showCustomize)
         .overlay(alignment: .top) {
