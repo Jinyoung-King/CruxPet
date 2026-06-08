@@ -55,8 +55,10 @@ jobs:
             curl -sL https://github.com/sparkle-project/Sparkle/releases/download/2.9.2/Sparkle-2.9.2.tar.xz | tar -xJ -C /tmp
             SIGN_UPDATE="/tmp/bin/sign_update"
           fi
-          echo "$SPARKLE_PRIVATE_KEY" | "$SIGN_UPDATE" /tmp/CruxPet-${{ env.VERSION }}.dmg --ed-key-file - > /tmp/sparkle-signature.txt
-          echo "SPARKLE_SIGNATURE=$(cat /tmp/sparkle-signature.txt)" >> $GITHUB_ENV
+          SPARKLE_RAW=$(echo "$SPARKLE_PRIVATE_KEY" | "$SIGN_UPDATE" /tmp/CruxPet-${{ env.VERSION }}.dmg --ed-key-file -)
+          # sign_update 출력: sparkle:edSignature="XXX" length="NNN" — 서명값만 추출
+          SPARKLE_SIGNATURE=$(echo "$SPARKLE_RAW" | sed 's/.*edSignature="\([^"]*\)".*/\1/')
+          echo "SPARKLE_SIGNATURE=$SPARKLE_SIGNATURE" >> $GITHUB_ENV
           echo "DMG_LENGTH=$(stat -f%z /tmp/CruxPet-${{ env.VERSION }}.dmg)" >> $GITHUB_ENV
 
       - name: Update appcast.xml
