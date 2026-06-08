@@ -83,7 +83,7 @@ struct ContentView: View {
                 .padding(12)
             }
         }
-        .frame(width: 200)
+        .frame(width: 220)
         .background(.ultraThinMaterial)
         .animation(.easeInOut(duration: 0.15), value: showCustomize)
         .onAppear { setupWatcher() }
