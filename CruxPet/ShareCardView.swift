@@ -2,8 +2,9 @@ import SwiftUI
 
 struct ShareCardView: View {
     let pet: PetModel
+    let customization: PetCustomization
 
-    private var appearance: SlimeAppearance { pet.slimeAppearance }
+    private var appearance: SlimeAppearance { pet.slimeAppearance.applying(customization) }
     private var tierColor: Color { Color(hex: appearance.isRainbow ? "#A8DADC" : appearance.bodyHex) }
 
     var body: some View {
@@ -17,11 +18,11 @@ struct ShareCardView: View {
 
             VStack(spacing: 12) {
                 // 슬라임
-                SlimeView(appearance: appearance)
+                SlimeView(appearance: appearance, accessory: customization.accessory)
                     .frame(width: appearance.size + 32, height: appearance.size + 40)
 
                 // 레벨
-                Text("Lv. \(pet.level)")
+                Text("Lv. \(pet.level) · \(customization.name)")
                     .font(.system(size: 28, weight: .bold, design: .rounded))
                     .foregroundStyle(.primary)
 

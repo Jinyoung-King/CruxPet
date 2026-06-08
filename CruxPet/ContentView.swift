@@ -215,7 +215,7 @@ struct ContentView: View {
     }
 
     private func shareCard() {
-        let card = ShareCardView(pet: pet)
+        let card = ShareCardView(pet: pet, customization: customization)
         let renderer = ImageRenderer(content: card)
         renderer.scale = 2.0
         guard let image = renderer.nsImage else { return }
