@@ -18,11 +18,16 @@ class EventWatcher {
     func start() {
         guard pollTimer == nil else { return }
         createEventsFileIfNeeded()
+        poll()
         pollTimer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
             Task { @MainActor [weak self] in
                 self?.poll()
             }
         }
+    }
+
+    func pollNow() {
+        poll()
     }
 
     func stop() {
