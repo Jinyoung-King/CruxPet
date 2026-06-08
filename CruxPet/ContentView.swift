@@ -41,6 +41,8 @@ struct ContentView: View {
     @State private var customization = PetCustomization.load()
     @State private var showCustomize = false
     @State private var toast: ToastData? = nil
+    @State private var questsModel = QuestModel()
+    @State private var isQuestExpanded = false
 
     var body: some View {
         let _ = watcher.pendingCommit  // @Observable 변경 추적 등록
@@ -61,6 +63,7 @@ struct ContentView: View {
                 VStack(spacing: 10) {
                     characterSection
                     expSection
+                    questSection
                     pomodoroSection
                     activitySection
                     Divider()
@@ -139,6 +142,18 @@ struct ContentView: View {
         .onChange(of: pet.todayPomodoroCount) { old, new in
             guard new > old else { return }
             showToast(ToastData(emoji: "🍅", title: "포모도로 완료!", subtitle: "EXP를 획득했어요 ✨"))
+        }
+        .onChange(of: pet.todayCommitCount) { _, _ in
+            let allClear = questsModel.claimCompleted(pet: pet)
+            if allClear {
+                showToast(ToastData(emoji: "🎉", title: "퀘스트 올클리어!", subtitle: "+100 EXP 보너스 지급!"))
+            }
+        }
+        .onChange(of: pet.todayPomodoroCount) { _, _ in
+            let allClear = questsModel.claimCompleted(pet: pet)
+            if allClear {
+                showToast(ToastData(emoji: "🎉", title: "퀘스트 올클리어!", subtitle: "+100 EXP 보너스 지급!"))
+            }
         }
     }
 
@@ -268,6 +283,108 @@ struct ContentView: View {
         }
     }
 
+    private var questSection: some View {
+        VStack(spacing: 0) {
+            Button(action: {
+                withAnimation(.easeInOut(duration: 0.2)) { isQuestExpanded.toggle() }
+            }) {
+                HStack {
+                    Image(systemName: "list.bullet.clipboard")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text("일일 퀘스트")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Text("✅ \(questsModel.claimedCount)/\(questsModel.todayQuests.count)")
+                        .font(.caption2.monospacedDigit())
+                        .foregroundStyle(.tertiary)
+                    Image(systemName: isQuestExpanded ? "chevron.down" : "chevron.right")
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 8)
+                .background(Color.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
+            }
+            .buttonStyle(.plain)
+
+            if isQuestExpanded {
+                VStack(spacing: 4) {
+                    ForEach(questsModel.todayQuests) { quest in
+                        questRow(quest)
+                    }
+                }
+                .padding(.top, 4)
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
+    }
+
+    private func questRow(_ quest: Quest) -> some View {
+        let claimed = questsModel.isClaimed(quest)
+        let (cur, total) = questsModel.progress(for: quest, pet: pet)
+
+        return HStack(spacing: 8) {
+            Image(systemName: claimed ? "checkmark.circle.fill" : "circle")
+                .font(.caption)
+                .foregroundStyle(claimed ? .green : .secondary)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(quest.description)
+                    .font(.caption.weight(claimed ? .regular : .medium))
+                    .foregroundStyle(claimed ? .secondary : .primary)
+
+                if claimed {
+                    Text("+\(quest.expReward) EXP")
+                        .font(.system(size: 9))
+                        .foregroundStyle(.green.opacity(0.7))
+                } else {
+                    GeometryReader { geo in
+                        ZStack(alignment: .leading) {
+                            Capsule().fill(Color.secondary.opacity(0.15))
+                            Capsule()
+                                .fill(questsModel.isCompleted(quest, pet: pet)
+                                      ? Color.green.opacity(0.7)
+                                      : Color.blue.opacity(0.5))
+                                .frame(width: total > 0
+                                       ? geo.size.width * min(CGFloat(cur) / CGFloat(total), 1)
+                                       : 0)
+                        }
+                    }
+                    .frame(height: 4)
+
+                    Text(progressLabel(quest))
+                        .font(.system(size: 9))
+                        .foregroundStyle(.tertiary)
+                }
+            }
+
+            Spacer()
+            if !claimed {
+                Text(quest.difficulty == .easy ? "보통" : "어려움")
+                    .font(.system(size: 8))
+                    .foregroundStyle(.tertiary)
+            }
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(Color.secondary.opacity(0.05), in: RoundedRectangle(cornerRadius: 6))
+    }
+
+    private func progressLabel(_ quest: Quest) -> String {
+        switch quest.type {
+        case .commit(let n):
+            return "\(min(pet.todayCommitCount, n))/\(n)"
+        case .pomodoro(let n):
+            return "\(min(pet.todayPomodoroCount, n))/\(n)"
+        case .combo(let c, let p):
+            return "커밋 \(min(pet.todayCommitCount, c))/\(c) · 포모도로 \(min(pet.todayPomodoroCount, p))/\(p)"
+        case .streak(let n):
+            return "\(min(pet.streakDays, n))/\(n)일"
+        }
+    }
+
     private var pomodoroSection: some View {
         let isRunning = pomodoro.state == .running
         let accent: Color = isRunning ? .orange : .blue
@@ -389,6 +506,8 @@ struct ContentView: View {
         if pomodoro.state == .idle {
             pomodoro.setDuration(customization.pomodoroMinutes)
         }
+        questsModel.refreshIfNeeded()
+        questsModel.claimCompleted(pet: pet)
     }
 
     private func confirmQuit() {
