@@ -140,18 +140,15 @@ struct ContentView: View {
             showToast(ToastData(emoji: emoji, title: "\(milestone)일 연속 달성!", subtitle: subtitle))
         }
         .onChange(of: pet.todayPomodoroCount) { old, new in
-            guard new > old else { return }
-            showToast(ToastData(emoji: "🍅", title: "포모도로 완료!", subtitle: "EXP를 획득했어요 ✨"))
-        }
-        .onChange(of: pet.todayCommitCount) { _, _ in
-            let allClear = questsModel.claimCompleted(pet: pet)
-            if allClear {
+            if new > old {
+                showToast(ToastData(emoji: "🍅", title: "포모도로 완료!", subtitle: "EXP를 획득했어요 ✨"))
+            }
+            if questsModel.claimCompleted(pet: pet) {
                 showToast(ToastData(emoji: "🎉", title: "퀘스트 올클리어!", subtitle: "+100 EXP 보너스 지급!"))
             }
         }
-        .onChange(of: pet.todayPomodoroCount) { _, _ in
-            let allClear = questsModel.claimCompleted(pet: pet)
-            if allClear {
+        .onChange(of: pet.todayCommitCount) { _, _ in
+            if questsModel.claimCompleted(pet: pet) {
                 showToast(ToastData(emoji: "🎉", title: "퀘스트 올클리어!", subtitle: "+100 EXP 보너스 지급!"))
             }
         }
