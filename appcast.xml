@@ -2,5 +2,17 @@
 <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
   <channel>
     <title>CruxPet</title>
+    <item>
+      <title>Version 1.0.2</title>
+      <pubDate>Mon, 08 Jun 2026 05:03:56 +0000</pubDate>
+      <sparkle:version>3</sparkle:version>
+      <sparkle:shortVersionString>1.0.2</sparkle:shortVersionString>
+      <enclosure
+        url="https://github.com/Jinyoung-King/CruxPet/releases/download/v1.0.2/CruxPet-1.0.2.dmg"
+        length="1324912"
+        type="application/octet-stream"
+        sparkle:edSignature="sparkle:edSignature="6T2bVLw4XLOX9Bx2qQuaawCWPE2E9cduE8kakJV17bUWDMkuy5dt+vCKGi908wBiaGunNH+wf+Y1DnvB4jgbDQ==" length="1324912""
+      />
+    </item>
   </channel>
 </rss>
