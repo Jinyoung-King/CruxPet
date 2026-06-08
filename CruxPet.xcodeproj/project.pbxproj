@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		30D70AC82FD6871B00C4C603 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 30D70A2B2FD65FE500C4C603 /* Sparkle */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		30D709E02FD29E2500C4C603 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -39,6 +43,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				30D70AC82FD6871B00C4C603 /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -80,6 +85,7 @@
 				300E65C12F87A36B007F9DEE /* Sources */,
 				300E65C22F87A36B007F9DEE /* Frameworks */,
 				300E65C32F87A36B007F9DEE /* Resources */,
+				AA000001AA000001AA000001 /* Inject Sparkle Info.plist Keys */,
 			);
 			buildRules = (
 			);
@@ -177,6 +183,23 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		AA000001AA000001AA000001 /* Inject Sparkle Info.plist Keys */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Inject Sparkle Info.plist Keys";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "PLIST=\"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n/usr/libexec/PlistBuddy -c \"Add :SUFeedURL string 'https://raw.githubusercontent.com/Jinyoung-King/CruxPet/main/appcast.xml'\" \"$PLIST\" 2>/dev/null || /usr/libexec/PlistBuddy -c \"Set :SUFeedURL 'https://raw.githubusercontent.com/Jinyoung-King/CruxPet/main/appcast.xml'\" \"$PLIST\"\n/usr/libexec/PlistBuddy -c \"Add :SUPublicEDKey string 'u2GfBAPwCszf1A3lcPrZg3dsXhStVCCx/0Rqj8SKBqI='\" \"$PLIST\" 2>/dev/null || /usr/libexec/PlistBuddy -c \"Set :SUPublicEDKey 'u2GfBAPwCszf1A3lcPrZg3dsXhStVCCx/0Rqj8SKBqI='\" \"$PLIST\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		300E65C12F87A36B007F9DEE /* Sources */ = {
@@ -333,11 +356,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_LSUIElement = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_SUFeedURL = "https://raw.githubusercontent.com/Jinyoung-King/CruxPet/main/appcast.xml";
-				INFOPLIST_KEY_SUPublicEDKey = "u2GfBAPwCszf1A3lcPrZg3dsXhStVCCx/0Rqj8SKBqI=";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = CruxPet/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -366,11 +386,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_LSUIElement = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_SUFeedURL = "https://raw.githubusercontent.com/Jinyoung-King/CruxPet/main/appcast.xml";
-				INFOPLIST_KEY_SUPublicEDKey = "u2GfBAPwCszf1A3lcPrZg3dsXhStVCCx/0Rqj8SKBqI=";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = CruxPet/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
