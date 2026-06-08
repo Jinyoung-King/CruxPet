@@ -1,6 +1,5 @@
 import SwiftUI
 import Observation
-import UserNotifications
 
 private struct ToastData: Equatable {
     let emoji: String
@@ -143,6 +142,10 @@ struct ContentView: View {
             pet.pendingStreakMilestone = 0
             let (emoji, subtitle) = streakMilestoneMessage(milestone)
             showToast(ToastData(emoji: emoji, title: "\(milestone)일 연속 달성!", subtitle: subtitle))
+        }
+        .onChange(of: pet.todayPomodoroCount) { old, new in
+            guard new > old else { return }
+            showToast(ToastData(emoji: "🍅", title: "포모도로 완료!", subtitle: "EXP를 획득했어요 ✨"))
         }
     }
 
@@ -393,16 +396,6 @@ struct ContentView: View {
         if pomodoro.state == .idle {
             pomodoro.setDuration(customization.pomodoroMinutes)
         }
-        watcher.onCommit = {
-            pet.gainCommitExp()
-        }
-        watcher.start()
-        pomodoro.onComplete = {
-            watcher.appendPomodoro()
-            pet.gainPomodoroExp()
-            sendPomodoroNotification()
-            showToast(ToastData(emoji: "🍅", title: "포모도로 완료!", subtitle: "EXP를 획득했어요 ✨"))
-        }
     }
 
     private func shareCard() {
@@ -419,14 +412,6 @@ struct ContentView: View {
         }
     }
 
-    private func sendPomodoroNotification() {
-        let content = UNMutableNotificationContent()
-        content.title = "포모도로 완료! 🍅"
-        content.body = "EXP 획득! 슬라임이 기뻐해요."
-        content.sound = .default
-        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
-        UNUserNotificationCenter.current().add(request)
-    }
 }
 
 #Preview {

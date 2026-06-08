@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import UserNotifications
 
 enum EmotionState: Equatable {
     case normal, happy, excited, sleepy
@@ -196,6 +197,12 @@ class PetModel {
     private func triggerLevelUp(_ newLevel: Int) {
         pendingLevelUp = newLevel
         showLevelUp = true
+        let content = UNMutableNotificationContent()
+        content.title = "레벨 업! 🎉 Lv.\(newLevel)"
+        content.body = "슬라임이 성장했어요!"
+        content.sound = .default
+        let req = UNNotificationRequest(identifier: "levelup-\(newLevel)", content: content, trigger: nil)
+        UNUserNotificationCenter.current().add(req)
         Task { @MainActor [weak self] in
             try? await Task.sleep(for: .seconds(2))
             self?.showLevelUp = false
@@ -238,6 +245,12 @@ class PetModel {
         let milestones = [3, 7, 14, 30, 60, 100]
         if milestones.contains(streakDays) {
             pendingStreakMilestone = streakDays
+            let content = UNMutableNotificationContent()
+            content.title = "\(streakDays)일 연속 달성! 🔥"
+            content.body = "꾸준함이 빛을 발하고 있어요."
+            content.sound = .default
+            let req = UNNotificationRequest(identifier: "streak-\(streakDays)", content: content, trigger: nil)
+            UNUserNotificationCenter.current().add(req)
         }
     }
 

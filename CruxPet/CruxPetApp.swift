@@ -44,17 +44,39 @@ struct CruxPetApp: App {
                 }
             }
         } label: {
-            switch pomodoro.state {
-            case .running:
-                Image(systemName: "timer")
-                    .symbolEffect(.variableColor.iterative, options: .repeating)
-            case .paused:
-                Image(systemName: "timer")
-            default:
-                Image(systemName: pet.emotion == .sleepy ? "zzz" : "pawprint.fill")
+            Group {
+                switch pomodoro.state {
+                case .running:
+                    Image(systemName: "timer")
+                        .symbolEffect(.variableColor.iterative, options: .repeating)
+                case .paused:
+                    Image(systemName: "timer")
+                default:
+                    Image(systemName: pet.emotion == .sleepy ? "zzz" : "pawprint.fill")
+                }
             }
+            .onAppear { startServices() }
         }
         .menuBarExtraStyle(.window)
+    }
+
+    private func startServices() {
+        watcher.onCommit = { pet.gainCommitExp() }
+        pomodoro.onComplete = {
+            watcher.appendPomodoro()
+            pet.gainPomodoroExp()
+            sendPomodoroNotification()
+        }
+        watcher.start()
+    }
+
+    private func sendPomodoroNotification() {
+        let content = UNMutableNotificationContent()
+        content.title = "포모도로 완료! 🍅"
+        content.body = "EXP 획득! 슬라임이 기뻐해요."
+        content.sound = .default
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+        UNUserNotificationCenter.current().add(request)
     }
 
     private static func installGitHook() {
