@@ -40,7 +40,6 @@ struct ContentView: View {
     @Environment(EventWatcher.self) private var watcher
     @State private var customization = PetCustomization.load()
     @State private var showCustomize = false
-    @State private var showQuitConfirm = false
     @State private var toast: ToastData? = nil
 
     var body: some View {
@@ -83,7 +82,7 @@ struct ContentView: View {
                         .buttonStyle(.plain)
                         .foregroundStyle(.secondary)
                         Button {
-                            showQuitConfirm = true
+                            confirmQuit()
                         } label: {
                             Image(systemName: "power")
                                 .font(.system(size: 14))
@@ -91,12 +90,6 @@ struct ContentView: View {
                         }
                         .buttonStyle(.plain)
                         .foregroundStyle(.secondary)
-                        .alert("CruxPet 종료", isPresented: $showQuitConfirm) {
-                            Button("종료", role: .destructive) { NSApplication.shared.terminate(nil) }
-                            Button("취소", role: .cancel) {}
-                        } message: {
-                            Text("슬라임이 잠들어요. 정말 종료할까요?")
-                        }
                     }
                     .padding(.vertical, 2)
                 if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
@@ -395,6 +388,18 @@ struct ContentView: View {
     private func setupWatcher() {
         if pomodoro.state == .idle {
             pomodoro.setDuration(customization.pomodoroMinutes)
+        }
+    }
+
+    private func confirmQuit() {
+        let alert = NSAlert()
+        alert.messageText = "CruxPet 종료"
+        alert.informativeText = "슬라임이 잠들어요. 정말 종료할까요?"
+        alert.alertStyle = .warning
+        alert.addButton(withTitle: "취소")
+        alert.addButton(withTitle: "종료")
+        if alert.runModal() == .alertSecondButtonReturn {
+            NSApplication.shared.terminate(nil)
         }
     }
 
