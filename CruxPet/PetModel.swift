@@ -31,6 +31,8 @@ class PetModel {
     private(set) var todayCommitCount: Int = 0
     private(set) var todayPomodoroCount: Int = 0
     private(set) var showCritical: Bool = false
+    private(set) var streakDays: Int = 0
+    var pendingStreakMilestone: Int = 0
 
     var level: Int { PetModel.levelForExp(totalExp) }
     var expInCurrentLevel: Double { totalExp - PetModel.totalExpAtLevelStart(level) }
@@ -45,6 +47,7 @@ class PetModel {
         totalExp = UserDefaults.standard.double(forKey: "cruxpet.totalExp")
         todayCommitCount = UserDefaults.standard.integer(forKey: "cruxpet.commitCount")
         todayPomodoroCount = UserDefaults.standard.integer(forKey: "cruxpet.pomodoroCount")
+        streakDays = UserDefaults.standard.integer(forKey: "cruxpet.streakDays")
         resetDailyCountsIfNeeded()
         awardPassiveCatchupExp()
         startPassiveTimer()
@@ -61,6 +64,7 @@ class PetModel {
         totalExp += Double(gained)
         todayCommitCount += 1
         if isCrit { triggerCritical() }
+        updateStreak()
         persist()
     }
 
@@ -69,6 +73,7 @@ class PetModel {
         totalExp += Double(gained)
         todayPomodoroCount += 1
         if isCrit { triggerCritical() }
+        updateStreak()
         persist()
     }
 
@@ -166,10 +171,28 @@ class PetModel {
         }
     }
 
+    private func updateStreak() {
+        let fmt = DateFormatter()
+        fmt.dateFormat = "yyyy-MM-dd"
+        let today = fmt.string(from: Date())
+        let lastDate = UserDefaults.standard.string(forKey: "cruxpet.streakDate") ?? ""
+        guard lastDate != today else { return }
+
+        let yesterday = fmt.string(from: Calendar.current.date(byAdding: .day, value: -1, to: Date())!)
+        streakDays = (lastDate == yesterday) ? streakDays + 1 : 1
+        UserDefaults.standard.set(today, forKey: "cruxpet.streakDate")
+
+        let milestones = [3, 7, 14, 30, 60, 100]
+        if milestones.contains(streakDays) {
+            pendingStreakMilestone = streakDays
+        }
+    }
+
     private func persist() {
         UserDefaults.standard.set(totalExp,          forKey: "cruxpet.totalExp")
         UserDefaults.standard.set(todayCommitCount,  forKey: "cruxpet.commitCount")
         UserDefaults.standard.set(todayPomodoroCount,forKey: "cruxpet.pomodoroCount")
+        UserDefaults.standard.set(streakDays,        forKey: "cruxpet.streakDays")
     }
 
     private func resetDailyCountsIfNeeded() {

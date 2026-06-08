@@ -132,6 +132,23 @@ struct ContentView: View {
                 showToast(ToastData(emoji: "⚡️", title: "커밋 감지!", subtitle: "EXP를 획득했어요"))
             }
         }
+        .onChange(of: pet.pendingStreakMilestone) { _, milestone in
+            guard milestone > 0 else { return }
+            pet.pendingStreakMilestone = 0
+            let (emoji, subtitle) = streakMilestoneMessage(milestone)
+            showToast(ToastData(emoji: emoji, title: "\(milestone)일 연속 달성!", subtitle: subtitle))
+        }
+    }
+
+    private func streakMilestoneMessage(_ days: Int) -> (String, String) {
+        switch days {
+        case 3:   return ("🔥", "3일 연속! 습관이 만들어지고 있어요")
+        case 7:   return ("🔥", "일주일 개근! 대단한데요?")
+        case 14:  return ("💪", "2주 연속! 이제 루틴이 됐네요")
+        case 30:  return ("👑", "한 달 연속!! 진짜 레전드")
+        case 60:  return ("💎", "두 달 연속... 미쳤다")
+        default:  return ("🌟", "무려 \(days)일 연속! 전설의 개발자")
+        }
     }
 
     // MARK: - Sections
@@ -169,6 +186,33 @@ struct ContentView: View {
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(.secondary)
             }
+            if pet.streakDays > 0 {
+                streakBadge
+                    .transition(.scale.combined(with: .opacity))
+            }
+        }
+        .animation(.spring(duration: 0.35), value: pet.streakDays)
+    }
+
+    private var streakBadge: some View {
+        HStack(spacing: 3) {
+            Text("🔥")
+                .font(.system(size: 11))
+            Text("\(pet.streakDays)일 연속")
+                .font(.system(size: 10, weight: .bold))
+                .foregroundStyle(streakColor)
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 3)
+        .background(streakColor.opacity(0.12), in: Capsule())
+    }
+
+    private var streakColor: Color {
+        switch pet.streakDays {
+        case 1...6:   return .orange
+        case 7...13:  return .red
+        case 14...29: return .purple
+        default:      return .yellow
         }
     }
 

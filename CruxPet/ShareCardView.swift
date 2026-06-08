@@ -197,6 +197,21 @@ struct ShareCardView: View {
                 }
                 .padding(.top, 14)
 
+                // 스트릭
+                if pet.streakDays > 0 {
+                    HStack(spacing: 5) {
+                        Text("🔥")
+                            .font(.system(size: 13))
+                        Text("\(pet.streakDays)일 연속 활동 중")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundStyle(streakColor)
+                    }
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 6)
+                    .background(streakColor.opacity(0.13), in: Capsule())
+                    .padding(.top, 8)
+                }
+
                 // 획득 뱃지 (있을 때만)
                 if !earnedBadges.isEmpty {
                     HStack(spacing: 6) {
@@ -259,6 +274,15 @@ struct ShareCardView: View {
         .padding(.vertical, 10)
         .frame(width: 128)
         .background(.white.opacity(0.28), in: RoundedRectangle(cornerRadius: 14))
+    }
+
+    private var streakColor: Color {
+        switch pet.streakDays {
+        case 1...6:   return .orange
+        case 7...13:  return .red
+        case 14...29: return .purple
+        default:      return .yellow
+        }
     }
 
     private func formattedExp(_ exp: Double) -> String {
