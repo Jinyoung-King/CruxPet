@@ -111,7 +111,7 @@ struct ContentView: View {
                 .padding(12)
             }
         }
-        .frame(width: 220)
+        .frame(width: 200)
         .background(.ultraThinMaterial)
         .animation(.easeInOut(duration: 0.15), value: showCustomize)
         .overlay(alignment: .top) {
