@@ -108,7 +108,7 @@ struct ContentView: View {
                         .padding(.bottom, 2)
                 }
                 }
-                .padding(8)
+                .padding(12)
             }
         }
         .frame(width: 220)
