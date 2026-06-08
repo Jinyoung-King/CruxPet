@@ -16,7 +16,7 @@ struct SlimeView: View {
 
                 // 후광 (Lv 80+)
                 if appearance.hasHalo {
-                    drawHalo(context: &context, center: CGPoint(x: size.width/2, y: size.height/2 - 4 + bobY), radius: appearance.size * 0.7)
+                    drawHalo(context: &context, center: CGPoint(x: size.width/2, y: size.height/2 - 4.0 + bobY), radius: appearance.size * 0.7)
                 }
 
                 // 슬라임 몸통
