@@ -11,3 +11,6 @@ DerivedData/
 
 # macOS
 .DS_Store
+
+# DMG builds (uploaded to GitHub Releases, not committed)
+*.dmg
