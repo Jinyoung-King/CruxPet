@@ -26,7 +26,7 @@ struct CustomizeView: View {
         ScrollView {
             VStack(spacing: 12) {
                 // 실시간 미리보기
-                SlimeView(appearance: previewAppearance, accessory: draft.accessory)
+                SlimeView(appearance: previewAppearance, accessory: "") // TODO: Task 2 - show selected accessories
                     .frame(height: 80)
 
                 Divider()
@@ -74,21 +74,8 @@ struct CustomizeView: View {
                 // 악세서리
                 VStack(alignment: .leading, spacing: 6) {
                     Text("악세서리").font(.caption.bold()).foregroundStyle(.secondary)
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 5), spacing: 6) {
-                        ForEach(PetCustomization.accessories, id: \.self) { emoji in
-                            Text(emoji)
-                                .font(.title3)
-                                .frame(width: 32, height: 32)
-                                .background(draft.accessory == emoji ? Color.blue.opacity(0.2) : Color.secondary.opacity(0.1), in: RoundedRectangle(cornerRadius: 6))
-                                .onTapGesture { draft.accessory = draft.accessory == emoji ? "" : emoji }
-                        }
-                        Text("✕")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .frame(width: 32, height: 32)
-                            .background(draft.accessory.isEmpty ? Color.blue.opacity(0.2) : Color.secondary.opacity(0.1), in: RoundedRectangle(cornerRadius: 6))
-                            .onTapGesture { draft.accessory = "" }
-                    }
+                    Text("Coming soon - Task 2").font(.caption).foregroundStyle(.secondary)
+                    // TODO: Task 2 - Replace with AccessorySlot selection UI
                 }
 
                 // 포모도로 시간

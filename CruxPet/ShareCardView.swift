@@ -131,7 +131,7 @@ struct ShareCardView: View {
                         .fill(tierColor.opacity(0.3))
                         .frame(width: 120)
                         .blur(radius: 22)
-                    SlimeView(appearance: appearance, accessory: customization.accessory)
+                    SlimeView(appearance: appearance, accessory: "") // TODO: Task 2 - show selected accessories
                         .scaleEffect(2.2)
                         .frame(width: (appearance.size + 32) * 2.2,
                                height: (appearance.size + 40) * 2.2)
