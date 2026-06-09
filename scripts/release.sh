@@ -167,9 +167,9 @@ update_appcast() {
 
     local DMG_PATH="$REPO_ROOT/$DMG_NAME"
 
-    # 서명 생성
+    # 서명 생성 (sign_update 출력: sparkle:edSignature="..." length="..." — 값만 추출)
     local SIGNATURE
-    SIGNATURE=$("$SPARKLE_BIN/sign_update" "$DMG_PATH")
+    SIGNATURE=$("$SPARKLE_BIN/sign_update" "$DMG_PATH" | sed -n 's/.*sparkle:edSignature="\([^"]*\)".*/\1/p')
 
     # 파일 크기
     local FILE_SIZE
