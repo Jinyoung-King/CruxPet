@@ -70,5 +70,69 @@ preflight() {
     echo "   Sparkle: $SPARKLE_BIN"
 }
 
+# ── 버전 번프 ──────────────────────────────────────────────────────────
+bump_version() {
+    echo "📝 버전 번프 중: $VERSION"
+
+    local PBXPROJ="$REPO_ROOT/CruxPet.xcodeproj/project.pbxproj"
+
+    # 현재 build number 읽기
+    local CURRENT_BUILD
+    CURRENT_BUILD=$(grep -m1 "CURRENT_PROJECT_VERSION" "$PBXPROJ" | tr -dc '0-9')
+    local NEW_BUILD=$(( CURRENT_BUILD + 1 ))
+
+    # MARKETING_VERSION 교체 (전체)
+    sed -i '' "s/MARKETING_VERSION = [0-9][0-9.]*;/MARKETING_VERSION = ${VERSION};/g" "$PBXPROJ"
+
+    # CURRENT_PROJECT_VERSION 교체 (전체)
+    sed -i '' "s/CURRENT_PROJECT_VERSION = ${CURRENT_BUILD};/CURRENT_PROJECT_VERSION = ${NEW_BUILD};/g" "$PBXPROJ"
+
+    echo "   빌드 번호: ${CURRENT_BUILD} → ${NEW_BUILD}"
+
+    git -C "$REPO_ROOT" add "$PBXPROJ"
+    git -C "$REPO_ROOT" commit -m "chore: bump version to ${VERSION} (build ${NEW_BUILD})"
+    echo "✅ 버전 번프 완료"
+}
+
+# ── 빌드 ───────────────────────────────────────────────────────────────
+build_app() {
+    echo "🔨 빌드 중..."
+
+    xcodebuild archive \
+        -scheme CruxPet \
+        -configuration Release \
+        -archivePath "$ARCHIVE_PATH" \
+        -destination "generic/platform=macOS" \
+        -quiet
+
+    xcodebuild -exportArchive \
+        -archivePath "$ARCHIVE_PATH" \
+        -exportPath "$EXPORT_PATH" \
+        -exportOptionsPlist "$SCRIPT_DIR/ExportOptions.plist" \
+        -quiet
+
+    echo "✅ 빌드 완료"
+}
+
+# ── DMG 생성 ────────────────────────────────────────────────────────────
+create_dmg() {
+    echo "📦 DMG 생성 중..."
+
+    local DMG_PATH="$REPO_ROOT/$DMG_NAME"
+
+    # hdiutil이 .dmg를 자동으로 붙이므로 확장자 제거 후 전달
+    hdiutil create \
+        -volname "CruxPet" \
+        -srcfolder "$EXPORT_PATH/CruxPet.app" \
+        -ov \
+        -format UDZO \
+        "${DMG_PATH%.dmg}"
+
+    echo "✅ DMG 생성: $DMG_NAME ($(du -h "$DMG_PATH" | cut -f1))"
+}
+
 preflight
 echo "🚀 릴리즈 $VERSION 시작"
+bump_version
+build_app
+create_dmg
