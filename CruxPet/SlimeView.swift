@@ -351,7 +351,7 @@ struct SlimeView: View {
         if let emoji = accessories[.face] {
             let size = bodyRect.width * 0.30
             let r = context.resolve(Text(emoji).font(.system(size: size)))
-            context.draw(r, at: CGPoint(x: bodyRect.midX, y: bodyRect.minY + bodyRect.height * 0.3), anchor: .center)
+            context.draw(r, at: CGPoint(x: bodyRect.midX, y: bodyRect.minY + bodyRect.height * 0.5), anchor: .center)
         }
         if let emoji = accessories[.body] {
             let size = bodyRect.width * 0.35
