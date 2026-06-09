@@ -182,12 +182,13 @@ update_appcast() {
     # 다운로드 URL
     local DOWNLOAD_URL="https://github.com/Jinyoung-King/CruxPet/releases/download/v${VERSION}/CruxPet-${VERSION}.dmg"
 
-    # appcast.xml 생성
-    python3 - "$VERSION" "$BUILD_NUMBER" "$SIGNATURE" "$FILE_SIZE" "$DOWNLOAD_URL" <<'PYEOF'
+    # appcast.xml 생성 (REPO_ROOT를 인자로 전달해 절대 경로 사용)
+    python3 - "$VERSION" "$BUILD_NUMBER" "$SIGNATURE" "$FILE_SIZE" "$DOWNLOAD_URL" "$REPO_ROOT" <<'PYEOF'
 import sys
 from datetime import datetime, timezone
 
-version, build, signature, size, url = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5]
+version, build, signature, size, url, repo_root = \
+    sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6]
 pub_date = datetime.now(timezone.utc).strftime('%a, %d %b %Y %H:%M:%S +0000')
 
 xml = f"""<?xml version="1.0" encoding="utf-8"?>
@@ -209,7 +210,7 @@ xml = f"""<?xml version="1.0" encoding="utf-8"?>
   </channel>
 </rss>"""
 
-with open('appcast.xml', 'w') as f:
+with open(f'{repo_root}/appcast.xml', 'w') as f:
     f.write(xml)
 print(f"appcast.xml updated for v{version} (build {build})")
 PYEOF
