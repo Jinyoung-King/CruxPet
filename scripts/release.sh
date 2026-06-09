@@ -57,11 +57,13 @@ preflight() {
     fi
 
     # Sparkle sign_update 경로 탐색
-    SPARKLE_BIN=$(find ~/Library/Developer/Xcode/DerivedData -maxdepth 6 -name "sign_update" 2>/dev/null | head -1 | xargs -I{} dirname {})
-    if [[ -z "$SPARKLE_BIN" ]]; then
+    local SIGN_UPDATE_PATH
+    SIGN_UPDATE_PATH=$(find "$HOME/Library/Developer/Xcode/DerivedData" -maxdepth 6 -name "sign_update" 2>/dev/null | head -1)
+    if [[ -z "$SIGN_UPDATE_PATH" ]]; then
         echo "❌ Sparkle sign_update를 찾을 수 없습니다. Xcode에서 한 번 빌드해주세요." >&2
         exit 1
     fi
+    SPARKLE_BIN=$(dirname "$SIGN_UPDATE_PATH")
 
     echo "✅ Preflight 통과"
     echo "   버전: $VERSION"
