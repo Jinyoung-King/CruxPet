@@ -169,6 +169,14 @@ final class AchievementModelTests: XCTestCase {
             hasNightOwlCommit: false, todayCommitCount: 5, todayPomodoroCount: 0))
     }
 
+    func testIsCompleted_focusKing_notYet() {
+        let a = AchievementModel.make(.special(.focusKing))
+        XCTAssertFalse(AchievementModel.isCompleted(a,
+            totalCommitCount: 0, totalPomodoroCount: 0, streakDays: 0,
+            level: 1, questClearCount: 0,
+            hasNightOwlCommit: false, todayCommitCount: 0, todayPomodoroCount: 2))
+    }
+
     func testIsCompleted_focusKing_exact() {
         let a = AchievementModel.make(.special(.focusKing))
         XCTAssertTrue(AchievementModel.isCompleted(a,
@@ -227,5 +235,15 @@ final class AchievementModelTests: XCTestCase {
             hasNightOwlCommit: false, todayCommitCount: 3, todayPomodoroCount: 0)
         XCTAssertEqual(cur, 3)
         XCTAssertEqual(total, 5)
+    }
+
+    func testProgress_focusKing_partial() {
+        let a = AchievementModel.make(.special(.focusKing))
+        let (cur, total) = AchievementModel.progress(for: a,
+            totalCommitCount: 0, totalPomodoroCount: 0, streakDays: 0,
+            level: 1, questClearCount: 0,
+            hasNightOwlCommit: false, todayCommitCount: 0, todayPomodoroCount: 2)
+        XCTAssertEqual(cur, 2)
+        XCTAssertEqual(total, 3)
     }
 }
