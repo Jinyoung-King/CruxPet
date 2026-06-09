@@ -609,7 +609,7 @@ struct ContentView: View {
     private func checkAchievements() {
         let newOnes = achievementModel.claimCompleted(pet: pet)
         for a in newOnes {
-            showToast(ToastData(emoji: "🏆", title: "업적 달성!", subtitle: a.title))
+            showToast(ToastData(emoji: "🏆", title: "업적 달성! \(a.title)", subtitle: "새 업적을 달성했어요"))
         }
     }
 
