@@ -3,7 +3,7 @@ import SwiftUI
 struct SlimeView: View {
     let appearance: SlimeAppearance
     var isPomodoroActive: Bool = false
-    var accessory: String = ""
+    var accessories: [AccessorySlot: String] = [:]
     var isWandering: Bool = false
     var emotion: EmotionState = .normal
 
@@ -83,9 +83,7 @@ struct SlimeView: View {
                 }
                 drawSparkles(context: &context, bodyRect: bodyRect, t: t,
                              count: appearance.sparkleCount)
-                if !accessory.isEmpty {
-                    drawAccessory(context: &context, bodyRect: bodyRect)
-                }
+                drawSlotAccessories(context: &context, bodyRect: bodyRect)
             }
             .frame(width: totalWidth, height: totalHeight)
         }
@@ -342,13 +340,29 @@ struct SlimeView: View {
         }
     }
 
-    // MARK: - Accessory
+    // MARK: - Accessories
 
-    private func drawAccessory(context: inout GraphicsContext, bodyRect: CGRect) {
-        let size = bodyRect.width * 0.38
-        let r = context.resolve(Text(accessory).font(.system(size: size)))
-        context.draw(r, at: CGPoint(x: bodyRect.maxX - size*0.1,
-                                    y: bodyRect.minY - size*0.1), anchor: .bottomTrailing)
+    private func drawSlotAccessories(context: inout GraphicsContext, bodyRect: CGRect) {
+        if let emoji = accessories[.head] {
+            let size = bodyRect.width * 0.40
+            let r = context.resolve(Text(emoji).font(.system(size: size)))
+            context.draw(r, at: CGPoint(x: bodyRect.midX, y: bodyRect.minY), anchor: .bottom)
+        }
+        if let emoji = accessories[.face] {
+            let size = bodyRect.width * 0.30
+            let r = context.resolve(Text(emoji).font(.system(size: size)))
+            context.draw(r, at: CGPoint(x: bodyRect.midX, y: bodyRect.minY + bodyRect.height * 0.3), anchor: .center)
+        }
+        if let emoji = accessories[.body] {
+            let size = bodyRect.width * 0.35
+            let r = context.resolve(Text(emoji).font(.system(size: size)))
+            context.draw(r, at: CGPoint(x: bodyRect.maxX, y: bodyRect.maxY), anchor: .bottomTrailing)
+        }
+        if let emoji = accessories[.aura] {
+            let size = bodyRect.width * 0.35
+            let r = context.resolve(Text(emoji).font(.system(size: size)))
+            context.draw(r, at: CGPoint(x: bodyRect.minX, y: bodyRect.maxY), anchor: .bottomLeading)
+        }
     }
 }
 
