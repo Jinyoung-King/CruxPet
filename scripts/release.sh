@@ -236,7 +236,7 @@ finalize() {
     rm -f "$DMG_PATH"
 
     # push
-    git -C "$REPO_ROOT" push origin main --tags
+    git -C "$REPO_ROOT" push origin main
 
     echo ""
     echo "🎉 릴리즈 완료!"
