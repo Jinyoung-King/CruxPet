@@ -58,7 +58,7 @@ preflight() {
 
     # Sparkle sign_update 경로 탐색
     local SIGN_UPDATE_PATH
-    SIGN_UPDATE_PATH=$(find "$HOME/Library/Developer/Xcode/DerivedData" -maxdepth 6 -name "sign_update" 2>/dev/null | head -1)
+    SIGN_UPDATE_PATH=$(find "$HOME/Library/Developer/Xcode/DerivedData" -maxdepth 8 -name "sign_update" -type f -path "*/artifacts/*" 2>/dev/null | head -1)
     if [[ -z "$SIGN_UPDATE_PATH" ]]; then
         echo "❌ Sparkle sign_update를 찾을 수 없습니다. Xcode에서 한 번 빌드해주세요." >&2
         exit 1
