@@ -168,6 +168,9 @@ struct ContentView: View {
         .onChange(of: pet.streakDays) { _, _ in
             checkAchievements()
         }
+        .onChange(of: pet.level) { _, _ in
+            checkAchievements()
+        }
     }
 
     private func streakMilestoneMessage(_ days: Int) -> (String, String) {
@@ -608,8 +611,11 @@ struct ContentView: View {
 
     private func checkAchievements() {
         let newOnes = achievementModel.claimCompleted(pet: pet)
-        for a in newOnes {
-            showToast(ToastData(emoji: "🏆", title: "업적 달성! \(a.title)", subtitle: "새 업적을 달성했어요"))
+        guard !newOnes.isEmpty else { return }
+        if newOnes.count == 1 {
+            showToast(ToastData(emoji: "🏆", title: "업적 달성! \(newOnes[0].title)", subtitle: "새 업적을 달성했어요"))
+        } else {
+            showToast(ToastData(emoji: "🏆", title: "업적 \(newOnes.count)개 달성!", subtitle: "새 업적을 달성했어요"))
         }
     }
 
