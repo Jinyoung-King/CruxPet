@@ -87,6 +87,16 @@ bump_version() {
     # CURRENT_PROJECT_VERSION 교체 (전체)
     sed -i '' "s/CURRENT_PROJECT_VERSION = ${CURRENT_BUILD};/CURRENT_PROJECT_VERSION = ${NEW_BUILD};/g" "$PBXPROJ"
 
+    # 교체 확인
+    if ! grep -q "MARKETING_VERSION = ${VERSION};" "$PBXPROJ"; then
+        echo "❌ MARKETING_VERSION 번프 실패 — pbxproj 형식을 확인하세요." >&2
+        exit 1
+    fi
+    if ! grep -q "CURRENT_PROJECT_VERSION = ${NEW_BUILD};" "$PBXPROJ"; then
+        echo "❌ CURRENT_PROJECT_VERSION 번프 실패 — pbxproj 형식을 확인하세요." >&2
+        exit 1
+    fi
+
     echo "   빌드 번호: ${CURRENT_BUILD} → ${NEW_BUILD}"
 
     git -C "$REPO_ROOT" add "$PBXPROJ"
