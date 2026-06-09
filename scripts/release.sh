@@ -113,13 +113,14 @@ build_app() {
         -configuration Release \
         -archivePath "$ARCHIVE_PATH" \
         -destination "generic/platform=macOS" \
+        CODE_SIGN_IDENTITY="" \
+        CODE_SIGNING_REQUIRED=NO \
+        CODE_SIGNING_ALLOWED=NO \
         -quiet
 
-    xcodebuild -exportArchive \
-        -archivePath "$ARCHIVE_PATH" \
-        -exportPath "$EXPORT_PATH" \
-        -exportOptionsPlist "$SCRIPT_DIR/ExportOptions.plist" \
-        -quiet
+    # Developer ID 인증서 없이도 배포 가능하도록 archive에서 직접 추출
+    mkdir -p "$EXPORT_PATH"
+    cp -R "$ARCHIVE_PATH/Products/Applications/CruxPet.app" "$EXPORT_PATH/"
 
     echo "✅ 빌드 완료"
 }
