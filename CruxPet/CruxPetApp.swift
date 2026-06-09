@@ -2,6 +2,14 @@ import SwiftUI
 import UserNotifications
 import Sparkle
 
+class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                willPresent notification: UNNotification,
+                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.banner, .sound])
+    }
+}
+
 @Observable
 class SparkleDelegate: NSObject, SPUUpdaterDelegate {
     var updateAvailable = false
@@ -15,12 +23,15 @@ class SparkleDelegate: NSObject, SPUUpdaterDelegate {
 struct CruxPetApp: App {
     private let sparkleDelegate = SparkleDelegate()
     private let updaterController: SPUStandardUpdaterController
+    private let notificationDelegate = NotificationDelegate()
 
     init() {
         updaterController = SPUStandardUpdaterController(
             startingUpdater: true, updaterDelegate: sparkleDelegate, userDriverDelegate: nil
         )
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
+        let center = UNUserNotificationCenter.current()
+        center.delegate = notificationDelegate
+        center.requestAuthorization(options: [.alert, .sound]) { _, _ in }
         if !UserDefaults.standard.bool(forKey: "cruxpet.hookInstalled") {
             CruxPetApp.installGitHook()
             UserDefaults.standard.set(true, forKey: "cruxpet.hookInstalled")
