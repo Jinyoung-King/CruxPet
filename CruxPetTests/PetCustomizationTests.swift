@@ -38,7 +38,7 @@ final class PetCustomizationTests: XCTestCase {
         c.name = "TestSlime"
         c.useCustomColor = true
         c.customColorHex = "#EF5350"
-        c.accessories = ["head": "🎩", "aura": "🔥"]
+        c.accessories = [.head: "🎩", .aura: "🔥"]
         c.pomodoroMinutes = 50
         c.save()
 
@@ -46,9 +46,9 @@ final class PetCustomizationTests: XCTestCase {
         XCTAssertEqual(loaded.name, "TestSlime")
         XCTAssertTrue(loaded.useCustomColor)
         XCTAssertEqual(loaded.customColorHex, "#EF5350")
-        XCTAssertEqual(loaded.accessories["head"], "🎩")
-        XCTAssertEqual(loaded.accessories["aura"], "🔥")
-        XCTAssertNil(loaded.accessories["face"])
+        XCTAssertEqual(loaded.accessories[.head], "🎩")
+        XCTAssertEqual(loaded.accessories[.aura], "🔥")
+        XCTAssertNil(loaded.accessories[.face])
         XCTAssertEqual(loaded.pomodoroMinutes, 50)
     }
 

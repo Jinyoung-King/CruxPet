@@ -26,7 +26,7 @@ struct PetCustomization: Codable {
     var name: String = "Crux"
     var useCustomColor: Bool = false
     var customColorHex: String = "#7EC8E3"
-    var accessories: [String: String] = [:]
+    var accessories: [AccessorySlot: String] = [:]
     var pomodoroMinutes: Int = 25
 
     static let presetColors: [String] = [
@@ -45,7 +45,7 @@ struct PetCustomization: Codable {
         name = try container.decodeIfPresent(String.self, forKey: .name) ?? "Crux"
         useCustomColor = try container.decodeIfPresent(Bool.self, forKey: .useCustomColor) ?? false
         customColorHex = try container.decodeIfPresent(String.self, forKey: .customColorHex) ?? "#7EC8E3"
-        accessories = try container.decodeIfPresent([String: String].self, forKey: .accessories) ?? [:]
+        accessories = try container.decodeIfPresent([AccessorySlot: String].self, forKey: .accessories) ?? [:]
         pomodoroMinutes = try container.decodeIfPresent(Int.self, forKey: .pomodoroMinutes) ?? 25
         // Note: old "accessory" field is intentionally ignored for migration
     }
@@ -58,6 +58,7 @@ struct PetCustomization: Codable {
         try container.encode(accessories, forKey: .accessories)
         try container.encode(pomodoroMinutes, forKey: .pomodoroMinutes)
     }
+
 
     func save() {
         guard let data = try? JSONEncoder().encode(self) else { return }
