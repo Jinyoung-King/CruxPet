@@ -126,4 +126,26 @@ final class PetModelTests: XCTestCase {
         XCTAssertEqual(result.bodyHex, "#EF5350")
         XCTAssertFalse(result.isRainbow)
     }
+
+    // MARK: - isNightOwlHour
+
+    func testIsNightOwlHour_midnight() {
+        var c = DateComponents(); c.year = 2026; c.month = 6; c.day = 9; c.hour = 0; c.minute = 0
+        XCTAssertTrue(PetModel.isNightOwlHour(Calendar.current.date(from: c)!))
+    }
+
+    func testIsNightOwlHour_3am() {
+        var c = DateComponents(); c.year = 2026; c.month = 6; c.day = 9; c.hour = 3; c.minute = 59
+        XCTAssertTrue(PetModel.isNightOwlHour(Calendar.current.date(from: c)!))
+    }
+
+    func testIsNightOwlHour_4am() {
+        var c = DateComponents(); c.year = 2026; c.month = 6; c.day = 9; c.hour = 4; c.minute = 0
+        XCTAssertFalse(PetModel.isNightOwlHour(Calendar.current.date(from: c)!))
+    }
+
+    func testIsNightOwlHour_noon() {
+        var c = DateComponents(); c.year = 2026; c.month = 6; c.day = 9; c.hour = 12; c.minute = 0
+        XCTAssertFalse(PetModel.isNightOwlHour(Calendar.current.date(from: c)!))
+    }
 }

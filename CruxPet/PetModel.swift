@@ -39,6 +39,10 @@ class PetModel {
     private(set) var showLevelUp: Bool = false
     var pendingLevelUp: Int = 0
     private(set) var streakDays: Int = 0
+    private(set) var totalCommitCount: Int = 0
+    private(set) var totalPomodoroCount: Int = 0
+    private(set) var questClearCount: Int = 0
+    private(set) var hasNightOwlCommit: Bool = false
     var pendingStreakMilestone: Int = 0
     private(set) var emotion: EmotionState = .normal
     private var lastActivityDate: Date = .distantPast
@@ -58,6 +62,10 @@ class PetModel {
         todayCommitCount = UserDefaults.standard.integer(forKey: "cruxpet.commitCount")
         todayPomodoroCount = UserDefaults.standard.integer(forKey: "cruxpet.pomodoroCount")
         streakDays = UserDefaults.standard.integer(forKey: "cruxpet.streakDays")
+        totalCommitCount  = UserDefaults.standard.integer(forKey: "cruxpet.totalCommitCount")
+        totalPomodoroCount = UserDefaults.standard.integer(forKey: "cruxpet.totalPomodoroCount")
+        questClearCount   = UserDefaults.standard.integer(forKey: "cruxpet.questClearCount")
+        hasNightOwlCommit = UserDefaults.standard.bool(forKey: "cruxpet.hasNightOwlCommit")
         let savedActivity = UserDefaults.standard.double(forKey: "cruxpet.lastActivityTime")
         if savedActivity > 0 { lastActivityDate = Date(timeIntervalSince1970: savedActivity) }
         resetDailyCountsIfNeeded()
@@ -78,6 +86,8 @@ class PetModel {
         let (gained, isCrit) = PetModel.computeGain(base: 15, level: level)
         totalExp += Double(gained)
         todayCommitCount += 1
+        totalCommitCount += 1
+        if PetModel.isNightOwlHour(Date()) { hasNightOwlCommit = true }
         if isCrit { triggerCritical() }
         if level > prevLevel { triggerLevelUp(level) }
         updateStreak()
@@ -90,6 +100,7 @@ class PetModel {
         let (gained, isCrit) = PetModel.computeGain(base: 50, level: level)
         totalExp += Double(gained)
         todayPomodoroCount += 1
+        totalPomodoroCount += 1
         if isCrit { triggerCritical() }
         if level > prevLevel { triggerLevelUp(level) }
         updateStreak()
@@ -104,7 +115,16 @@ class PetModel {
         persist()
     }
 
+    @MainActor func incrementQuestClear() {
+        questClearCount += 1
+        persist()
+    }
+
     // MARK: - Pure static logic (테스트 가능)
+
+    static func isNightOwlHour(_ date: Date) -> Bool {
+        Calendar.current.component(.hour, from: date) < 4
+    }
 
     // 포켓몬 Medium Fast 스타일 3차 다항식:
     // 저레벨 증가폭 ≈ 5, 고레벨 증가폭 ≈ 3n² / 10 (제곱 비례 가속)
@@ -267,6 +287,10 @@ class PetModel {
         UserDefaults.standard.set(todayPomodoroCount,forKey: "cruxpet.pomodoroCount")
         UserDefaults.standard.set(streakDays,        forKey: "cruxpet.streakDays")
         UserDefaults.standard.set(lastActivityDate.timeIntervalSince1970, forKey: "cruxpet.lastActivityTime")
+        UserDefaults.standard.set(totalCommitCount,   forKey: "cruxpet.totalCommitCount")
+        UserDefaults.standard.set(totalPomodoroCount, forKey: "cruxpet.totalPomodoroCount")
+        UserDefaults.standard.set(questClearCount,    forKey: "cruxpet.questClearCount")
+        UserDefaults.standard.set(hasNightOwlCommit,  forKey: "cruxpet.hasNightOwlCommit")
     }
 
     private func resetDailyCountsIfNeeded() {
