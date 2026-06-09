@@ -196,7 +196,7 @@ struct ContentView: View {
                 SlimeView(
                     appearance: pet.slimeAppearance.applying(customization),
                     isPomodoroActive: pomodoro.state == .running,
-                    accessory: "", // TODO: Task 2 - update with accessories slot logic
+                    accessories: customization.accessories,
                     isWandering: pomodoro.state != .running,
                     emotion: pomodoro.state == .running ? .normal : pet.emotion
                 )
