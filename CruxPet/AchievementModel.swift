@@ -77,6 +77,50 @@ class AchievementModel {
         }
     }
 
+    // MARK: - Completion logic (static, 테스트 가능)
+
+    static func isCompleted(
+        _ achievement: Achievement,
+        totalCommitCount: Int, totalPomodoroCount: Int, streakDays: Int,
+        level: Int, questClearCount: Int,
+        hasNightOwlCommit: Bool, todayCommitCount: Int, todayPomodoroCount: Int
+    ) -> Bool {
+        switch achievement.type {
+        case .commit(let n):     return totalCommitCount >= n
+        case .pomodoro(let n):   return totalPomodoroCount >= n
+        case .streak(let n):     return streakDays >= n
+        case .level(let n):      return level >= n
+        case .questClear(let n): return questClearCount >= n
+        case .special(let kind):
+            switch kind {
+            case .nightOwl:  return hasNightOwlCommit
+            case .sprinter:  return todayCommitCount >= 5
+            case .focusKing: return todayPomodoroCount >= 3
+            }
+        }
+    }
+
+    static func progress(
+        for achievement: Achievement,
+        totalCommitCount: Int, totalPomodoroCount: Int, streakDays: Int,
+        level: Int, questClearCount: Int,
+        hasNightOwlCommit: Bool, todayCommitCount: Int, todayPomodoroCount: Int
+    ) -> (current: Int, total: Int) {
+        switch achievement.type {
+        case .commit(let n):     return (min(totalCommitCount, n), n)
+        case .pomodoro(let n):   return (min(totalPomodoroCount, n), n)
+        case .streak(let n):     return (min(streakDays, n), n)
+        case .level(let n):      return (min(level, n), n)
+        case .questClear(let n): return (min(questClearCount, n), n)
+        case .special(let kind):
+            switch kind {
+            case .nightOwl:  return (hasNightOwlCommit ? 1 : 0, 1)
+            case .sprinter:  return (min(todayCommitCount, 5), 5)
+            case .focusKing: return (min(todayPomodoroCount, 3), 3)
+            }
+        }
+    }
+
     // MARK: - Achievement factory
 
     static func make(_ type: AchievementType) -> Achievement {
@@ -98,5 +142,57 @@ class AchievementModel {
             case .focusKing: return Achievement(id: "special_focusKing",  type: type, emoji: "🎯", title: "집중왕")
             }
         }
+    }
+
+    // MARK: - Instance methods
+
+    func isClaimed(_ achievement: Achievement) -> Bool {
+        claimedIds.contains(achievement.id)
+    }
+
+    func isCompleted(_ achievement: Achievement, pet: PetModel) -> Bool {
+        Self.isCompleted(achievement,
+            totalCommitCount: pet.totalCommitCount, totalPomodoroCount: pet.totalPomodoroCount,
+            streakDays: pet.streakDays, level: pet.level, questClearCount: pet.questClearCount,
+            hasNightOwlCommit: pet.hasNightOwlCommit,
+            todayCommitCount: pet.todayCommitCount, todayPomodoroCount: pet.todayPomodoroCount)
+    }
+
+    func progress(for achievement: Achievement, pet: PetModel) -> (current: Int, total: Int) {
+        Self.progress(for: achievement,
+            totalCommitCount: pet.totalCommitCount, totalPomodoroCount: pet.totalPomodoroCount,
+            streakDays: pet.streakDays, level: pet.level, questClearCount: pet.questClearCount,
+            hasNightOwlCommit: pet.hasNightOwlCommit,
+            todayCommitCount: pet.todayCommitCount, todayPomodoroCount: pet.todayPomodoroCount)
+    }
+
+    // 표시할 업적: 카테고리별 달성한 것 전부 + 다음 미달성 1개 + 특수 3개
+    func visibleAchievements(for pet: PetModel) -> [Achievement] {
+        var result: [Achievement] = []
+        for n in Self.commitMilestones(upTo: pet.totalCommitCount)    { result.append(Self.make(.commit(n)))      }
+        for n in Self.pomodoroMilestones(upTo: pet.totalPomodoroCount) { result.append(Self.make(.pomodoro(n)))   }
+        for n in Self.streakMilestones(upTo: pet.streakDays)           { result.append(Self.make(.streak(n)))     }
+        for n in Self.levelMilestones(upTo: pet.level)                 { result.append(Self.make(.level(n)))      }
+        for n in Self.questClearMilestones(upTo: pet.questClearCount)  { result.append(Self.make(.questClear(n))) }
+        result.append(Self.make(.special(.nightOwl)))
+        result.append(Self.make(.special(.sprinter)))
+        result.append(Self.make(.special(.focusKing)))
+        return result
+    }
+
+    @discardableResult
+    func claimCompleted(pet: PetModel) -> [Achievement] {
+        let visible = visibleAchievements(for: pet)
+        var newlyClaimed: [Achievement] = []
+        for achievement in visible {
+            guard !claimedIds.contains(achievement.id) else { continue }
+            guard isCompleted(achievement, pet: pet) else { continue }
+            claimedIds.insert(achievement.id)
+            newlyClaimed.append(achievement)
+        }
+        if !newlyClaimed.isEmpty {
+            UserDefaults.standard.set(Array(claimedIds), forKey: "cruxpet.achievements.claimedIds")
+        }
+        return newlyClaimed
     }
 }

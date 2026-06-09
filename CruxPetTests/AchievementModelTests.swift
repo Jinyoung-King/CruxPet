@@ -114,4 +114,118 @@ final class AchievementModelTests: XCTestCase {
     func testMake_focusKing_id() {
         XCTAssertEqual(AchievementModel.make(.special(.focusKing)).id, "special_focusKing")
     }
+
+    // MARK: - isCompleted
+
+    private func notCompleted(_ a: Achievement) -> Bool {
+        !AchievementModel.isCompleted(a,
+            totalCommitCount: 0, totalPomodoroCount: 0, streakDays: 0,
+            level: 1, questClearCount: 0,
+            hasNightOwlCommit: false, todayCommitCount: 0, todayPomodoroCount: 0)
+    }
+
+    func testIsCompleted_commit_notYet() {
+        let a = AchievementModel.make(.commit(10))
+        XCTAssertFalse(AchievementModel.isCompleted(a,
+            totalCommitCount: 9, totalPomodoroCount: 0, streakDays: 0,
+            level: 1, questClearCount: 0,
+            hasNightOwlCommit: false, todayCommitCount: 0, todayPomodoroCount: 0))
+    }
+
+    func testIsCompleted_commit_exact() {
+        let a = AchievementModel.make(.commit(10))
+        XCTAssertTrue(AchievementModel.isCompleted(a,
+            totalCommitCount: 10, totalPomodoroCount: 0, streakDays: 0,
+            level: 1, questClearCount: 0,
+            hasNightOwlCommit: false, todayCommitCount: 0, todayPomodoroCount: 0))
+    }
+
+    func testIsCompleted_nightOwl_false() {
+        let a = AchievementModel.make(.special(.nightOwl))
+        XCTAssertTrue(notCompleted(a))
+    }
+
+    func testIsCompleted_nightOwl_true() {
+        let a = AchievementModel.make(.special(.nightOwl))
+        XCTAssertTrue(AchievementModel.isCompleted(a,
+            totalCommitCount: 0, totalPomodoroCount: 0, streakDays: 0,
+            level: 1, questClearCount: 0,
+            hasNightOwlCommit: true, todayCommitCount: 0, todayPomodoroCount: 0))
+    }
+
+    func testIsCompleted_sprinter_notYet() {
+        let a = AchievementModel.make(.special(.sprinter))
+        XCTAssertFalse(AchievementModel.isCompleted(a,
+            totalCommitCount: 0, totalPomodoroCount: 0, streakDays: 0,
+            level: 1, questClearCount: 0,
+            hasNightOwlCommit: false, todayCommitCount: 4, todayPomodoroCount: 0))
+    }
+
+    func testIsCompleted_sprinter_exact() {
+        let a = AchievementModel.make(.special(.sprinter))
+        XCTAssertTrue(AchievementModel.isCompleted(a,
+            totalCommitCount: 0, totalPomodoroCount: 0, streakDays: 0,
+            level: 1, questClearCount: 0,
+            hasNightOwlCommit: false, todayCommitCount: 5, todayPomodoroCount: 0))
+    }
+
+    func testIsCompleted_focusKing_exact() {
+        let a = AchievementModel.make(.special(.focusKing))
+        XCTAssertTrue(AchievementModel.isCompleted(a,
+            totalCommitCount: 0, totalPomodoroCount: 0, streakDays: 0,
+            level: 1, questClearCount: 0,
+            hasNightOwlCommit: false, todayCommitCount: 0, todayPomodoroCount: 3))
+    }
+
+    // MARK: - progress
+
+    func testProgress_commit_partial() {
+        let a = AchievementModel.make(.commit(10))
+        let (cur, total) = AchievementModel.progress(for: a,
+            totalCommitCount: 7, totalPomodoroCount: 0, streakDays: 0,
+            level: 1, questClearCount: 0,
+            hasNightOwlCommit: false, todayCommitCount: 0, todayPomodoroCount: 0)
+        XCTAssertEqual(cur, 7)
+        XCTAssertEqual(total, 10)
+    }
+
+    func testProgress_commit_capped() {
+        let a = AchievementModel.make(.commit(10))
+        let (cur, total) = AchievementModel.progress(for: a,
+            totalCommitCount: 15, totalPomodoroCount: 0, streakDays: 0,
+            level: 1, questClearCount: 0,
+            hasNightOwlCommit: false, todayCommitCount: 0, todayPomodoroCount: 0)
+        XCTAssertEqual(cur, 10)
+        XCTAssertEqual(total, 10)
+    }
+
+    func testProgress_nightOwl_unclaimed() {
+        let a = AchievementModel.make(.special(.nightOwl))
+        let (cur, total) = AchievementModel.progress(for: a,
+            totalCommitCount: 0, totalPomodoroCount: 0, streakDays: 0,
+            level: 1, questClearCount: 0,
+            hasNightOwlCommit: false, todayCommitCount: 0, todayPomodoroCount: 0)
+        XCTAssertEqual(cur, 0)
+        XCTAssertEqual(total, 1)
+    }
+
+    func testProgress_nightOwl_claimed() {
+        let a = AchievementModel.make(.special(.nightOwl))
+        let (cur, total) = AchievementModel.progress(for: a,
+            totalCommitCount: 0, totalPomodoroCount: 0, streakDays: 0,
+            level: 1, questClearCount: 0,
+            hasNightOwlCommit: true, todayCommitCount: 0, todayPomodoroCount: 0)
+        XCTAssertEqual(cur, 1)
+        XCTAssertEqual(total, 1)
+    }
+
+    func testProgress_sprinter_partial() {
+        let a = AchievementModel.make(.special(.sprinter))
+        let (cur, total) = AchievementModel.progress(for: a,
+            totalCommitCount: 0, totalPomodoroCount: 0, streakDays: 0,
+            level: 1, questClearCount: 0,
+            hasNightOwlCommit: false, todayCommitCount: 3, todayPomodoroCount: 0)
+        XCTAssertEqual(cur, 3)
+        XCTAssertEqual(total, 5)
+    }
 }
