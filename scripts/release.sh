@@ -141,8 +141,113 @@ create_dmg() {
     echo "✅ DMG 생성: $DMG_NAME ($(du -h "$DMG_PATH" | cut -f1))"
 }
 
+# ── GitHub 릴리즈 ────────────────────────────────────────────────────────
+create_github_release() {
+    echo "🚀 GitHub 릴리즈 생성 중..."
+
+    local DMG_PATH="$REPO_ROOT/$DMG_NAME"
+
+    gh release create "v${VERSION}" \
+        --title "v${VERSION}" \
+        --generate-notes \
+        --repo "Jinyoung-King/CruxPet"
+
+    RELEASE_CREATED=true
+
+    gh release upload "v${VERSION}" "$DMG_PATH" \
+        --repo "Jinyoung-King/CruxPet"
+
+    echo "✅ GitHub 릴리즈 완료: v${VERSION}"
+}
+
+# ── appcast.xml 업데이트 ──────────────────────────────────────────────────
+update_appcast() {
+    echo "📡 appcast.xml 업데이트 중..."
+
+    local DMG_PATH="$REPO_ROOT/$DMG_NAME"
+
+    # 서명 생성
+    local SIGNATURE
+    SIGNATURE=$("$SPARKLE_BIN/sign_update" "$DMG_PATH")
+
+    # 파일 크기
+    local FILE_SIZE
+    FILE_SIZE=$(stat -f%z "$DMG_PATH")
+
+    # 현재 build number 읽기
+    local BUILD_NUMBER
+    BUILD_NUMBER=$(grep -m1 "CURRENT_PROJECT_VERSION" \
+        "$REPO_ROOT/CruxPet.xcodeproj/project.pbxproj" | tr -dc '0-9')
+
+    # 다운로드 URL
+    local DOWNLOAD_URL="https://github.com/Jinyoung-King/CruxPet/releases/download/v${VERSION}/CruxPet-${VERSION}.dmg"
+
+    # appcast.xml 생성
+    python3 - "$VERSION" "$BUILD_NUMBER" "$SIGNATURE" "$FILE_SIZE" "$DOWNLOAD_URL" <<'PYEOF'
+import sys
+from datetime import datetime, timezone
+
+version, build, signature, size, url = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5]
+pub_date = datetime.now(timezone.utc).strftime('%a, %d %b %Y %H:%M:%S +0000')
+
+xml = f"""<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+  <channel>
+    <title>CruxPet</title>
+    <item>
+      <title>Version {version}</title>
+      <pubDate>{pub_date}</pubDate>
+      <sparkle:version>{build}</sparkle:version>
+      <sparkle:shortVersionString>{version}</sparkle:shortVersionString>
+      <enclosure
+        url="{url}"
+        length="{size}"
+        type="application/octet-stream"
+        sparkle:edSignature="{signature}"
+      />
+    </item>
+  </channel>
+</rss>"""
+
+with open('appcast.xml', 'w') as f:
+    f.write(xml)
+print(f"appcast.xml updated for v{version} (build {build})")
+PYEOF
+
+    echo "✅ appcast.xml 업데이트 완료"
+}
+
+# ── 마무리 ────────────────────────────────────────────────────────────────
+finalize() {
+    echo "🏁 마무리 중..."
+
+    local DMG_PATH="$REPO_ROOT/$DMG_NAME"
+
+    # appcast.xml 커밋
+    git -C "$REPO_ROOT" add appcast.xml
+    git -C "$REPO_ROOT" commit -m "chore: update appcast for v${VERSION}"
+
+    # 태그 생성
+    git -C "$REPO_ROOT" tag "v${VERSION}"
+
+    # DMG 로컬 삭제 (GitHub에 업로드됨)
+    rm -f "$DMG_PATH"
+
+    # push
+    git -C "$REPO_ROOT" push origin main --tags
+
+    echo ""
+    echo "🎉 릴리즈 완료!"
+    echo "   버전: v${VERSION}"
+    echo "   GitHub: https://github.com/Jinyoung-King/CruxPet/releases/tag/v${VERSION}"
+    echo "   기존 앱 사용자에게 업데이트가 전파됩니다."
+}
+
 preflight
 echo "🚀 릴리즈 $VERSION 시작"
 bump_version
 build_app
 create_dmg
+create_github_release
+update_appcast
+finalize
