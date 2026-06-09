@@ -76,6 +76,7 @@ class QuestModel {
         if allDone && !alreadyClaimed {
             UserDefaults.standard.set(true, forKey: "cruxpet.quest.allClearClaimed")
             pet.gainQuestExp(100)
+            pet.incrementQuestClear()
             return true
         }
         return false
