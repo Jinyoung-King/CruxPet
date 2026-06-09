@@ -43,6 +43,8 @@ struct ContentView: View {
     @State private var toast: ToastData? = nil
     @State private var questsModel = QuestModel()
     @State private var isQuestExpanded = false
+    @State private var achievementModel = AchievementModel()
+    @State private var isAchievementExpanded = false
 
     var body: some View {
         let _ = watcher.pendingCommit  // @Observable 변경 추적 등록
@@ -64,6 +66,7 @@ struct ContentView: View {
                     characterSection
                     expSection
                     questSection
+                    achievementSection
                     pomodoroSection
                     activitySection
                     Divider()
@@ -132,6 +135,7 @@ struct ContentView: View {
             pet.pendingLevelUp = 0
             showToast(ToastData(emoji: "🎉", title: "레벨 업! Lv.\(newLevel)",
                                 subtitle: "슬라임이 성장했어요 ✨"))
+            checkAchievements()
         }
         .onChange(of: pet.pendingStreakMilestone) { _, milestone in
             guard milestone > 0 else { return }
@@ -151,6 +155,18 @@ struct ContentView: View {
             if questsModel.claimCompleted(pet: pet) {
                 showToast(ToastData(emoji: "🎉", title: "퀘스트 올클리어!", subtitle: "+100 EXP 보너스 지급!"))
             }
+        }
+        .onChange(of: pet.totalCommitCount) { _, _ in
+            checkAchievements()
+        }
+        .onChange(of: pet.totalPomodoroCount) { _, _ in
+            checkAchievements()
+        }
+        .onChange(of: pet.questClearCount) { _, _ in
+            checkAchievements()
+        }
+        .onChange(of: pet.streakDays) { _, _ in
+            checkAchievements()
         }
     }
 
@@ -318,6 +334,44 @@ struct ContentView: View {
         }
     }
 
+    private var achievementSection: some View {
+        VStack(spacing: 0) {
+            Button(action: {
+                withAnimation(.easeInOut(duration: 0.2)) { isAchievementExpanded.toggle() }
+            }) {
+                HStack {
+                    Image(systemName: "trophy.fill")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text("업적")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Text("✨ \(achievementModel.claimedCount)개 달성")
+                        .font(.caption2.monospacedDigit())
+                        .foregroundStyle(.tertiary)
+                    Image(systemName: isAchievementExpanded ? "chevron.down" : "chevron.right")
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 8)
+                .background(Color.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
+            }
+            .buttonStyle(.plain)
+
+            if isAchievementExpanded {
+                VStack(spacing: 4) {
+                    ForEach(achievementModel.visibleAchievements(for: pet)) { achievement in
+                        achievementRow(achievement)
+                    }
+                }
+                .padding(.top, 4)
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
+    }
+
     private func questRow(_ quest: Quest) -> some View {
         let claimed = questsModel.isClaimed(quest)
         let (cur, total) = questsModel.progress(for: quest, pet: pet)
@@ -379,6 +433,61 @@ struct ContentView: View {
             return "커밋 \(min(pet.todayCommitCount, c))/\(c) · 포모도로 \(min(pet.todayPomodoroCount, p))/\(p)"
         case .streak(let n):
             return "\(min(pet.streakDays, n))/\(n)일"
+        }
+    }
+
+    private func achievementRow(_ achievement: Achievement) -> some View {
+        let claimed = achievementModel.isClaimed(achievement)
+        let (cur, total) = achievementModel.progress(for: achievement, pet: pet)
+
+        return HStack(spacing: 8) {
+            Text(achievement.emoji)
+                .font(.caption)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(achievement.title)
+                    .font(.caption.weight(claimed ? .regular : .medium))
+                    .foregroundStyle(claimed ? .secondary : .primary)
+
+                if claimed {
+                    Text("🎉 달성!")
+                        .font(.system(size: 9))
+                        .foregroundStyle(.green.opacity(0.7))
+                } else if case .special(let kind) = achievement.type {
+                    Text(specialConditionText(kind))
+                        .font(.system(size: 9))
+                        .foregroundStyle(.tertiary)
+                } else {
+                    GeometryReader { geo in
+                        ZStack(alignment: .leading) {
+                            Capsule().fill(Color.secondary.opacity(0.15))
+                            Capsule()
+                                .fill(Color.orange.opacity(0.5))
+                                .frame(width: total > 0
+                                       ? geo.size.width * min(CGFloat(cur) / CGFloat(total), 1)
+                                       : 0)
+                        }
+                    }
+                    .frame(height: 4)
+
+                    Text("\(cur)/\(total)")
+                        .font(.system(size: 9))
+                        .foregroundStyle(.tertiary)
+                }
+            }
+
+            Spacer()
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(Color.secondary.opacity(0.05), in: RoundedRectangle(cornerRadius: 6))
+    }
+
+    private func specialConditionText(_ kind: SpecialKind) -> String {
+        switch kind {
+        case .nightOwl:  return "자정(00:00~03:59) 커밋"
+        case .sprinter:  return "하루 커밋 5회"
+        case .focusKing: return "하루 포모도로 3회"
         }
     }
 
@@ -497,6 +606,13 @@ struct ContentView: View {
         }
     }
 
+    private func checkAchievements() {
+        let newOnes = achievementModel.claimCompleted(pet: pet)
+        for a in newOnes {
+            showToast(ToastData(emoji: "🏆", title: "업적 달성!", subtitle: a.title))
+        }
+    }
+
     // MARK: - Setup
 
     private func setupWatcher() {
@@ -505,6 +621,7 @@ struct ContentView: View {
         }
         questsModel.refreshIfNeeded()
         questsModel.claimCompleted(pet: pet)
+        achievementModel.claimCompleted(pet: pet)
     }
 
     private func confirmQuit() {
