@@ -22,12 +22,7 @@ struct Achievement: Identifiable {
     let type: AchievementType
     let emoji: String
     let title: String
-    let unlocksItemId: String?
-
-    init(id: String, type: AchievementType, emoji: String, title: String, unlocksItemId: String? = nil) {
-        self.id = id; self.type = type; self.emoji = emoji
-        self.title = title; self.unlocksItemId = unlocksItemId
-    }
+    let unlocksItemId: String? = nil
 }
 
 @Observable
@@ -99,7 +94,7 @@ class AchievementModel {
         case .special(let kind):
             switch kind {
             case .nightOwl:  return Achievement(id: "special_nightOwl",  type: type, emoji: "🌙", title: "밤샘 코더")
-            case .sprinter:  return Achievement(id: "special_sprinter",   type: type, emoji: "⚡️", title: "스프린터")
+            case .sprinter:  return Achievement(id: "special_sprinter",   type: type, emoji: "⚡", title: "스프린터")
             case .focusKing: return Achievement(id: "special_focusKing",  type: type, emoji: "🎯", title: "집중왕")
             }
         }
