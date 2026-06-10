@@ -13,9 +13,15 @@ class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
 @Observable
 class SparkleDelegate: NSObject, SPUUpdaterDelegate {
     var updateAvailable = false
+    var isUpToDate = false
 
     func updater(_ updater: SPUUpdater, didFindValidUpdate item: SUAppcastItem) {
         updateAvailable = true
+        isUpToDate = false
+    }
+
+    func updaterDidNotFindUpdate(_ updater: SPUUpdater) {
+        isUpToDate = true
     }
 }
 
@@ -54,9 +60,11 @@ struct CruxPetApp: App {
                     updaterController.updater.checkForUpdates()
                 }
             }
-            Divider()
-            Button("업데이트 확인") {
-                updaterController.updater.checkForUpdates()
+            if !sparkleDelegate.isUpToDate && !sparkleDelegate.updateAvailable {
+                Divider()
+                Button("업데이트 확인") {
+                    updaterController.updater.checkForUpdates()
+                }
             }
         } label: {
             Group {
