@@ -12,40 +12,30 @@ class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
 
 class StatusItemRightClickHandler: NSObject {
     private let updaterController: SPUStandardUpdaterController
-    private weak var button: NSStatusBarButton?
-    private var originalAction: Selector?
-    private var originalTarget: AnyObject?
-    private var installed = false
+    private var eventMonitor: Any?
 
     init(updaterController: SPUStandardUpdaterController) {
         self.updaterController = updaterController
     }
 
     func install() {
-        guard !installed,
-              let items = NSStatusBar.system.value(forKey: "statusItems") as? [NSStatusItem],
-              let button = items.first?.button else { return }
-        installed = true
-        self.button = button
-        originalAction = button.action
-        originalTarget = button.target as AnyObject?
-        button.target = self
-        button.action = #selector(handleClick(_:))
-        button.sendAction(on: NSEvent.EventTypeMask([.leftMouseUp, .rightMouseUp]))
-    }
-
-    @objc private func handleClick(_ sender: NSStatusBarButton) {
-        guard let event = NSApp.currentEvent else { return }
-        if event.type == .rightMouseUp {
-            showContextMenu(from: sender)
-        } else {
-            if let target = originalTarget, let action = originalAction {
-                _ = target.perform(action, with: sender)
-            }
+        guard eventMonitor == nil else { return }
+        eventMonitor = NSEvent.addGlobalMonitorForEvents(matching: .rightMouseDown) { [weak self] _ in
+            self?.handleGlobalRightClick()
         }
     }
 
-    private func showContextMenu(from button: NSStatusBarButton) {
+    deinit {
+        if let m = eventMonitor { NSEvent.removeMonitor(m) }
+    }
+
+    private func handleGlobalRightClick() {
+        guard let iconRect = iconRectInAppKitCoords(),
+              iconRect.contains(NSEvent.mouseLocation) else { return }
+        DispatchQueue.main.async { [weak self] in self?.showContextMenu(near: iconRect) }
+    }
+
+    private func showContextMenu(near rect: NSRect) {
         let menu = NSMenu()
         let item = NSMenuItem(
             title: "업데이트 확인",
@@ -54,9 +44,25 @@ class StatusItemRightClickHandler: NSObject {
         )
         item.target = updaterController
         menu.addItem(item)
-        menu.popUp(positioning: nil,
-                   at: NSPoint(x: 0, y: button.bounds.height + 4),
-                   in: button)
+        menu.popUp(positioning: nil, at: NSPoint(x: rect.minX, y: rect.minY), in: nil)
+    }
+
+    private func iconRectInAppKitCoords() -> NSRect? {
+        let axApp = AXUIElementCreateApplication(pid_t(ProcessInfo.processInfo.processIdentifier))
+        var menuBar: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(axApp, "AXExtrasMenuBar" as CFString, &menuBar) == .success,
+              let mb = menuBar else { return nil }
+        var children: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(mb as! AXUIElement, kAXChildrenAttribute as CFString, &children) == .success,
+              let first = (children as? [AXUIElement])?.first else { return nil }
+        var posRef: CFTypeRef?, sizeRef: CFTypeRef?
+        AXUIElementCopyAttributeValue(first, kAXPositionAttribute as CFString, &posRef)
+        AXUIElementCopyAttributeValue(first, kAXSizeAttribute as CFString, &sizeRef)
+        var pos = CGPoint.zero, size = CGSize.zero
+        if let p = posRef { AXValueGetValue(p as! AXValue, .cgPoint, &pos) }
+        if let s = sizeRef { AXValueGetValue(s as! AXValue, .cgSize, &size) }
+        let screenH = NSScreen.main?.frame.height ?? 0
+        return NSRect(x: pos.x, y: screenH - pos.y - size.height, width: size.width, height: size.height)
     }
 }
 
