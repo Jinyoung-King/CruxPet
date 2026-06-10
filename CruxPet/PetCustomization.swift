@@ -5,10 +5,10 @@ enum AccessorySlot: String, CaseIterable, Codable {
 
     var label: String {
         switch self {
-        case .head: return "🎩 머리"
-        case .face: return "👓 얼굴"
-        case .body: return "💎 몸"
-        case .aura: return "🔥 오라"
+        case .head: return "머리"
+        case .face: return "얼굴"
+        case .body: return "몸"
+        case .aura: return "오라"
         }
     }
 

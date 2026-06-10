@@ -1,0 +1,75 @@
+"%@ %@ is currently the newest version available." = "%1$@ %2$@이(가) 현재 최신 버전입니다.";
+
+"%@ %@ is currently the newest version available.\n(You are currently running version %@.)" = "%1$@ %2$@이(가) 현재 최신 버전입니다.\n(현재 %3$@ 버전을 사용 중입니다.)";
+
+"%@ %@ is now available—you have %@. Would you like to download it now?" = "%1$@ %2$@을(를) 사용할 수 있습니다. 현재 %3$@ 버전을 사용 중입니다. 지금 다운로드할까요?";
+
+"%@ downloaded" = "%@ 다운로드 완료";
+
+"%@ of %@" = "%1$@ / %2$@";
+
+"%1$@ %2$@ has been downloaded and is ready to use! Would you like to install it and relaunch %1$@ now?" = "%1$@ %2$@이(가) 다운로드되었습니다. 지금 설치하고 %1$@을(를) 재시작할까요?";
+
+"%1$@ can't be updated because it was opened from a read-only or a temporary location." = "%1$@은(는) 읽기 전용 또는 임시 위치에서 실행 중이므로 업데이트할 수 없습니다.";
+
+"A new version of %@ is available!" = "%@ 새 버전이 출시됐어요!";
+
+"A new version of %@ is ready to install!" = "%@ 새 버전을 설치할 준비가 됐어요!";
+
+"An error occurred in retrieving update information. Please try again later." = "업데이트 정보를 가져오는 중 오류가 발생했습니다. 나중에 다시 시도해 주세요.";
+
+"An error occurred while downloading the update. Please try again later." = "업데이트를 다운로드하는 중 오류가 발생했습니다. 나중에 다시 시도해 주세요.";
+
+"An error occurred while extracting the archive. Please try again later." = "압축을 해제하는 중 오류가 발생했습니다. 나중에 다시 시도해 주세요.";
+
+"An error occurred while parsing the update feed." = "업데이트 피드를 불러오는 중 오류가 발생했습니다. 나중에 다시 시도해 주세요.";
+
+"Cancel" = "취소";
+
+"Cancel Update" = "업데이트 취소";
+
+"Checking for updates…" = "업데이트 확인 중…";
+
+"Downloading update…" = "업데이트 다운로드 중…";
+
+"Extracting update…" = "업데이트 압축 해제 중…";
+
+"Install and Relaunch" = "설치 후 재시작";
+
+"Installing update…" = "업데이트 설치 중…";
+
+"Learn More…" = "자세히 보기…";
+
+"OK" = "확인";
+
+"Ready to Install" = "설치 준비 완료";
+
+"Should %1$@ automatically check for updates? You can always check for updates manually from the %1$@ menu." = "%1$@이(가) 자동으로 업데이트를 확인할까요? 언제든지 %1$@ 메뉴에서 직접 확인할 수 있습니다.";
+
+"Update Error!" = "업데이트 오류!";
+
+"Updating %@" = "%@ 업데이트 중";
+
+"Use Finder to copy %1$@ to the Applications folder, relaunch it from there, and try again." = "Finder에서 %1$@을(를) 응용 프로그램 폴더로 복사한 후 다시 실행해 주세요.";
+
+"You're up to date!" = "최신 버전입니다!";
+
+"Software Update" = "소프트웨어 업데이트";
+
+"Remind Me Later" = "나중에 알림";
+
+"Skip This Version" = "이 버전 건너뛰기";
+
+"Install Update" = "업데이트 설치";
+
+"Automatically download and install updates in the future" = "이후 업데이트를 자동으로 다운로드 및 설치";
+
+"Check Automatically" = "자동으로 확인";
+
+"Don't Check" = "확인 안 함";
+
+"Check for updates automatically?" = "업데이트를 자동으로 확인할까요?";
+
+"Include anonymous system profile" = "익명 시스템 정보 포함";
+
+"Automatically download and install updates" = "업데이트 자동 다운로드 및 설치";

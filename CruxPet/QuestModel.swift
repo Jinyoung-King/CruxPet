@@ -116,7 +116,6 @@ class QuestModel {
         Quest(id: "pomodoro_1", type: .pomodoro(1), difficulty: .easy),
         Quest(id: "pomodoro_2", type: .pomodoro(2), difficulty: .easy),
         Quest(id: "combo_1_1",  type: .combo(1, 1), difficulty: .easy),
-        Quest(id: "streak_3",   type: .streak(3),   difficulty: .easy),
     ]
 
     static let hardPool: [Quest] = [
@@ -124,7 +123,6 @@ class QuestModel {
         Quest(id: "pomodoro_3", type: .pomodoro(3), difficulty: .hard),
         Quest(id: "combo_3_1",  type: .combo(3, 1), difficulty: .hard),
         Quest(id: "combo_2_2",  type: .combo(2, 2), difficulty: .hard),
-        Quest(id: "streak_7",   type: .streak(7),   difficulty: .hard),
     ]
 
     static func questsForDate(_ dateString: String) -> [Quest] {

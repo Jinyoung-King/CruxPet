@@ -34,6 +34,101 @@ private struct PomodoroInfoButton: View {
     }
 }
 
+private struct AchievementsView: View {
+    let achievementModel: AchievementModel
+    let pet: PetModel
+    let onBack: () -> Void
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Button(action: onBack) {
+                    HStack(spacing: 3) {
+                        Image(systemName: "chevron.left")
+                            .font(.caption.weight(.semibold))
+                        Text("뒤로")
+                            .font(.caption)
+                    }
+                    .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                Spacer()
+                Text("업적")
+                    .font(.caption.weight(.semibold))
+                Spacer()
+                Text("✨ \(achievementModel.claimedCount)개 달성")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+
+            Divider()
+
+            ScrollView {
+                VStack(spacing: 4) {
+                    ForEach(achievementModel.visibleAchievements(for: pet)) { achievement in
+                        achievementRow(achievement)
+                    }
+                }
+                .padding(12)
+            }
+        }
+        .frame(width: 220, height: 360)
+    }
+
+    private func achievementRow(_ achievement: Achievement) -> some View {
+        let claimed = achievementModel.isClaimed(achievement)
+        let (cur, total) = achievementModel.progress(for: achievement, pet: pet)
+
+        return HStack(spacing: 8) {
+            Text(achievement.emoji)
+                .font(.caption)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(achievement.title)
+                    .font(.caption.weight(claimed ? .regular : .medium))
+                    .foregroundStyle(claimed ? .secondary : .primary)
+                if claimed {
+                    Text("🎉 달성!")
+                        .font(.system(size: 9))
+                        .foregroundStyle(.green.opacity(0.7))
+                } else if case .special(let kind) = achievement.type {
+                    Text(specialConditionText(kind))
+                        .font(.system(size: 9))
+                        .foregroundStyle(.tertiary)
+                } else {
+                    GeometryReader { geo in
+                        ZStack(alignment: .leading) {
+                            Capsule().fill(Color.secondary.opacity(0.15))
+                            Capsule()
+                                .fill(Color.orange.opacity(0.5))
+                                .frame(width: total > 0
+                                       ? geo.size.width * min(CGFloat(cur) / CGFloat(total), 1)
+                                       : 0)
+                        }
+                    }
+                    .frame(height: 4)
+                    Text("\(cur)/\(total)")
+                        .font(.system(size: 9))
+                        .foregroundStyle(.tertiary)
+                }
+            }
+            Spacer()
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(Color.secondary.opacity(0.05), in: RoundedRectangle(cornerRadius: 6))
+    }
+
+    private func specialConditionText(_ kind: SpecialKind) -> String {
+        switch kind {
+        case .nightOwl:  return "자정(00:00~03:59) 커밋"
+        case .sprinter:  return "하루 커밋 5회"
+        case .focusKing: return "하루 포모도로 3회"
+        }
+    }
+}
+
 struct ContentView: View {
     @Environment(PetModel.self) private var pet
     @Environment(PomodoroTimer.self) private var pomodoro
@@ -44,12 +139,18 @@ struct ContentView: View {
     @State private var questsModel = QuestModel()
     @State private var isQuestExpanded = false
     @State private var achievementModel = AchievementModel()
-    @State private var isAchievementExpanded = false
+    @State private var showAchievements = false
 
     var body: some View {
         let _ = watcher.pendingCommit  // @Observable 변경 추적 등록
         Group {
-            if showCustomize {
+            if showAchievements {
+                AchievementsView(
+                    achievementModel: achievementModel,
+                    pet: pet,
+                    onBack: { showAchievements = false }
+                )
+            } else if showCustomize {
                 CustomizeView(
                     current: customization,
                     petLevel: pet.level,
@@ -338,41 +439,27 @@ struct ContentView: View {
     }
 
     private var achievementSection: some View {
-        VStack(spacing: 0) {
-            Button(action: {
-                withAnimation(.easeInOut(duration: 0.2)) { isAchievementExpanded.toggle() }
-            }) {
-                HStack {
-                    Image(systemName: "trophy.fill")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Text("업적")
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                    Text("✨ \(achievementModel.claimedCount)개 달성")
-                        .font(.caption2.monospacedDigit())
-                        .foregroundStyle(.tertiary)
-                    Image(systemName: isAchievementExpanded ? "chevron.down" : "chevron.right")
-                        .font(.caption2)
-                        .foregroundStyle(.tertiary)
-                }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 8)
-                .background(Color.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
+        Button(action: { showAchievements = true }) {
+            HStack {
+                Image(systemName: "trophy.fill")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text("업적")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Text("✨ \(achievementModel.claimedCount)개 달성")
+                    .font(.caption2.monospacedDigit())
+                    .foregroundStyle(.tertiary)
+                Image(systemName: "chevron.right")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
             }
-            .buttonStyle(.plain)
-
-            if isAchievementExpanded {
-                VStack(spacing: 4) {
-                    ForEach(achievementModel.visibleAchievements(for: pet)) { achievement in
-                        achievementRow(achievement)
-                    }
-                }
-                .padding(.top, 4)
-                .transition(.opacity.combined(with: .move(edge: .top)))
-            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 8)
+            .background(Color.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
         }
+        .buttonStyle(.plain)
     }
 
     private func questRow(_ quest: Quest) -> some View {
@@ -439,60 +526,6 @@ struct ContentView: View {
         }
     }
 
-    private func achievementRow(_ achievement: Achievement) -> some View {
-        let claimed = achievementModel.isClaimed(achievement)
-        let (cur, total) = achievementModel.progress(for: achievement, pet: pet)
-
-        return HStack(spacing: 8) {
-            Text(achievement.emoji)
-                .font(.caption)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(achievement.title)
-                    .font(.caption.weight(claimed ? .regular : .medium))
-                    .foregroundStyle(claimed ? .secondary : .primary)
-
-                if claimed {
-                    Text("🎉 달성!")
-                        .font(.system(size: 9))
-                        .foregroundStyle(.green.opacity(0.7))
-                } else if case .special(let kind) = achievement.type {
-                    Text(specialConditionText(kind))
-                        .font(.system(size: 9))
-                        .foregroundStyle(.tertiary)
-                } else {
-                    GeometryReader { geo in
-                        ZStack(alignment: .leading) {
-                            Capsule().fill(Color.secondary.opacity(0.15))
-                            Capsule()
-                                .fill(Color.orange.opacity(0.5))
-                                .frame(width: total > 0
-                                       ? geo.size.width * min(CGFloat(cur) / CGFloat(total), 1)
-                                       : 0)
-                        }
-                    }
-                    .frame(height: 4)
-
-                    Text("\(cur)/\(total)")
-                        .font(.system(size: 9))
-                        .foregroundStyle(.tertiary)
-                }
-            }
-
-            Spacer()
-        }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .background(Color.secondary.opacity(0.05), in: RoundedRectangle(cornerRadius: 6))
-    }
-
-    private func specialConditionText(_ kind: SpecialKind) -> String {
-        switch kind {
-        case .nightOwl:  return "자정(00:00~03:59) 커밋"
-        case .sprinter:  return "하루 커밋 5회"
-        case .focusKing: return "하루 포모도로 3회"
-        }
-    }
 
     private var pomodoroSection: some View {
         let isRunning = pomodoro.state == .running
