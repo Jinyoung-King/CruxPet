@@ -23,14 +23,15 @@ class StatusItemRightClickHandler: NSObject {
 
     func install() {
         guard !installed,
-              let button = NSStatusBar.system.statusItems.first?.button else { return }
+              let items = NSStatusBar.system.value(forKey: "statusItems") as? [NSStatusItem],
+              let button = items.first?.button else { return }
         installed = true
         self.button = button
         originalAction = button.action
         originalTarget = button.target as AnyObject?
         button.target = self
         button.action = #selector(handleClick(_:))
-        button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+        button.sendAction(on: NSEvent.EventTypeMask([.leftMouseUp, .rightMouseUp]))
     }
 
     @objc private func handleClick(_ sender: NSStatusBarButton) {
