@@ -10,6 +10,55 @@ class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
     }
 }
 
+class StatusItemRightClickHandler: NSObject {
+    private let updaterController: SPUStandardUpdaterController
+    private weak var button: NSStatusBarButton?
+    private var originalAction: Selector?
+    private var originalTarget: AnyObject?
+    private var installed = false
+
+    init(updaterController: SPUStandardUpdaterController) {
+        self.updaterController = updaterController
+    }
+
+    func install() {
+        guard !installed,
+              let button = NSStatusBar.system.statusItems.first?.button else { return }
+        installed = true
+        self.button = button
+        originalAction = button.action
+        originalTarget = button.target as AnyObject?
+        button.target = self
+        button.action = #selector(handleClick(_:))
+        button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+    }
+
+    @objc private func handleClick(_ sender: NSStatusBarButton) {
+        guard let event = NSApp.currentEvent else { return }
+        if event.type == .rightMouseUp {
+            showContextMenu(from: sender)
+        } else {
+            if let target = originalTarget, let action = originalAction {
+                _ = target.perform(action, with: sender)
+            }
+        }
+    }
+
+    private func showContextMenu(from button: NSStatusBarButton) {
+        let menu = NSMenu()
+        let item = NSMenuItem(
+            title: "업데이트 확인",
+            action: #selector(SPUStandardUpdaterController.checkForUpdates(_:)),
+            keyEquivalent: ""
+        )
+        item.target = updaterController
+        menu.addItem(item)
+        menu.popUp(positioning: nil,
+                   at: NSPoint(x: 0, y: button.bounds.height + 4),
+                   in: button)
+    }
+}
+
 @Observable
 class SparkleDelegate: NSObject, SPUUpdaterDelegate {
     var updateAvailable = false
@@ -31,11 +80,13 @@ struct CruxPetApp: App {
     private let sparkleDelegate = SparkleDelegate()
     private let updaterController: SPUStandardUpdaterController
     private let notificationDelegate = NotificationDelegate()
+    private let rightClickHandler: StatusItemRightClickHandler
 
     init() {
         updaterController = SPUStandardUpdaterController(
             startingUpdater: true, updaterDelegate: sparkleDelegate, userDriverDelegate: nil
         )
+        rightClickHandler = StatusItemRightClickHandler(updaterController: updaterController)
         let center = UNUserNotificationCenter.current()
         center.delegate = notificationDelegate
         center.requestAuthorization(options: [.alert, .sound]) { _, _ in }
@@ -91,6 +142,11 @@ struct CruxPetApp: App {
             sendPomodoroNotification()
         }
         watcher.start()
+        for delay in [0.1, 0.3, 0.8] {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                self.rightClickHandler.install()
+            }
+        }
     }
 
     private func sendPomodoroNotification() {
