@@ -19,16 +19,88 @@ class SparkleDelegate: NSObject, SPUUpdaterDelegate {
     }
 }
 
+// Intercepts right-click on the status bar button and shows a context menu.
+// SwiftUI's MenuBarExtra doesn't expose NSStatusItem, so we find the
+// NSStatusBarButton by scanning NSApp.windows for the NSStatusBarWindow.
+class StatusItemRightClickHandler: NSObject {
+    private let updaterController: SPUStandardUpdaterController
+    private weak var button: NSStatusBarButton?
+    private var originalAction: Selector?
+    private var originalTarget: AnyObject?
+    private var installed = false
+
+    init(updaterController: SPUStandardUpdaterController) {
+        self.updaterController = updaterController
+    }
+
+    func install() {
+        guard !installed, let button = findStatusBarButton() else { return }
+        installed = true
+        self.button = button
+        originalAction = button.action
+        originalTarget = button.target as AnyObject?
+        button.target = self
+        button.action = #selector(handleClick(_:))
+        button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+    }
+
+    @objc private func handleClick(_ sender: NSStatusBarButton) {
+        guard let event = NSApp.currentEvent else { return }
+        if event.type == .rightMouseUp {
+            showContextMenu(from: sender)
+        } else {
+            // Forward left-click to SwiftUI's original handler
+            if let target = originalTarget, let action = originalAction {
+                _ = target.perform(action, with: sender)
+            }
+        }
+    }
+
+    private func showContextMenu(from button: NSStatusBarButton) {
+        let menu = NSMenu()
+        let item = NSMenuItem(
+            title: "업데이트 확인",
+            action: #selector(SPUStandardUpdaterController.checkForUpdates(_:)),
+            keyEquivalent: ""
+        )
+        item.target = updaterController
+        menu.addItem(item)
+        menu.popUp(positioning: nil,
+                   at: NSPoint(x: 0, y: button.bounds.height + 4),
+                   in: button)
+    }
+
+    private func findStatusBarButton() -> NSStatusBarButton? {
+        for window in NSApp.windows {
+            let className = String(describing: type(of: window))
+            guard className.contains("StatusBar") else { continue }
+            if let button = findButton(in: window.contentView) { return button }
+        }
+        return nil
+    }
+
+    private func findButton(in view: NSView?) -> NSStatusBarButton? {
+        guard let view = view else { return nil }
+        if let b = view as? NSStatusBarButton { return b }
+        for sub in view.subviews {
+            if let b = findButton(in: sub) { return b }
+        }
+        return nil
+    }
+}
+
 @main
 struct CruxPetApp: App {
     private let sparkleDelegate = SparkleDelegate()
     private let updaterController: SPUStandardUpdaterController
     private let notificationDelegate = NotificationDelegate()
+    private let rightClickHandler: StatusItemRightClickHandler
 
     init() {
         updaterController = SPUStandardUpdaterController(
             startingUpdater: true, updaterDelegate: sparkleDelegate, userDriverDelegate: nil
         )
+        rightClickHandler = StatusItemRightClickHandler(updaterController: updaterController)
         let center = UNUserNotificationCenter.current()
         center.delegate = notificationDelegate
         center.requestAuthorization(options: [.alert, .sound]) { _, _ in }
@@ -40,7 +112,6 @@ struct CruxPetApp: App {
     @State private var pet = PetModel()
     @State private var pomodoro = PomodoroTimer()
     @State private var watcher = EventWatcher()
-
 
     var body: some Scene {
         MenuBarExtra {
@@ -79,6 +150,12 @@ struct CruxPetApp: App {
             sendPomodoroNotification()
         }
         watcher.start()
+        // Retry with delays — the NSStatusBarWindow may not exist yet on first onAppear
+        for delay in [0.1, 0.3, 0.8] {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                rightClickHandler.install()
+            }
+        }
     }
 
     private func sendPomodoroNotification() {
