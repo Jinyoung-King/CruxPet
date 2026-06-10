@@ -137,6 +137,7 @@ struct CruxPetApp: App {
             sendPomodoroNotification()
         }
         watcher.start()
+        updaterController.updater.checkForUpdatesInBackground()
         for delay in [0.1, 0.3, 0.8] {
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
                 self.rightClickHandler.install()

@@ -31,5 +31,7 @@
 	<string>https://raw.githubusercontent.com/Jinyoung-King/CruxPet/main/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>u2GfBAPwCszf1A3lcPrZg3dsXhStVCCx/0Rqj8SKBqI=</string>
+	<key>SUScheduledCheckInterval</key>
+	<integer>3600</integer>
 </dict>
 </plist>
