@@ -9,9 +9,9 @@
       <sparkle:shortVersionString>1.0.8</sparkle:shortVersionString>
       <enclosure
         url="https://github.com/Jinyoung-King/CruxPet/releases/download/v1.0.8/CruxPet-1.0.8.dmg"
-        length="1765182"
+        length="1754695"
         type="application/octet-stream"
-        sparkle:edSignature="3eY8zySbDJxsjIP0IQyCuIZujs79zvAR7S3HTkCG+zXWmtcxL9cSkCKpoECpUjwGk8iCug6lR2vUoA6YW5OMCg=="
+        sparkle:edSignature="vRYSTHKMuPtTC9Md/XX53usjUK+6CZBNeXjMvxQPRi3F7ERRuwCD47vQc+hJubXdnV0vdBnFJ6LPiySIQ6pAAQ=="
       />
     </item>
   </channel>

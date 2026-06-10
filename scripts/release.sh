@@ -113,9 +113,10 @@ build_app() {
         -configuration Release \
         -archivePath "$ARCHIVE_PATH" \
         -destination "generic/platform=macOS" \
-        CODE_SIGN_IDENTITY="" \
-        CODE_SIGNING_REQUIRED=NO \
-        CODE_SIGNING_ALLOWED=NO \
+        CODE_SIGN_IDENTITY="-" \
+        CODE_SIGNING_REQUIRED=YES \
+        CODE_SIGNING_ALLOWED=YES \
+        OTHER_CODE_SIGN_FLAGS="--timestamp=none" \
         -quiet
 
     # Developer ID 인증서 없이도 배포 가능하도록 archive에서 직접 추출
