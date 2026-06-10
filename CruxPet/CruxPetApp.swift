@@ -66,13 +66,6 @@ class SparkleDelegate: NSObject, SPUUpdaterDelegate {
 
     func updater(_ updater: SPUUpdater, didFindValidUpdate item: SUAppcastItem) {
         updateAvailable = true
-        let content = UNMutableNotificationContent()
-        content.title = "CruxPet 업데이트 출시!"
-        content.body = "v\(item.displayVersionString) — 아이콘 우클릭으로 업데이트하세요"
-        content.sound = .default
-        UNUserNotificationCenter.current().add(
-            UNNotificationRequest(identifier: "cruxpet.update", content: content, trigger: nil)
-        )
     }
 }
 
