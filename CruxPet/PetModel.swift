@@ -52,6 +52,7 @@ class PetModel {
     var expInCurrentLevel: Double { totalExp - PetModel.totalExpAtLevelStart(level) }
     var expNeededThisLevel: Double { PetModel.expNeededForLevel(level) }
     var slimeAppearance: SlimeAppearance { PetModel.appearance(for: level) }
+    var streakMultiplier: Double { PetModel.multiplierForStreak(streakDays) }
 
     private var passiveTimer: Timer?
     private static let passiveExpPerMinute: Double = 1.0
@@ -84,7 +85,7 @@ class PetModel {
     @MainActor func gainCommitExp() {
         let prevLevel = level
         let (gained, isCrit) = PetModel.computeGain(base: 15, level: level)
-        totalExp += Double(gained)
+        totalExp += (Double(gained) * streakMultiplier).rounded()
         todayCommitCount += 1
         totalCommitCount += 1
         if PetModel.isNightOwlHour(Date()) { hasNightOwlCommit = true }
@@ -98,7 +99,7 @@ class PetModel {
     @MainActor func gainPomodoroExp() {
         let prevLevel = level
         let (gained, isCrit) = PetModel.computeGain(base: 50, level: level)
-        totalExp += Double(gained)
+        totalExp += (Double(gained) * streakMultiplier).rounded()
         todayPomodoroCount += 1
         totalPomodoroCount += 1
         if isCrit { triggerCritical() }
@@ -146,6 +147,16 @@ class PetModel {
             if accumulated + needed > totalExp { return level }
             accumulated += needed
             level += 1
+        }
+    }
+
+    static func multiplierForStreak(_ days: Int) -> Double {
+        switch days {
+        case 3...6:   return 1.1
+        case 7...13:  return 1.2
+        case 14...29: return 1.3
+        case 30...:   return 1.5
+        default:      return 1.0
         }
     }
 

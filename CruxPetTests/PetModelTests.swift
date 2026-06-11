@@ -148,4 +148,20 @@ final class PetModelTests: XCTestCase {
         var c = DateComponents(); c.year = 2026; c.month = 6; c.day = 9; c.hour = 12; c.minute = 0
         XCTAssertFalse(PetModel.isNightOwlHour(Calendar.current.date(from: c)!))
     }
+
+    // MARK: - streakMultiplier
+
+    func testMultiplierBoundaries() {
+        XCTAssertEqual(PetModel.multiplierForStreak(0),  1.0, accuracy: 0.001)
+        XCTAssertEqual(PetModel.multiplierForStreak(1),  1.0, accuracy: 0.001)
+        XCTAssertEqual(PetModel.multiplierForStreak(2),  1.0, accuracy: 0.001)
+        XCTAssertEqual(PetModel.multiplierForStreak(3),  1.1, accuracy: 0.001)
+        XCTAssertEqual(PetModel.multiplierForStreak(6),  1.1, accuracy: 0.001)
+        XCTAssertEqual(PetModel.multiplierForStreak(7),  1.2, accuracy: 0.001)
+        XCTAssertEqual(PetModel.multiplierForStreak(13), 1.2, accuracy: 0.001)
+        XCTAssertEqual(PetModel.multiplierForStreak(14), 1.3, accuracy: 0.001)
+        XCTAssertEqual(PetModel.multiplierForStreak(29), 1.3, accuracy: 0.001)
+        XCTAssertEqual(PetModel.multiplierForStreak(30), 1.5, accuracy: 0.001)
+        XCTAssertEqual(PetModel.multiplierForStreak(100),1.5, accuracy: 0.001)
+    }
 }
