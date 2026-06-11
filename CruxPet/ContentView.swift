@@ -265,6 +265,7 @@ struct ContentView: View {
         }
         .onChange(of: pet.totalCommitCount) { _, _ in
             checkAchievements()
+            checkCompanionUnlocks()
         }
         .onChange(of: pet.totalPomodoroCount) { _, _ in
             checkAchievements()
