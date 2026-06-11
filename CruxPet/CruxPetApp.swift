@@ -11,12 +11,7 @@ class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
 }
 
 class StatusItemRightClickHandler: NSObject {
-    private let updaterController: SPUStandardUpdaterController
     private var eventMonitor: Any?
-
-    init(updaterController: SPUStandardUpdaterController) {
-        self.updaterController = updaterController
-    }
 
     func install() {
         guard eventMonitor == nil else { return }
@@ -38,14 +33,14 @@ class StatusItemRightClickHandler: NSObject {
 
     private func showContextMenu(at point: NSPoint) {
         let menu = NSMenu()
-        let item = NSMenuItem(
-            title: "업데이트 확인",
-            action: #selector(SPUStandardUpdaterController.checkForUpdates(_:)),
-            keyEquivalent: ""
-        )
-        item.target = updaterController
+        let item = NSMenuItem(title: "업데이트 확인", action: #selector(openReleasePage), keyEquivalent: "")
+        item.target = self
         menu.addItem(item)
         menu.popUp(positioning: nil, at: point, in: nil)
+    }
+
+    @objc private func openReleasePage() {
+        NSWorkspace.shared.open(URL(string: "https://github.com/Jinyoung-King/CruxPet/releases/latest")!)
     }
 }
 
@@ -70,7 +65,7 @@ struct CruxPetApp: App {
         updaterController = SPUStandardUpdaterController(
             startingUpdater: true, updaterDelegate: sparkleDelegate, userDriverDelegate: nil
         )
-        rightClickHandler = StatusItemRightClickHandler(updaterController: updaterController)
+        rightClickHandler = StatusItemRightClickHandler()
         let center = UNUserNotificationCenter.current()
         center.delegate = notificationDelegate
         center.requestAuthorization(options: [.alert, .sound]) { _, _ in }
@@ -92,7 +87,7 @@ struct CruxPetApp: App {
             if sparkleDelegate.updateAvailable {
                 Divider()
                 Button("🆕 업데이트 설치") {
-                    updaterController.updater.checkForUpdates()
+                    NSWorkspace.shared.open(URL(string: "https://github.com/Jinyoung-King/CruxPet/releases/latest")!)
                 }
             }
         } label: {
