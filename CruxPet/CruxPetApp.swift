@@ -54,6 +54,16 @@ class StatusItemRightClickHandler: NSObject {
     }
 }
 
+private struct CheckForUpdatesKey: EnvironmentKey {
+    static let defaultValue: () -> Void = {}
+}
+extension EnvironmentValues {
+    var checkForUpdates: () -> Void {
+        get { self[CheckForUpdatesKey.self] }
+        set { self[CheckForUpdatesKey.self] = newValue }
+    }
+}
+
 @Observable
 class SparkleDelegate: NSObject, SPUUpdaterDelegate {
     var updateAvailable = false
@@ -91,11 +101,13 @@ struct CruxPetApp: App {
 
     var body: some Scene {
         MenuBarExtra {
+            let updater = updaterController.updater
             ContentView()
                 .environment(pet)
                 .environment(pomodoro)
                 .environment(watcher)
                 .environment(environment)
+                .environment(\.checkForUpdates, { updater.checkForUpdates() })
         } label: {
             Group {
                 if sparkleDelegate.updateAvailable {

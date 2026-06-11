@@ -6,6 +6,7 @@ struct CustomizeView: View {
     let onSave: (PetCustomization) -> Void
     let onCancel: () -> Void
 
+    @Environment(\.checkForUpdates) private var checkForUpdates
     @State private var draft: PetCustomization
     @State private var selectedSlot: AccessorySlot = .head
 
@@ -142,6 +143,16 @@ struct CustomizeView: View {
                         .controlSize(.small)
                 }
                 .padding(.top, 4)
+                Button(action: checkForUpdates) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "arrow.triangle.2.circlepath")
+                            .font(.system(size: 10))
+                        Text("업데이트 확인")
+                            .font(.system(size: 11))
+                    }
+                    .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
             }
             .padding(12)
         }
