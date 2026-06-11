@@ -30,11 +30,10 @@ struct CompanionSlimeView: View {
 
                 // 몸통
                 let color = Color(hex: companion.bodyHex)
-                context.fill(Path(ellipseIn: bodyRect), with: .color(color))
-
-                // 외곽선
+                // 외곽선 (fill 전에 그려야 stroke의 내측이 fill로 덮임)
                 var outCtx = context; outCtx.opacity = 0.2
                 outCtx.stroke(Path(ellipseIn: bodyRect), with: .color(color), lineWidth: bodyRect.width * 0.08)
+                context.fill(Path(ellipseIn: bodyRect), with: .color(color))
 
                 // 하이라이트
                 let hlRect = CGRect(
