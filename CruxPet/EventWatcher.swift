@@ -64,6 +64,31 @@ class EventWatcher {
         events.filter { $0.timestamp > lastProcessed }
     }
 
+    nonisolated static func activityDays(from content: String, last n: Int, relativeTo date: Date = Date()) -> Set<String> {
+        let fmt = DateFormatter()
+        fmt.dateFormat = "yyyy-MM-dd"
+        let calendar = Calendar.current
+
+        var validDays = Set<String>()
+        for i in 0..<n {
+            if let d = calendar.date(byAdding: .day, value: -i, to: date) {
+                validDays.insert(fmt.string(from: d))
+            }
+        }
+
+        let events = parseLines(content)
+        return Set(events.compactMap { event -> String? in
+            let dateStr = fmt.string(from: Date(timeIntervalSince1970: event.timestamp))
+            return validDays.contains(dateStr) ? dateStr : nil
+        })
+    }
+
+    nonisolated func activityDays(last n: Int) -> Set<String> {
+        let url = URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent(".cruxpet/events.json")
+        guard let content = try? String(contentsOf: url, encoding: .utf8) else { return [] }
+        return EventWatcher.activityDays(from: content, last: n)
+    }
+
     // MARK: - Private
 
     private func poll() {
