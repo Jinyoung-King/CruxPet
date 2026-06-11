@@ -45,7 +45,7 @@ class EnvironmentModel: NSObject, CLLocationManagerDelegate {
     private let locationManager = CLLocationManager()
     private var cachedWMOCode: Int? = nil
     private var cachedTemp: Double? = nil
-    private var timers: [Timer] = []
+    private var updateTimer: Timer?
 
     override init() {
         super.init()
@@ -98,11 +98,9 @@ class EnvironmentModel: NSObject, CLLocationManagerDelegate {
     private func restoreCache() {
         let lastFetch = UserDefaults.standard.double(forKey: "cruxpet.env.lastFetch")
         guard lastFetch > 0, Date().timeIntervalSince1970 - lastFetch < 30 * 60 else { return }
-        let wmo = UserDefaults.standard.integer(forKey: "cruxpet.env.wmoCode")
-        let temp = UserDefaults.standard.double(forKey: "cruxpet.env.temp")
-        if wmo > 0 {
+        if let wmo = UserDefaults.standard.object(forKey: "cruxpet.env.wmoCode") as? Int {
             cachedWMOCode = wmo
-            cachedTemp = temp
+            cachedTemp = UserDefaults.standard.double(forKey: "cruxpet.env.temp")
         }
         updateAccessories()
     }
@@ -116,14 +114,15 @@ class EnvironmentModel: NSObject, CLLocationManagerDelegate {
     // MARK: - Stubs (Task 5에서 구현)
 
     func startUpdating() {
+        guard updateTimer == nil else { return }
         updateAccessories()
-        timers.append(Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
+        updateTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
             Task { @MainActor [weak self] in self?.updateAccessories() }
-        })
+        }
     }
 
     // CLLocationManagerDelegate stubs
     nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {}
     nonisolated func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {}
-    nonisolated func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {}
+    nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {}
 }
