@@ -691,10 +691,12 @@ struct ContentView: View {
     }
 
     private func last7Days() -> [String] {
+        let calendar = Calendar.current
         let fmt = DateFormatter()
         fmt.dateFormat = "yyyy-MM-dd"
+        fmt.timeZone = calendar.timeZone
         return (0..<7).reversed().map { i in
-            fmt.string(from: Calendar.current.date(byAdding: .day, value: -i, to: Date())!)
+            fmt.string(from: calendar.date(byAdding: .day, value: -i, to: Date())!)
         }
     }
 
