@@ -141,6 +141,7 @@ struct ContentView: View {
     @State private var achievementModel = AchievementModel()
     @State private var showAchievements = false
     @State private var activityDays: Set<String> = []
+    @State private var companionModel = CompanionModel()
 
     var body: some View {
         let _ = watcher.pendingCommit  // @Observable 변경 추적 등록
@@ -226,6 +227,7 @@ struct ContentView: View {
             setupWatcher()
             watcher.pollNow()
             refreshActivityDays()
+            checkCompanionUnlocks()
         }
         .onChange(of: watcher.pendingCommit) { _, hasPending in
             if hasPending {
@@ -266,15 +268,22 @@ struct ContentView: View {
         }
         .onChange(of: pet.totalPomodoroCount) { _, _ in
             checkAchievements()
+            checkCompanionUnlocks()
         }
         .onChange(of: pet.questClearCount) { _, _ in
             checkAchievements()
+            checkCompanionUnlocks()
         }
         .onChange(of: pet.streakDays) { _, _ in
             checkAchievements()
+            checkCompanionUnlocks()
         }
         .onChange(of: pet.level) { _, _ in
             checkAchievements()
+            checkCompanionUnlocks()
+        }
+        .onChange(of: pet.hasNightOwlCommit) { _, val in
+            if val { checkCompanionUnlocks() }
         }
     }
 
@@ -347,8 +356,13 @@ struct ContentView: View {
                 streakCalendar
                     .transition(.opacity)
             }
+            if !companionModel.unlockedCompanions.isEmpty {
+                companionRow
+                    .transition(.scale.combined(with: .opacity))
+            }
         }
         .animation(.spring(duration: 0.35), value: pet.streakDays)
+        .animation(.spring(duration: 0.4), value: companionModel.unlockedIDs)
     }
 
     private var streakBadge: some View {
@@ -388,6 +402,14 @@ struct ContentView: View {
             }
         }
         .padding(.horizontal, 4)
+    }
+
+    private var companionRow: some View {
+        HStack(spacing: 8) {
+            ForEach(companionModel.unlockedCompanions) { companion in
+                CompanionSlimeView(companion: companion)
+            }
+        }
     }
 
     private var streakColor: Color {
@@ -715,6 +737,21 @@ struct ContentView: View {
         questsModel.refreshIfNeeded()
         questsModel.claimCompleted(pet: pet)
         achievementModel.claimCompleted(pet: pet)
+    }
+
+    @MainActor
+    private func checkCompanionUnlocks() {
+        let newOnes = companionModel.checkUnlocks(
+            level: pet.level,
+            streakDays: pet.streakDays,
+            claimedAchievementCount: achievementModel.claimedCount,
+            hasNightOwlCommit: pet.hasNightOwlCommit,
+            totalPomodoroCount: pet.totalPomodoroCount
+        )
+        for companion in newOnes {
+            showToast(ToastData(emoji: "🐾", title: "\(companion.name) 등장!",
+                                subtitle: "새 친구를 얻었어요"))
+        }
     }
 
     private func confirmQuit() {
