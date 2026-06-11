@@ -84,22 +84,20 @@ struct CruxPetApp: App {
                 .environment(pet)
                 .environment(pomodoro)
                 .environment(watcher)
-            if sparkleDelegate.updateAvailable {
-                Divider()
-                Button("🆕 업데이트 설치") {
-                    NSWorkspace.shared.open(URL(string: "https://github.com/Jinyoung-King/CruxPet/releases/latest")!)
-                }
-            }
         } label: {
             Group {
-                switch pomodoro.state {
-                case .running:
-                    Image(systemName: "timer")
-                        .symbolEffect(.variableColor.iterative, options: .repeating)
-                case .paused:
-                    Image(systemName: "timer")
-                default:
-                    Image(systemName: pet.emotion == .sleepy ? "zzz" : "pawprint.fill")
+                if sparkleDelegate.updateAvailable {
+                    Image(systemName: "exclamationmark.circle.fill")
+                } else {
+                    switch pomodoro.state {
+                    case .running:
+                        Image(systemName: "timer")
+                            .symbolEffect(.variableColor.iterative, options: .repeating)
+                    case .paused:
+                        Image(systemName: "timer")
+                    default:
+                        Image(systemName: pet.emotion == .sleepy ? "zzz" : "pawprint.fill")
+                    }
                 }
             }
             .onAppear { startServices() }
