@@ -143,6 +143,7 @@ struct ContentView: View {
     @State private var showAchievements = false
     @State private var activityDays: Set<String> = []
     @State private var companionModel = CompanionModel()
+    @State private var showSharePreview = false
 
     var body: some View {
         let _ = watcher.pendingCommit  // @Observable 변경 추적 등록
@@ -153,6 +154,8 @@ struct ContentView: View {
                     pet: pet,
                     onBack: { showAchievements = false }
                 )
+            } else if showSharePreview {
+                sharePreviewSection
             } else if showCustomize {
                 CustomizeView(
                     current: customization,
@@ -175,7 +178,7 @@ struct ContentView: View {
                     activitySection
                     Divider()
                     HStack(spacing: 0) {
-                        Button(action: shareCard) {
+                        Button(action: { showSharePreview = true }) {
                             Image(systemName: "square.and.arrow.up")
                                 .font(.system(size: 14))
                                 .frame(maxWidth: .infinity)
@@ -216,6 +219,7 @@ struct ContentView: View {
         .frame(width: 220)
         .background(.ultraThinMaterial)
         .animation(.easeInOut(duration: 0.15), value: showCustomize)
+        .animation(.easeInOut(duration: 0.15), value: showSharePreview)
         .overlay(alignment: .top) {
             if let toast {
                 toastView(toast)
@@ -767,6 +771,47 @@ struct ContentView: View {
         if alert.runModal() == .alertSecondButtonReturn {
             NSApplication.shared.terminate(nil)
         }
+    }
+
+    private var sharePreviewSection: some View {
+        let scale: CGFloat = 196.0 / 300.0
+        return VStack(spacing: 12) {
+            HStack {
+                Button(action: { showSharePreview = false }) {
+                    HStack(spacing: 3) {
+                        Image(systemName: "chevron.left")
+                            .font(.caption.weight(.semibold))
+                        Text("뒤로")
+                            .font(.caption)
+                    }
+                    .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                Spacer()
+                Text("공유 카드 미리보기")
+                    .font(.caption.weight(.semibold))
+                Spacer()
+            }
+            .padding(.horizontal, 12)
+            .padding(.top, 8)
+
+            ShareCardView(pet: pet, customization: customization)
+                .scaleEffect(scale, anchor: .top)
+                .frame(width: 300 * scale, height: 560 * scale)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .shadow(color: .black.opacity(0.15), radius: 6, y: 2)
+
+            HStack(spacing: 8) {
+                Button("취소") { showSharePreview = false }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                Button("공유하기") { shareCard(); showSharePreview = false }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
+            }
+            .padding(.bottom, 12)
+        }
+        .frame(width: 220)
     }
 
     private func shareCard() {
