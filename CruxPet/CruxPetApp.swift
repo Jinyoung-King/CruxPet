@@ -30,12 +30,13 @@ class StatusItemRightClickHandler: NSObject {
     }
 
     private func handleGlobalRightClick() {
-        guard let iconRect = iconRectInAppKitCoords(),
-              iconRect.contains(NSEvent.mouseLocation) else { return }
-        DispatchQueue.main.async { [weak self] in self?.showContextMenu(near: iconRect) }
+        let loc = NSEvent.mouseLocation
+        guard let screen = NSScreen.main,
+              loc.y >= screen.frame.height - NSStatusBar.system.thickness else { return }
+        DispatchQueue.main.async { [weak self] in self?.showContextMenu(at: loc) }
     }
 
-    private func showContextMenu(near rect: NSRect) {
+    private func showContextMenu(at point: NSPoint) {
         let menu = NSMenu()
         let item = NSMenuItem(
             title: "업데이트 확인",
@@ -44,25 +45,7 @@ class StatusItemRightClickHandler: NSObject {
         )
         item.target = updaterController
         menu.addItem(item)
-        menu.popUp(positioning: nil, at: NSPoint(x: rect.minX, y: rect.minY), in: nil)
-    }
-
-    private func iconRectInAppKitCoords() -> NSRect? {
-        let axApp = AXUIElementCreateApplication(pid_t(ProcessInfo.processInfo.processIdentifier))
-        var menuBar: CFTypeRef?
-        guard AXUIElementCopyAttributeValue(axApp, "AXExtrasMenuBar" as CFString, &menuBar) == .success,
-              let mb = menuBar else { return nil }
-        var children: CFTypeRef?
-        guard AXUIElementCopyAttributeValue(mb as! AXUIElement, kAXChildrenAttribute as CFString, &children) == .success,
-              let first = (children as? [AXUIElement])?.first else { return nil }
-        var posRef: CFTypeRef?, sizeRef: CFTypeRef?
-        AXUIElementCopyAttributeValue(first, kAXPositionAttribute as CFString, &posRef)
-        AXUIElementCopyAttributeValue(first, kAXSizeAttribute as CFString, &sizeRef)
-        var pos = CGPoint.zero, size = CGSize.zero
-        if let p = posRef { AXValueGetValue(p as! AXValue, .cgPoint, &pos) }
-        if let s = sizeRef { AXValueGetValue(s as! AXValue, .cgSize, &size) }
-        let screenH = NSScreen.main?.frame.height ?? 0
-        return NSRect(x: pos.x, y: screenH - pos.y - size.height, width: size.width, height: size.height)
+        menu.popUp(positioning: nil, at: point, in: nil)
     }
 }
 
@@ -138,11 +121,7 @@ struct CruxPetApp: App {
         }
         watcher.start()
         updaterController.updater.checkForUpdatesInBackground()
-        for delay in [0.1, 0.3, 0.8] {
-            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                self.rightClickHandler.install()
-            }
-        }
+        rightClickHandler.install()
     }
 
     private func sendPomodoroNotification() {
