@@ -30,11 +30,11 @@ class CompanionModel {
     }
 
     /// 새로 달성된 친구를 반환하고 UserDefaults에 저장
-    @discardableResult
-    func checkUnlocks(level: Int, streakDays: Int, achievementCount: Int,
+    @MainActor @discardableResult
+    func checkUnlocks(level: Int, streakDays: Int, claimedAchievementCount: Int,
                       hasNightOwlCommit: Bool, totalPomodoroCount: Int) -> [Companion] {
         let newIDs = CompanionModel.newlyUnlockedIDs(
-            level: level, streakDays: streakDays, achievementCount: achievementCount,
+            level: level, streakDays: streakDays, claimedAchievementCount: claimedAchievementCount,
             hasNightOwlCommit: hasNightOwlCommit, totalPomodoroCount: totalPomodoroCount,
             alreadyUnlocked: unlockedIDs
         )
@@ -45,14 +45,14 @@ class CompanionModel {
     }
 
     static func newlyUnlockedIDs(
-        level: Int, streakDays: Int, achievementCount: Int,
+        level: Int, streakDays: Int, claimedAchievementCount: Int,
         hasNightOwlCommit: Bool, totalPomodoroCount: Int,
         alreadyUnlocked: Set<String>
     ) -> Set<String> {
         var result: Set<String> = []
-        if level >= 10,              !alreadyUnlocked.contains("baby")  { result.insert("baby") }
-        if streakDays >= 7,          !alreadyUnlocked.contains("flame") { result.insert("flame") }
-        if achievementCount >= 5,    !alreadyUnlocked.contains("star")  { result.insert("star") }
+        if level >= 10,                     !alreadyUnlocked.contains("baby")  { result.insert("baby") }
+        if streakDays >= 7,                 !alreadyUnlocked.contains("flame") { result.insert("flame") }
+        if claimedAchievementCount >= 5,    !alreadyUnlocked.contains("star")  { result.insert("star") }
         if hasNightOwlCommit,        !alreadyUnlocked.contains("night") { result.insert("night") }
         if totalPomodoroCount >= 20, !alreadyUnlocked.contains("pomo")  { result.insert("pomo") }
         return result
