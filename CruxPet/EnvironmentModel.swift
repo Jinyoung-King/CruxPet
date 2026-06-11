@@ -46,6 +46,8 @@ class EnvironmentModel: NSObject, CLLocationManagerDelegate {
     private var cachedWMOCode: Int? = nil
     private var cachedTemp: Double? = nil
     private var updateTimer: Timer?
+    private var weatherTimer: Timer?
+    private var isFetching = false
 
     override init() {
         super.init()
@@ -122,12 +124,13 @@ class EnvironmentModel: NSObject, CLLocationManagerDelegate {
             Task { @MainActor [weak self] in self?.updateAccessories() }
         }
         // 30분마다 날씨 갱신
-        Timer.scheduledTimer(withTimeInterval: 30 * 60, repeats: true) { [weak self] _ in
+        weatherTimer = Timer.scheduledTimer(withTimeInterval: 30 * 60, repeats: true) { [weak self] _ in
             Task { @MainActor [weak self] in self?.requestLocationUpdate() }
         }
     }
 
     private func requestLocationUpdate() {
+        guard !isFetching else { return }
         let lastFetch = UserDefaults.standard.double(forKey: "cruxpet.env.lastFetch")
         let elapsed = Date().timeIntervalSince1970 - lastFetch
         guard elapsed > 30 * 60 else { return }
@@ -169,6 +172,8 @@ class EnvironmentModel: NSObject, CLLocationManagerDelegate {
     // MARK: - Weather fetch
 
     private func fetchWeather(lat: Double, lon: Double) async {
+        isFetching = true
+        defer { isFetching = false }
         let urlString = "https://api.open-meteo.com/v1/forecast"
             + "?latitude=\(lat)&longitude=\(lon)"
             + "&current=weathercode,temperature_2m"
