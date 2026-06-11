@@ -87,6 +87,7 @@ struct CruxPetApp: App {
     @State private var pet = PetModel()
     @State private var pomodoro = PomodoroTimer()
     @State private var watcher = EventWatcher()
+    @State private var environment = EnvironmentModel()
 
     var body: some Scene {
         MenuBarExtra {
@@ -94,6 +95,7 @@ struct CruxPetApp: App {
                 .environment(pet)
                 .environment(pomodoro)
                 .environment(watcher)
+                .environment(environment)
         } label: {
             Group {
                 if sparkleDelegate.updateAvailable {
@@ -125,6 +127,7 @@ struct CruxPetApp: App {
         watcher.start()
         updaterController.updater.checkForUpdatesInBackground()
         rightClickHandler.install()
+        environment.startUpdating()
     }
 
     private func sendPomodoroNotification() {

@@ -133,6 +133,7 @@ struct ContentView: View {
     @Environment(PetModel.self) private var pet
     @Environment(PomodoroTimer.self) private var pomodoro
     @Environment(EventWatcher.self) private var watcher
+    @Environment(EnvironmentModel.self) private var environment
     @State private var customization = PetCustomization.load()
     @State private var showCustomize = false
     @State private var toast: ToastData? = nil
@@ -313,7 +314,8 @@ struct ContentView: View {
                     isPomodoroActive: pomodoro.state == .running,
                     accessories: customization.accessories,
                     isWandering: pomodoro.state != .running,
-                    emotion: pomodoro.state == .running ? .normal : pet.emotion
+                    emotion: pomodoro.state == .running ? .normal : pet.emotion,
+                    environmentAccessories: environment.currentAccessories
                 )
                 if pet.showCritical {
                     Text("💥 CRITICAL!")
