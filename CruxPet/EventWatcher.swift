@@ -65,9 +65,10 @@ class EventWatcher {
     }
 
     nonisolated static func activityDays(from content: String, last n: Int, relativeTo date: Date = Date()) -> Set<String> {
+        let calendar = Calendar.current
         let fmt = DateFormatter()
         fmt.dateFormat = "yyyy-MM-dd"
-        let calendar = Calendar.current
+        fmt.timeZone = calendar.timeZone
 
         var validDays = Set<String>()
         for i in 0..<n {
@@ -84,8 +85,7 @@ class EventWatcher {
     }
 
     nonisolated func activityDays(last n: Int) -> Set<String> {
-        let url = URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent(".cruxpet/events.json")
-        guard let content = try? String(contentsOf: url, encoding: .utf8) else { return [] }
+        guard let content = try? String(contentsOf: eventsURL, encoding: .utf8) else { return [] }
         return EventWatcher.activityDays(from: content, last: n)
     }
 
