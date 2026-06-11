@@ -111,18 +111,78 @@ class EnvironmentModel: NSObject, CLLocationManagerDelegate {
         UserDefaults.standard.set(temp, forKey: "cruxpet.env.temp")
     }
 
-    // MARK: - Stubs (Task 5에서 구현)
+    // MARK: - Updating
 
     func startUpdating() {
         guard updateTimer == nil else { return }
         updateAccessories()
+        requestLocationUpdate()
+        // 60초마다 시간대 갱신
         updateTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
             Task { @MainActor [weak self] in self?.updateAccessories() }
         }
+        // 30분마다 날씨 갱신
+        Timer.scheduledTimer(withTimeInterval: 30 * 60, repeats: true) { [weak self] _ in
+            Task { @MainActor [weak self] in self?.requestLocationUpdate() }
+        }
     }
 
-    // CLLocationManagerDelegate stubs
-    nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {}
-    nonisolated func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {}
-    nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {}
+    private func requestLocationUpdate() {
+        let lastFetch = UserDefaults.standard.double(forKey: "cruxpet.env.lastFetch")
+        let elapsed = Date().timeIntervalSince1970 - lastFetch
+        guard elapsed > 30 * 60 else { return }
+
+        switch locationManager.authorizationStatus {
+        case .notDetermined:
+            locationManager.requestWhenInUseAuthorization()
+        case .authorized, .authorizedAlways:
+            locationManager.requestLocation()
+        default:
+            break
+        }
+    }
+
+    // MARK: - CLLocationManagerDelegate
+
+    nonisolated func locationManager(_ manager: CLLocationManager,
+                                      didUpdateLocations locations: [CLLocation]) {
+        guard let loc = locations.last else { return }
+        let lat = loc.coordinate.latitude
+        let lon = loc.coordinate.longitude
+        Task { @MainActor [weak self] in
+            await self?.fetchWeather(lat: lat, lon: lon)
+        }
+    }
+
+    nonisolated func locationManager(_ manager: CLLocationManager,
+                                      didFailWithError error: Error) {
+        // 위치 실패 시 날씨 반응 없이 시간 반응만 유지 (currentAccessories는 그대로)
+    }
+
+    nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        let status = manager.authorizationStatus
+        if status == .authorized || status == .authorizedAlways {
+            Task { @MainActor [weak self] in self?.requestLocationUpdate() }
+        }
+    }
+
+    // MARK: - Weather fetch
+
+    private func fetchWeather(lat: Double, lon: Double) async {
+        let urlString = "https://api.open-meteo.com/v1/forecast"
+            + "?latitude=\(lat)&longitude=\(lon)"
+            + "&current=weathercode,temperature_2m"
+        guard let url = URL(string: urlString),
+              let (data, _) = try? await URLSession.shared.data(from: url),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let current = json["current"] as? [String: Any],
+              let wmo = current["weathercode"] as? Int,
+              let temp = current["temperature_2m"] as? Double
+        else { return }
+
+        cachedWMOCode = wmo
+        cachedTemp = temp
+        saveCache(wmo: wmo, temp: temp)
+        updateAccessories()
+    }
 }
