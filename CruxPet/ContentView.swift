@@ -790,4 +790,5 @@ struct ContentView: View {
         .environment(PetModel())
         .environment(PomodoroTimer())
         .environment(EventWatcher())
+        .environment(EnvironmentModel())
 }

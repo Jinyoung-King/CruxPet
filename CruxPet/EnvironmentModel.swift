@@ -102,7 +102,7 @@ class EnvironmentModel: NSObject, CLLocationManagerDelegate {
         guard lastFetch > 0, Date().timeIntervalSince1970 - lastFetch < 30 * 60 else { return }
         if let wmo = UserDefaults.standard.object(forKey: "cruxpet.env.wmoCode") as? Int {
             cachedWMOCode = wmo
-            cachedTemp = UserDefaults.standard.double(forKey: "cruxpet.env.temp")
+            cachedTemp = UserDefaults.standard.object(forKey: "cruxpet.env.temp") as? Double
         }
         updateAccessories()
     }
@@ -176,12 +176,12 @@ class EnvironmentModel: NSObject, CLLocationManagerDelegate {
         defer { isFetching = false }
         let urlString = "https://api.open-meteo.com/v1/forecast"
             + "?latitude=\(lat)&longitude=\(lon)"
-            + "&current=weathercode,temperature_2m"
+            + "&current=weather_code,temperature_2m"
         guard let url = URL(string: urlString),
               let (data, _) = try? await URLSession.shared.data(from: url),
               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
               let current = json["current"] as? [String: Any],
-              let wmo = current["weathercode"] as? Int,
+              let wmo = current["weather_code"] as? Int,
               let temp = current["temperature_2m"] as? Double
         else { return }
 
