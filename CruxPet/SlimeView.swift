@@ -8,7 +8,7 @@ struct SlimeView: View {
     var emotion: EmotionState = .normal
 
     // 배회 시 캔버스를 확장해 클리핑 방지
-    private var wanderPad: CGFloat { isWandering ? appearance.size * 0.45 : 0 }
+    private var wanderPad: CGFloat { appearance.size * 0.45 }
     private var totalWidth:  CGFloat { appearance.size + 32 + wanderPad * 2 }
     private var totalHeight: CGFloat { appearance.size + 40 + wanderPad * 2 }
 
