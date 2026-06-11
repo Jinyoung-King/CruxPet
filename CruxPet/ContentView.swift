@@ -140,6 +140,7 @@ struct ContentView: View {
     @State private var isQuestExpanded = false
     @State private var achievementModel = AchievementModel()
     @State private var showAchievements = false
+    @State private var activityDays: Set<String> = []
 
     var body: some View {
         let _ = watcher.pendingCommit  // @Observable 변경 추적 등록
@@ -224,6 +225,7 @@ struct ContentView: View {
         .onAppear {
             setupWatcher()
             watcher.pollNow()
+            refreshActivityDays()
         }
         .onChange(of: watcher.pendingCommit) { _, hasPending in
             if hasPending {
@@ -251,11 +253,13 @@ struct ContentView: View {
             if questsModel.claimCompleted(pet: pet) {
                 showToast(ToastData(emoji: "🎉", title: "퀘스트 올클리어!", subtitle: "+100 EXP 보너스 지급!"))
             }
+            refreshActivityDays()
         }
         .onChange(of: pet.todayCommitCount) { _, _ in
             if questsModel.claimCompleted(pet: pet) {
                 showToast(ToastData(emoji: "🎉", title: "퀘스트 올클리어!", subtitle: "+100 EXP 보너스 지급!"))
             }
+            refreshActivityDays()
         }
         .onChange(of: pet.totalCommitCount) { _, _ in
             checkAchievements()
@@ -340,6 +344,8 @@ struct ContentView: View {
             if pet.streakDays > 0 {
                 streakBadge
                     .transition(.scale.combined(with: .opacity))
+                streakCalendar
+                    .transition(.opacity)
             }
         }
         .animation(.spring(duration: 0.35), value: pet.streakDays)
@@ -352,10 +358,36 @@ struct ContentView: View {
             Text("\(pet.streakDays)일 연속")
                 .font(.system(size: 10, weight: .bold))
                 .foregroundStyle(streakColor)
+            if pet.streakMultiplier > 1.0 {
+                Text("×\(String(format: "%.1f", pet.streakMultiplier))")
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundStyle(streakColor.opacity(0.8))
+            }
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 3)
         .background(streakColor.opacity(0.12), in: Capsule())
+    }
+
+    private var streakCalendar: some View {
+        let days = last7Days()
+        let todayStr = days.last ?? ""
+        return HStack(spacing: 0) {
+            ForEach(days, id: \.self) { dateStr in
+                let isActive = activityDays.contains(dateStr)
+                let isToday = dateStr == todayStr
+                VStack(spacing: 3) {
+                    Text(weekdayLabel(for: dateStr))
+                        .font(.system(size: 8, weight: isToday ? .bold : .regular))
+                        .foregroundStyle(isToday ? streakColor : Color.secondary.opacity(0.5))
+                    Image(systemName: isActive ? "circle.fill" : "circle")
+                        .font(.system(size: 8))
+                        .foregroundStyle(isActive ? streakColor : Color.secondary.opacity(0.3))
+                }
+                .frame(maxWidth: .infinity)
+            }
+        }
+        .padding(.horizontal, 4)
     }
 
     private var streakColor: Color {
@@ -653,6 +685,26 @@ struct ContentView: View {
     }
 
     // MARK: - Setup
+
+    private func refreshActivityDays() {
+        activityDays = watcher.activityDays(last: 7)
+    }
+
+    private func last7Days() -> [String] {
+        let fmt = DateFormatter()
+        fmt.dateFormat = "yyyy-MM-dd"
+        return (0..<7).reversed().map { i in
+            fmt.string(from: Calendar.current.date(byAdding: .day, value: -i, to: Date())!)
+        }
+    }
+
+    private func weekdayLabel(for dateStr: String) -> String {
+        let fmt = DateFormatter()
+        fmt.dateFormat = "yyyy-MM-dd"
+        guard let date = fmt.date(from: dateStr) else { return "" }
+        let labels = ["일", "월", "화", "수", "목", "금", "토"]
+        return labels[Calendar.current.component(.weekday, from: date) - 1]
+    }
 
     private func setupWatcher() {
         if pomodoro.state == .idle {
