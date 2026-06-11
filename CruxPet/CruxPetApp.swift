@@ -26,9 +26,14 @@ class StatusItemRightClickHandler: NSObject {
 
     private func handleGlobalRightClick() {
         let loc = NSEvent.mouseLocation
-        guard let screen = NSScreen.main,
-              loc.y >= screen.frame.height - NSStatusBar.system.thickness else { return }
+        guard let frame = statusItemFrame(), frame.contains(loc) else { return }
         DispatchQueue.main.async { [weak self] in self?.showContextMenu(at: loc) }
+    }
+
+    private func statusItemFrame() -> NSRect? {
+        NSApp.windows
+            .first { NSStringFromClass(type(of: $0)).contains("StatusBar") }?
+            .frame
     }
 
     private func showContextMenu(at point: NSPoint) {
