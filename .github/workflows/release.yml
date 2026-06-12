@@ -19,21 +19,6 @@ jobs:
       - name: Set version from tag
         run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_ENV
 
-      - name: Import signing certificate
-        env:
-          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
-          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
-        run: |
-          KEYCHAIN_PATH=$RUNNER_TEMP/build.keychain
-          KEYCHAIN_PWD=$(openssl rand -hex 16)
-          echo "$MACOS_CERTIFICATE" | base64 --decode -o $RUNNER_TEMP/cert.p12
-          security create-keychain -p "$KEYCHAIN_PWD" "$KEYCHAIN_PATH"
-          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
-          security unlock-keychain -p "$KEYCHAIN_PWD" "$KEYCHAIN_PATH"
-          security import "$RUNNER_TEMP/cert.p12" -k "$KEYCHAIN_PATH" -P "$MACOS_CERTIFICATE_PWD" -T /usr/bin/codesign
-          security list-keychain -d user -s "$KEYCHAIN_PATH"
-          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PWD" "$KEYCHAIN_PATH"
-
       - name: Clean SPM cache
         run: rm -rf ~/Library/Caches/org.swift.swiftpm/artifacts
 
@@ -43,10 +28,9 @@ jobs:
             -scheme CruxPet \
             -configuration Release \
             -archivePath /tmp/CruxPet.xcarchive \
-            CODE_SIGN_IDENTITY="Apple Development" \
+            CODE_SIGN_IDENTITY="-" \
             CODE_SIGNING_REQUIRED=YES \
             CODE_SIGNING_ALLOWED=YES \
-            PROVISIONING_PROFILE_SPECIFIER="" \
             OTHER_CODE_SIGN_FLAGS="--timestamp=none" \
             CURRENT_PROJECT_VERSION=${{ github.run_number }} \
             MARKETING_VERSION=${{ env.VERSION }}
@@ -114,11 +98,6 @@ jobs:
           git add appcast.xml
           git commit -m "chore: update appcast for ${{ github.ref_name }}"
           git push origin HEAD:main
-
-      - name: Cleanup keychain
-        if: always()
-        run: |
-          security delete-keychain $RUNNER_TEMP/build.keychain 2>/dev/null || true
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3
