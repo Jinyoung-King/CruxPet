@@ -25,9 +25,22 @@
 		30D709DC2FD29E2500C4C603 /* CruxPetTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CruxPetTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		3483333313C64B0AB018B0C5 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 300E65C42F87A36B007F9DEE /* CruxPet */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		300E65C72F87A36B007F9DEE /* CruxPet */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				3483333313C64B0AB018B0C5 /* PBXFileSystemSynchronizedBuildFileExceptionSet */,
+			);
 			path = CruxPet;
 			sourceTree = "<group>";
 		};
