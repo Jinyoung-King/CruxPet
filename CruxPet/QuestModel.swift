@@ -30,6 +30,7 @@ struct Quest: Identifiable {
 }
 
 @Observable
+@MainActor
 class QuestModel {
     private(set) var todayQuests: [Quest] = []
     private var claimedIds: Set<String> = []
