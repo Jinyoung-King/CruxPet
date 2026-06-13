@@ -72,4 +72,28 @@ final class PetCustomizationTests: XCTestCase {
         XCTAssertEqual(c.name, "OldSlime")
         XCTAssertTrue(c.accessories.isEmpty)   // accessory 필드 무시, 기본값
     }
+
+    // MARK: - petType
+
+    func testDefaultPetType() {
+        let c = PetCustomization()
+        XCTAssertEqual(c.petType, .slime)
+    }
+
+    func testPetTypeSaveAndLoad() {
+        var c = PetCustomization()
+        c.petType = .cat
+        c.save()
+        let loaded = PetCustomization.load()
+        XCTAssertEqual(loaded.petType, .cat)
+    }
+
+    func testOldDataDefaultsToPetTypeSlime() {
+        let oldJSON = """
+        {"name":"OldSlime","useCustomColor":false,"customColorHex":"#7EC8E3","pomodoroMinutes":25}
+        """.data(using: .utf8)!
+        UserDefaults.standard.set(oldJSON, forKey: "cruxpet.customization")
+        let c = PetCustomization.load()
+        XCTAssertEqual(c.petType, .slime)
+    }
 }

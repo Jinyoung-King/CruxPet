@@ -28,6 +28,7 @@ struct PetCustomization: Codable {
     var customColorHex: String = "#7EC8E3"
     var accessories: [AccessorySlot: String] = [:]
     var pomodoroMinutes: Int = 25
+    var petType: PetType = .slime
 
     static let presetColors: [String] = [
         "#7EC8E3", "#EF5350", "#66BB6A",
@@ -37,28 +38,29 @@ struct PetCustomization: Codable {
     init() {}
 
     enum CodingKeys: String, CodingKey {
-        case name, useCustomColor, customColorHex, accessories, pomodoroMinutes
+        case name, useCustomColor, customColorHex, accessories, pomodoroMinutes, petType
     }
 
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        name = try container.decodeIfPresent(String.self, forKey: .name) ?? "Crux"
-        useCustomColor = try container.decodeIfPresent(Bool.self, forKey: .useCustomColor) ?? false
-        customColorHex = try container.decodeIfPresent(String.self, forKey: .customColorHex) ?? "#7EC8E3"
-        accessories = try container.decodeIfPresent([AccessorySlot: String].self, forKey: .accessories) ?? [:]
-        pomodoroMinutes = try container.decodeIfPresent(Int.self, forKey: .pomodoroMinutes) ?? 25
+        name             = try container.decodeIfPresent(String.self,               forKey: .name)             ?? "Crux"
+        useCustomColor   = try container.decodeIfPresent(Bool.self,                 forKey: .useCustomColor)   ?? false
+        customColorHex   = try container.decodeIfPresent(String.self,               forKey: .customColorHex)   ?? "#7EC8E3"
+        accessories      = try container.decodeIfPresent([AccessorySlot: String].self, forKey: .accessories)   ?? [:]
+        pomodoroMinutes  = try container.decodeIfPresent(Int.self,                  forKey: .pomodoroMinutes)  ?? 25
+        petType          = try container.decodeIfPresent(PetType.self,              forKey: .petType)          ?? .slime
         // Note: old "accessory" field is intentionally ignored for migration
     }
 
     func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(name, forKey: .name)
-        try container.encode(useCustomColor, forKey: .useCustomColor)
-        try container.encode(customColorHex, forKey: .customColorHex)
-        try container.encode(accessories, forKey: .accessories)
+        try container.encode(name,            forKey: .name)
+        try container.encode(useCustomColor,  forKey: .useCustomColor)
+        try container.encode(customColorHex,  forKey: .customColorHex)
+        try container.encode(accessories,     forKey: .accessories)
         try container.encode(pomodoroMinutes, forKey: .pomodoroMinutes)
+        try container.encode(petType,         forKey: .petType)
     }
-
 
     func save() {
         guard let data = try? JSONEncoder().encode(self) else { return }
