@@ -35,11 +35,11 @@ final class QuestModelTests: XCTestCase {
     }
 
     func testEasyPoolCount() {
-        XCTAssertEqual(QuestModel.easyPool.count, 6)
+        XCTAssertEqual(QuestModel.easyPool.count, 5)
     }
 
     func testHardPoolCount() {
-        XCTAssertEqual(QuestModel.hardPool.count, 5)
+        XCTAssertEqual(QuestModel.hardPool.count, 4)
     }
 
     func testPoolIdsAreUnique() {
