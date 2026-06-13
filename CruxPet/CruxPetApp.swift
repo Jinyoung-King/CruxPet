@@ -98,6 +98,7 @@ struct CruxPetApp: App {
     @State private var pomodoro = PomodoroTimer()
     @State private var watcher = EventWatcher()
     @State private var environment = EnvironmentModel()
+    @State private var interaction = PetInteractionModel()
 
     var body: some Scene {
         MenuBarExtra {
@@ -107,6 +108,7 @@ struct CruxPetApp: App {
                 .environment(pomodoro)
                 .environment(watcher)
                 .environment(environment)
+                .environment(interaction)
                 .environment(\.checkForUpdates, { updater.checkForUpdates() })
         } label: {
             Group {

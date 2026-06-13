@@ -134,6 +134,7 @@ struct ContentView: View {
     @Environment(PomodoroTimer.self) private var pomodoro
     @Environment(EventWatcher.self) private var watcher
     @Environment(EnvironmentModel.self) private var environment
+    @Environment(PetInteractionModel.self) private var interaction
     @State private var customization = PetCustomization.load()
     @State private var showCustomize = false
     @State private var toast: ToastData? = nil
@@ -323,6 +324,12 @@ struct ContentView: View {
                     isPomodoroActive: pomodoro.state == .running,
                     isWandering: pomodoro.state != .running
                 )
+                .scaleEffect(interaction.isTapped ? 1.25 : 1.0)
+                .animation(.spring(response: 0.25, dampingFraction: 0.4), value: interaction.isTapped)
+                .onTapGesture { interaction.tap(pet: pet) }
+                if interaction.showParticles {
+                    ParticleOverlayView()
+                }
                 if pet.showCritical {
                     Text("💥 CRITICAL!")
                         .font(.system(size: 11, weight: .bold))
@@ -348,6 +355,7 @@ struct ContentView: View {
             }
             .animation(.easeInOut(duration: 0.2), value: pet.showCritical)
             .animation(.spring(duration: 0.4), value: pet.showLevelUp)
+            treatButton
             HStack(spacing: 5) {
                 Text("Lv.\(pet.level)")
                     .font(.system(size: 10, weight: .bold))
@@ -372,6 +380,25 @@ struct ContentView: View {
         }
         .animation(.spring(duration: 0.35), value: pet.streakDays)
         .animation(.spring(duration: 0.4), value: companionModel.unlockedIDs)
+    }
+
+    private var treatButton: some View {
+        Button {
+            interaction.feed(pet: pet)
+        } label: {
+            HStack(spacing: 3) {
+                Text(interaction.isEating ? "😋" : "🍬")
+                    .font(.system(size: 13))
+                if !interaction.canFeed {
+                    Text("\(max(1, Int(interaction.cooldownRemaining / 60)))분")
+                        .font(.system(size: 9))
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .buttonStyle(.plain)
+        .disabled(!interaction.canFeed)
+        .opacity(interaction.canFeed ? 1.0 : 0.45)
     }
 
     private var streakBadge: some View {
@@ -832,10 +859,28 @@ struct ContentView: View {
 
 }
 
+private struct ParticleOverlayView: View {
+    @State private var floated = false
+
+    var body: some View {
+        ZStack {
+            ForEach(0..<3, id: \.self) { i in
+                Text("❤️")
+                    .font(.system(size: 12))
+                    .offset(x: CGFloat(i - 1) * 10, y: floated ? -40 : 0)
+                    .opacity(floated ? 0 : 1)
+                    .animation(.easeOut(duration: 0.8).delay(Double(i) * 0.1), value: floated)
+            }
+        }
+        .onAppear { floated = true }
+    }
+}
+
 #Preview {
     ContentView()
         .environment(PetModel())
         .environment(PomodoroTimer())
         .environment(EventWatcher())
         .environment(EnvironmentModel())
+        .environment(PetInteractionModel())
 }
