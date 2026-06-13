@@ -313,13 +313,15 @@ struct ContentView: View {
                     .fill(Color.blue.opacity(0.06))
                     .frame(width: 90, height: 90)
                     .blur(radius: 14)
-                SlimeView(
+                PetView(
+                    petType: customization.petType,
                     appearance: pet.slimeAppearance.applying(customization),
-                    isPomodoroActive: pomodoro.state == .running,
-                    accessories: customization.accessories,
-                    isWandering: pomodoro.state != .running,
+                    level: pet.level,
                     emotion: pomodoro.state == .running ? .normal : pet.emotion,
-                    environmentAccessories: environment.currentAccessories
+                    environmentAccessories: environment.currentAccessories,
+                    accessories: customization.accessories,
+                    isPomodoroActive: pomodoro.state == .running,
+                    isWandering: pomodoro.state != .running
                 )
                 if pet.showCritical {
                     Text("💥 CRITICAL!")
@@ -795,7 +797,7 @@ struct ContentView: View {
             .padding(.horizontal, 12)
             .padding(.top, 8)
 
-            ShareCardView(pet: pet, customization: customization)
+            ShareCardView(pet: pet, customization: customization, environment: environment)
                 .scaleEffect(scale, anchor: .top)
                 .frame(width: 300 * scale, height: 560 * scale)
                 .clipShape(RoundedRectangle(cornerRadius: 16))
@@ -815,7 +817,7 @@ struct ContentView: View {
     }
 
     private func shareCard() {
-        let card = ShareCardView(pet: pet, customization: customization)
+        let card = ShareCardView(pet: pet, customization: customization, environment: environment)
         let renderer = ImageRenderer(content: card)
         renderer.scale = 2.0
         guard let image = renderer.nsImage else { return }

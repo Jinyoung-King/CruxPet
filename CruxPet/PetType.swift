@@ -1,4 +1,4 @@
-import Foundation
+import SwiftUI
 
 enum PetType: String, Codable, CaseIterable {
     case slime, cat, dog, ghost
@@ -27,6 +27,56 @@ enum PetType: String, Codable, CaseIterable {
         case .cat:   return "🐱"
         case .dog:   return "🐶"
         case .ghost: return "👻"
+        }
+    }
+}
+
+struct PetView: View {
+    let petType: PetType
+    let appearance: SlimeAppearance
+    let level: Int
+    let emotion: EmotionState
+    let environmentAccessories: [EnvironmentAccessory]
+    let accessories: [AccessorySlot: String]
+    let isPomodoroActive: Bool
+    let isWandering: Bool
+
+    var body: some View {
+        switch petType {
+        case .slime:
+            SlimeView(
+                appearance: appearance,
+                isPomodoroActive: isPomodoroActive,
+                accessories: accessories,
+                isWandering: isWandering,
+                emotion: emotion,
+                environmentAccessories: environmentAccessories
+            )
+        case .cat:
+            CatView(
+                level: level,
+                emotion: emotion,
+                accessories: accessories,
+                isPomodoroActive: isPomodoroActive,
+                isWandering: isWandering
+            )
+        case .dog:
+            DogView(
+                level: level,
+                emotion: emotion,
+                accessories: accessories,
+                isPomodoroActive: isPomodoroActive,
+                isWandering: isWandering
+            )
+        case .ghost:
+            GhostView(
+                level: level,
+                emotion: emotion,
+                accessories: accessories,
+                isPomodoroActive: isPomodoroActive,
+                isWandering: isWandering,
+                environmentAccessories: environmentAccessories
+            )
         }
     }
 }
