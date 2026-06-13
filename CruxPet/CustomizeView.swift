@@ -28,8 +28,54 @@ struct CustomizeView: View {
         ScrollView {
             VStack(spacing: 12) {
                 // 실시간 미리보기
-                SlimeView(appearance: previewAppearance, accessories: draft.accessories)
-                    .frame(height: 80)
+                PetView(
+                    petType: draft.petType,
+                    appearance: previewAppearance,
+                    level: petLevel,
+                    emotion: .normal,
+                    environmentAccessories: [],
+                    accessories: draft.accessories,
+                    isPomodoroActive: false,
+                    isWandering: false
+                )
+                .frame(height: 80)
+
+                Divider()
+
+                // 펫 종류
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("펫 종류").font(.caption.bold()).foregroundStyle(.secondary)
+                    HStack(spacing: 5) {
+                        ForEach(PetType.allCases, id: \.self) { type in
+                            let isUnlocked = petLevel >= type.unlockLevel
+                            let isSelected = draft.petType == type
+                            Button {
+                                if isUnlocked { draft.petType = type }
+                            } label: {
+                                VStack(spacing: 2) {
+                                    Text(isUnlocked ? type.emoji : "🔒")
+                                        .font(.system(size: 15))
+                                    Text(isUnlocked ? type.displayName : "Lv.\(type.unlockLevel)~")
+                                        .font(.system(size: 9))
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 5)
+                                .background(isUnlocked && isSelected ? Color.blue : Color.clear)
+                                .foregroundStyle(isUnlocked && isSelected ? .white : (isUnlocked ? .primary : .secondary))
+                                .clipShape(RoundedRectangle(cornerRadius: 6))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .stroke(
+                                            isUnlocked && !isSelected ? Color.secondary.opacity(0.35) : Color.clear,
+                                            lineWidth: 1
+                                        )
+                                )
+                            }
+                            .buttonStyle(.plain)
+                            .disabled(!isUnlocked)
+                        }
+                    }
+                }
 
                 Divider()
 
