@@ -1,6 +1,7 @@
 import XCTest
 @testable import CruxPet
 
+@MainActor
 final class QuestModelTests: XCTestCase {
 
     func testQuestDescription_commit1() {
