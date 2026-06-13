@@ -116,6 +116,19 @@ class PetModel {
         persist()
     }
 
+    @MainActor func gainTreatExp() {
+        totalExp += 10
+        persist()
+    }
+
+    func setTemporaryEmotion(_ newEmotion: EmotionState, duration: Double) {
+        emotion = newEmotion
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .seconds(duration))
+            self?.updateEmotion()
+        }
+    }
+
     @MainActor func incrementQuestClear() {
         questClearCount += 1
         persist()

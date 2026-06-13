@@ -164,4 +164,14 @@ final class PetModelTests: XCTestCase {
         XCTAssertEqual(PetModel.multiplierForStreak(30), 1.5, accuracy: 0.001)
         XCTAssertEqual(PetModel.multiplierForStreak(100),1.5, accuracy: 0.001)
     }
+
+    // MARK: - gainTreatExp
+
+    @MainActor func testGainTreatExpAdds10() {
+        UserDefaults.standard.removeObject(forKey: "cruxpet.totalExp")
+        let pet = PetModel()
+        let before = pet.totalExp
+        pet.gainTreatExp()
+        XCTAssertEqual(pet.totalExp, before + 10)
+    }
 }
