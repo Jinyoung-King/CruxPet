@@ -121,6 +121,8 @@ struct CruxPetApp: App {
                             .symbolEffect(.variableColor.iterative, options: .repeating)
                     case .paused:
                         Image(systemName: "timer")
+                    case .shortBreak, .longBreak:
+                        Image(systemName: "cup.and.saucer.fill")
                     default:
                         Image(systemName: pet.emotion == .sleepy ? "zzz" : "pawprint.fill")
                     }

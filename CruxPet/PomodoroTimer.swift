@@ -79,6 +79,7 @@ class PomodoroTimer {
     }
 
     // For unit testing — simulates the focus countdown reaching zero.
+    #if DEBUG
     func completeForTesting() {
         timer?.invalidate()
         timer = nil
@@ -86,6 +87,7 @@ class PomodoroTimer {
         state = .completed
         onComplete?()
     }
+    #endif
 
     @MainActor
     private func scheduleFocusTimer() {
