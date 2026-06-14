@@ -619,21 +619,40 @@ struct ContentView: View {
 
     private var pomodoroSection: some View {
         let isRunning = pomodoro.state == .running
-        let accent: Color = isRunning ? .orange : .blue
+        let isBreak = pomodoro.state == .shortBreak || pomodoro.state == .longBreak
+        let isCompleted = pomodoro.state == .completed
+        let accent: Color = isRunning ? .orange : isCompleted ? .green : isBreak ? .teal : .blue
+        let headerIcon: String = isRunning ? "flame.fill" : isCompleted ? "checkmark.circle.fill" : isBreak ? "cup.and.saucer.fill" : "timer"
+        let headerText: String = {
+            switch pomodoro.state {
+            case .running:    return "집중 중"
+            case .completed:  return "포모도로 완료"
+            case .shortBreak: return "☕ 짧은 휴식"
+            case .longBreak:  return "🛋 긴 휴식"
+            default:          return "포모도로"
+            }
+        }()
         return VStack(spacing: 7) {
             HStack(spacing: 4) {
-                Image(systemName: isRunning ? "flame.fill" : "timer")
+                Image(systemName: headerIcon)
                     .font(.caption)
-                    .foregroundStyle(isRunning ? .orange : .secondary)
-                Text(isRunning ? "집중 중" : "포모도로")
+                    .foregroundStyle(accent)
+                Text(headerText)
                     .font(.caption.weight(.medium))
-                    .foregroundStyle(isRunning ? .orange : .secondary)
-                PomodoroInfoButton()
+                    .foregroundStyle(accent)
+                if pomodoro.state == .idle || pomodoro.state == .paused {
+                    PomodoroInfoButton()
+                }
             }
             Text(pomodoro.displayTime)
                 .font(.system(size: 30, weight: .bold, design: .monospaced))
-                .foregroundStyle(isRunning ? .primary : .secondary)
+                .foregroundStyle(isRunning || isCompleted || isBreak ? .primary : .secondary)
                 .animation(.none, value: pomodoro.displayTime)
+            if pomodoro.sessionCount > 0 {
+                Text("🍅 × \(pomodoro.sessionCount)")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.secondary)
+            }
             HStack(spacing: 8) {
                 Group {
                     switch pomodoro.state {
@@ -656,14 +675,15 @@ struct ContentView: View {
                             .buttonStyle(.bordered)
                             .controlSize(.small)
                     case .completed:
-                        Button("↺  다시") { pomodoro.reset() }
+                        Button("☕  휴식 시작") { pomodoro.startBreak() }
                             .buttonStyle(.borderedProminent)
-                            .controlSize(.small)
-                    case .shortBreak, .longBreak:
-                        Button("⏭  건너뛰기") { pomodoro.skipBreak() }
-                            .buttonStyle(.bordered)
+                            .tint(.green)
                             .controlSize(.small)
                         Button("↺") { pomodoro.reset() }
+                            .buttonStyle(.bordered)
+                            .controlSize(.small)
+                    case .shortBreak, .longBreak:
+                        Button("건너뛰기") { pomodoro.skipBreak() }
                             .buttonStyle(.bordered)
                             .controlSize(.small)
                     }
@@ -681,7 +701,7 @@ struct ContentView: View {
                         .strokeBorder(accent.opacity(0.2), lineWidth: 1)
                 )
         )
-        .animation(.easeInOut(duration: 0.25), value: isRunning)
+        .animation(.easeInOut(duration: 0.25), value: pomodoro.state)
     }
 
     private var activitySection: some View {
