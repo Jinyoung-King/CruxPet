@@ -109,6 +109,13 @@ final class PomodoroTimerTests: XCTestCase {
         XCTAssertEqual(timer.state, .shortBreak)
     }
 
+    func testStartBreakTransitionsToShortBreakAtSession1() {
+        let timer = PomodoroTimer()
+        timer.completeForTesting()   // sessionCount = 1
+        timer.startBreak()
+        XCTAssertEqual(timer.state, .shortBreak, "session 1 must be short break, not long")
+    }
+
     func testStartBreakTransitionsToLongBreakAtSession4() {
         let timer = PomodoroTimer()
         timer.completeForTesting()   // 1

@@ -60,7 +60,7 @@ class PomodoroTimer {
 
     func startBreak() {
         guard state == .completed else { return }
-        if sessionCount % 4 == 0 {
+        if sessionCount > 0 && sessionCount % 4 == 0 {
             timeRemaining = longBreakDuration
             state = .longBreak
         } else {
