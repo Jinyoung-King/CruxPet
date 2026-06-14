@@ -138,10 +138,21 @@ struct CruxPetApp: App {
             pet.gainPomodoroExp()
             sendPomodoroNotification()
         }
+        pomodoro.breakComplete = {
+            sendBreakCompleteNotification()
+        }
         watcher.start()
         updaterController.updater.checkForUpdatesInBackground()
         rightClickHandler.install()
         environment.startUpdating()
+    }
+
+    private func sendBreakCompleteNotification() {
+        let content = UNMutableNotificationContent()
+        content.title = "CruxPet 🍅"
+        content.body = "집중 시작!"
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+        UNUserNotificationCenter.current().add(request)
     }
 
     private func sendPomodoroNotification() {
