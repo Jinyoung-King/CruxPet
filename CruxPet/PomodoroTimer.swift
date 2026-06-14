@@ -2,7 +2,7 @@ import Foundation
 import Observation
 
 enum PomodoroState: Equatable {
-    case idle, running, paused, completed
+    case idle, running, paused, completed, shortBreak, longBreak
 }
 
 @MainActor @Observable
@@ -10,6 +10,10 @@ class PomodoroTimer {
     private(set) var state: PomodoroState = .idle
     private(set) var duration: TimeInterval = 25 * 60
     private(set) var timeRemaining: TimeInterval = 25 * 60
+    private(set) var sessionCount: Int = 0
+
+    let shortBreakDuration: TimeInterval = 5 * 60
+    let longBreakDuration: TimeInterval = 15 * 60
 
     var displayTime: String {
         let m = Int(timeRemaining) / 60
@@ -18,13 +22,14 @@ class PomodoroTimer {
     }
 
     var onComplete: (() -> Void)?
+    var breakComplete: (() -> Void)?
 
     private var timer: Timer?
 
     func start() {
         guard state == .idle else { return }
         state = .running
-        scheduleTimer()
+        scheduleFocusTimer()
     }
 
     func pause() {
@@ -37,7 +42,7 @@ class PomodoroTimer {
     func resume() {
         guard state == .paused else { return }
         state = .running
-        scheduleTimer()
+        scheduleFocusTimer()
     }
 
     func reset() {
@@ -45,6 +50,7 @@ class PomodoroTimer {
         timer = nil
         state = .idle
         timeRemaining = duration
+        sessionCount = 0
     }
 
     func setDuration(_ minutes: Int) {
@@ -52,8 +58,37 @@ class PomodoroTimer {
         reset()
     }
 
+    func startBreak() {
+        guard state == .completed else { return }
+        if sessionCount % 4 == 0 {
+            timeRemaining = longBreakDuration
+            state = .longBreak
+        } else {
+            timeRemaining = shortBreakDuration
+            state = .shortBreak
+        }
+        scheduleBreakTimer()
+    }
+
+    func skipBreak() {
+        guard state == .shortBreak || state == .longBreak else { return }
+        timer?.invalidate()
+        timer = nil
+        state = .idle
+        timeRemaining = duration
+    }
+
+    // For unit testing — simulates the focus countdown reaching zero.
+    func completeForTesting() {
+        timer?.invalidate()
+        timer = nil
+        sessionCount += 1
+        state = .completed
+        onComplete?()
+    }
+
     @MainActor
-    private func scheduleTimer() {
+    private func scheduleFocusTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             guard let self else { return }
             if self.timeRemaining > 0 {
@@ -61,8 +96,25 @@ class PomodoroTimer {
             } else {
                 self.timer?.invalidate()
                 self.timer = nil
+                self.sessionCount += 1
                 self.state = .completed
                 self.onComplete?()
+            }
+        }
+    }
+
+    @MainActor
+    private func scheduleBreakTimer() {
+        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+            guard let self else { return }
+            if self.timeRemaining > 0 {
+                self.timeRemaining -= 1
+            } else {
+                self.timer?.invalidate()
+                self.timer = nil
+                self.state = .idle
+                self.timeRemaining = self.duration
+                self.breakComplete?()
             }
         }
     }

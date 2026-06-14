@@ -659,6 +659,13 @@ struct ContentView: View {
                         Button("↺  다시") { pomodoro.reset() }
                             .buttonStyle(.borderedProminent)
                             .controlSize(.small)
+                    case .shortBreak, .longBreak:
+                        Button("⏭  건너뛰기") { pomodoro.skipBreak() }
+                            .buttonStyle(.bordered)
+                            .controlSize(.small)
+                        Button("↺") { pomodoro.reset() }
+                            .buttonStyle(.bordered)
+                            .controlSize(.small)
                     }
                 }
             }

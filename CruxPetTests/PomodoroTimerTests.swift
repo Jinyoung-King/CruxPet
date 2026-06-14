@@ -82,4 +82,90 @@ final class PomodoroTimerTests: XCTestCase {
         timer.reset()
         XCTAssertEqual(timer.timeRemaining, 50 * 60)
     }
+
+    // MARK: - Break timer
+
+    func testSessionCountInitiallyZero() {
+        let timer = PomodoroTimer()
+        XCTAssertEqual(timer.sessionCount, 0)
+    }
+
+    func testCompleteForTestingIncrementsSessionCount() {
+        let timer = PomodoroTimer()
+        timer.completeForTesting()
+        XCTAssertEqual(timer.sessionCount, 1)
+    }
+
+    func testCompleteForTestingSetsCompletedState() {
+        let timer = PomodoroTimer()
+        timer.completeForTesting()
+        XCTAssertEqual(timer.state, .completed)
+    }
+
+    func testStartBreakTransitionsToShortBreak() {
+        let timer = PomodoroTimer()
+        timer.completeForTesting()   // sessionCount = 1, state = .completed
+        timer.startBreak()
+        XCTAssertEqual(timer.state, .shortBreak)
+    }
+
+    func testStartBreakTransitionsToLongBreakAtSession4() {
+        let timer = PomodoroTimer()
+        timer.completeForTesting()   // 1
+        timer.completeForTesting()   // 2
+        timer.completeForTesting()   // 3
+        timer.completeForTesting()   // 4 → longBreak threshold
+        timer.startBreak()
+        XCTAssertEqual(timer.state, .longBreak)
+    }
+
+    func testStartBreakSetsShortBreakTimeRemaining() {
+        let timer = PomodoroTimer()
+        timer.completeForTesting()
+        timer.startBreak()
+        XCTAssertEqual(timer.timeRemaining, 5 * 60)
+    }
+
+    func testStartBreakSetsLongBreakTimeRemaining() {
+        let timer = PomodoroTimer()
+        for _ in 0..<4 { timer.completeForTesting() }
+        timer.startBreak()
+        XCTAssertEqual(timer.timeRemaining, 15 * 60)
+    }
+
+    func testStartBreakIsNoOpFromIdle() {
+        let timer = PomodoroTimer()
+        timer.startBreak()
+        XCTAssertEqual(timer.state, .idle)
+    }
+
+    func testSkipBreakResetsToIdle() {
+        let timer = PomodoroTimer()
+        timer.completeForTesting()
+        timer.startBreak()
+        timer.skipBreak()
+        XCTAssertEqual(timer.state, .idle)
+        XCTAssertEqual(timer.timeRemaining, timer.duration)
+    }
+
+    func testSkipBreakPreservesSessionCount() {
+        let timer = PomodoroTimer()
+        timer.completeForTesting()
+        timer.startBreak()
+        timer.skipBreak()
+        XCTAssertEqual(timer.sessionCount, 1)
+    }
+
+    func testResetClearsSessionCount() {
+        let timer = PomodoroTimer()
+        timer.completeForTesting()
+        timer.reset()
+        XCTAssertEqual(timer.sessionCount, 0)
+    }
+
+    func testBreakCompleteCallbackCanBeSet() {
+        let timer = PomodoroTimer()
+        timer.breakComplete = {}
+        XCTAssertNotNil(timer.breakComplete)
+    }
 }
