@@ -84,6 +84,7 @@ class ActivityHistoryModel {
     #if DEBUG
     func clearAllForTesting() {
         entries = []
+        UserDefaults.standard.removeObject(forKey: Self.storageKey)
     }
     #endif
 }

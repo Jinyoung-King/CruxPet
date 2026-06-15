@@ -44,6 +44,28 @@ final class ActivityHistoryModelTests: XCTestCase {
         XCTAssertNil(model.entries.first(where: { $0.dateString == "2026-01-01" }))
     }
 
+    // captureYesterdayIfNeeded: init() 시점에 어제 UserDefaults 데이터를 entries에 기록함
+    func testCaptureYesterdayIfNeeded() {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let yesterday = formatter.string(from: Calendar.current.date(byAdding: .day, value: -1, to: Date())!)
+
+        UserDefaults.standard.set(yesterday, forKey: "cruxpet.todayDate")
+        UserDefaults.standard.set(4, forKey: "cruxpet.commitCount")
+        UserDefaults.standard.set(2, forKey: "cruxpet.pomodoroCount")
+
+        let model = ActivityHistoryModel()
+        let captured = model.entries.first(where: { $0.dateString == yesterday })
+        XCTAssertEqual(captured?.commits, 4)
+        XCTAssertEqual(captured?.pomodoros, 2)
+
+        // Cleanup
+        UserDefaults.standard.removeObject(forKey: "cruxpet.todayDate")
+        UserDefaults.standard.removeObject(forKey: "cruxpet.commitCount")
+        UserDefaults.standard.removeObject(forKey: "cruxpet.pomodoroCount")
+        model.clearAllForTesting()
+    }
+
     // last7Days: 기록된 날짜가 7일 범위 내에 있으면 포함됨
     func testLast7DaysIncludesRecentEntry() {
         let model = ActivityHistoryModel()
