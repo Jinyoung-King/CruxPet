@@ -34,6 +34,49 @@ private struct PomodoroInfoButton: View {
     }
 }
 
+private struct DailyGoalView: View {
+    let todayCommits: Int
+    let todayPomodoros: Int
+    let commitGoal: Int
+    let pomodoroGoal: Int
+
+    var body: some View {
+        VStack(spacing: 4) {
+            goalRow("⚡", "커밋",  current: todayCommits,   goal: commitGoal)
+            goalRow("🍅", "포모", current: todayPomodoros, goal: pomodoroGoal)
+        }
+    }
+
+    private func goalRow(_ emoji: String, _ label: String, current: Int, goal: Int) -> some View {
+        let done = current >= goal
+        let ratio: CGFloat = goal > 0 ? min(CGFloat(current) / CGFloat(goal), 1.0) : 0
+        return HStack(spacing: 6) {
+            Text("\(emoji) \(label)")
+                .font(.system(size: 10))
+                .foregroundStyle(.secondary)
+                .frame(width: 40, alignment: .leading)
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(Color.secondary.opacity(0.15))
+                    Capsule()
+                        .fill(done ? Color.green.opacity(0.6) : Color.blue.opacity(0.5))
+                        .frame(width: geo.size.width * ratio)
+                }
+            }
+            .frame(height: 6)
+            HStack(spacing: 2) {
+                Text("\(current)/\(goal)")
+                    .font(.system(size: 9))
+                    .foregroundStyle(done ? .green : .secondary)
+                if done {
+                    Text("✓").font(.system(size: 9)).foregroundStyle(.green)
+                }
+            }
+            .frame(width: 36, alignment: .trailing)
+        }
+    }
+}
+
 private struct AchievementsView: View {
     let achievementModel: AchievementModel
     let pet: PetModel
@@ -173,6 +216,7 @@ struct ContentView: View {
             } else {
                 VStack(spacing: 10) {
                     characterSection
+                    goalSection
                     expSection
                     statsSection
                     questSection
@@ -490,6 +534,15 @@ struct ContentView: View {
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
         }
+    }
+
+    private var goalSection: some View {
+        DailyGoalView(
+            todayCommits: pet.todayCommitCount,
+            todayPomodoros: pet.todayPomodoroCount,
+            commitGoal: customization.dailyCommitGoal,
+            pomodoroGoal: customization.dailyPomodoroGoal
+        )
     }
 
     private var statsSection: some View {
