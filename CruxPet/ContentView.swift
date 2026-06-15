@@ -135,6 +135,7 @@ struct ContentView: View {
     @Environment(EventWatcher.self) private var watcher
     @Environment(EnvironmentModel.self) private var environment
     @Environment(PetInteractionModel.self) private var interaction
+    @Environment(ActivityHistoryModel.self) private var history
     @State private var customization = PetCustomization.load()
     @State private var showCustomize = false
     @State private var toast: ToastData? = nil
@@ -173,6 +174,7 @@ struct ContentView: View {
                 VStack(spacing: 10) {
                     characterSection
                     expSection
+                    statsSection
                     questSection
                     achievementSection
                     pomodoroSection
@@ -488,6 +490,10 @@ struct ContentView: View {
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
         }
+    }
+
+    private var statsSection: some View {
+        StatsView(pet: pet, history: history)
     }
 
     private var questSection: some View {

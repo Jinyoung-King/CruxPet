@@ -94,6 +94,7 @@ struct CruxPetApp: App {
             UserDefaults.standard.set(true, forKey: "cruxpet.hookInstalled")
         }
     }
+    @State private var history = ActivityHistoryModel()  // pet보다 먼저 — 어제 데이터 캡처 타이밍 보장
     @State private var pet = PetModel()
     @State private var pomodoro = PomodoroTimer()
     @State private var watcher = EventWatcher()
@@ -109,6 +110,7 @@ struct CruxPetApp: App {
                 .environment(watcher)
                 .environment(environment)
                 .environment(interaction)
+                .environment(history)
                 .environment(\.checkForUpdates, { updater.checkForUpdates() })
         } label: {
             Group {
