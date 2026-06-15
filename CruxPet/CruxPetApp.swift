@@ -136,11 +136,15 @@ struct CruxPetApp: App {
     }
 
     private func startServices() {
-        watcher.onCommit = { pet.gainCommitExp() }
+        watcher.onCommit = {
+            pet.gainCommitExp()
+            Self.cancelStreakReminder()
+        }
         pomodoro.onComplete = {
             watcher.appendPomodoro()
             pet.gainPomodoroExp()
             sendPomodoroNotification()
+            Self.cancelStreakReminder()
         }
         pomodoro.breakComplete = {
             sendBreakCompleteNotification()
@@ -149,6 +153,7 @@ struct CruxPetApp: App {
         updaterController.updater.checkForUpdatesInBackground()
         rightClickHandler.install()
         environment.startUpdating()
+        scheduleStreakReminderIfNeeded()
     }
 
     private func sendBreakCompleteNotification() {
@@ -166,6 +171,28 @@ struct CruxPetApp: App {
         content.sound = .default
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
         UNUserNotificationCenter.current().add(request)
+    }
+
+    private func scheduleStreakReminderIfNeeded() {
+        guard pet.todayCommitCount == 0, pet.todayPomodoroCount == 0 else { return }
+        let calendar = Calendar.current
+        var components = calendar.dateComponents([.year, .month, .day], from: Date())
+        components.hour = 20
+        components.minute = 0
+        guard let fireDate = calendar.date(from: components), fireDate > Date() else { return }
+        let content = UNMutableNotificationContent()
+        content.title = "CruxPet 🐾"
+        content.body = "오늘 아직 활동이 없어요. 펫이 기다리고 있어요!"
+        let trigger = UNCalendarNotificationTrigger(
+            dateMatching: calendar.dateComponents([.year, .month, .day, .hour, .minute], from: fireDate),
+            repeats: false
+        )
+        let request = UNNotificationRequest(identifier: "streak.reminder", content: content, trigger: trigger)
+        UNUserNotificationCenter.current().add(request)
+    }
+
+    private static func cancelStreakReminder() {
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["streak.reminder"])
     }
 
     private static func installGitHook() {
