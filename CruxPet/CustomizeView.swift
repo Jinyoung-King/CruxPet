@@ -179,6 +179,25 @@ struct CustomizeView: View {
                     }
                 }
 
+                // 일일 목표
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("일일 목표").font(.caption.bold()).foregroundStyle(.secondary)
+                    HStack {
+                        Text("⚡ 커밋").font(.caption2).foregroundStyle(.secondary)
+                        Spacer()
+                        Stepper(value: $draft.dailyCommitGoal, in: 1...20) {
+                            Text("\(draft.dailyCommitGoal)회").font(.caption2)
+                        }
+                    }
+                    HStack {
+                        Text("🍅 포모도로").font(.caption2).foregroundStyle(.secondary)
+                        Spacer()
+                        Stepper(value: $draft.dailyPomodoroGoal, in: 1...10) {
+                            Text("\(draft.dailyPomodoroGoal)회").font(.caption2)
+                        }
+                    }
+                }
+
                 // 버튼
                 HStack(spacing: 8) {
                     Button("취소", action: onCancel)
@@ -202,6 +221,6 @@ struct CustomizeView: View {
             }
             .padding(12)
         }
-        .frame(width: 220, height: 580)
+        .frame(width: 220, height: 650)
     }
 }
