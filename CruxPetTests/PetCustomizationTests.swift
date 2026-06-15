@@ -96,4 +96,32 @@ final class PetCustomizationTests: XCTestCase {
         let c = PetCustomization.load()
         XCTAssertEqual(c.petType, .slime)
     }
+
+    // MARK: - Daily Goals
+
+    func testDailyGoalDefaults() {
+        let c = PetCustomization()
+        XCTAssertEqual(c.dailyCommitGoal, 5)
+        XCTAssertEqual(c.dailyPomodoroGoal, 4)
+    }
+
+    func testDailyGoalRoundTrip() throws {
+        var c = PetCustomization()
+        c.dailyCommitGoal = 8
+        c.dailyPomodoroGoal = 3
+        let data = try JSONEncoder().encode(c)
+        let decoded = try JSONDecoder().decode(PetCustomization.self, from: data)
+        XCTAssertEqual(decoded.dailyCommitGoal, 8)
+        XCTAssertEqual(decoded.dailyPomodoroGoal, 3)
+    }
+
+    func testDailyGoalDefaultsOnOldData() {
+        let oldJSON = """
+        {"name":"Crux","useCustomColor":false,"customColorHex":"#7EC8E3","pomodoroMinutes":25}
+        """.data(using: .utf8)!
+        UserDefaults.standard.set(oldJSON, forKey: "cruxpet.customization")
+        let c = PetCustomization.load()
+        XCTAssertEqual(c.dailyCommitGoal, 5)
+        XCTAssertEqual(c.dailyPomodoroGoal, 4)
+    }
 }

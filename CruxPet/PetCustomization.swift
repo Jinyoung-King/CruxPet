@@ -29,6 +29,8 @@ struct PetCustomization: Codable {
     var accessories: [AccessorySlot: String] = [:]
     var pomodoroMinutes: Int = 25
     var petType: PetType = .slime
+    var dailyCommitGoal: Int = 5
+    var dailyPomodoroGoal: Int = 4
 
     var name: String {
         get { petNames[petType, default: petType.defaultName] }
@@ -43,7 +45,7 @@ struct PetCustomization: Codable {
     init() {}
 
     enum CodingKeys: String, CodingKey {
-        case petNames, name, useCustomColor, customColorHex, accessories, pomodoroMinutes, petType
+        case petNames, name, useCustomColor, customColorHex, accessories, pomodoroMinutes, petType, dailyCommitGoal, dailyPomodoroGoal
     }
 
     init(from decoder: any Decoder) throws {
@@ -53,6 +55,8 @@ struct PetCustomization: Codable {
         accessories      = try container.decodeIfPresent([AccessorySlot: String].self, forKey: .accessories)   ?? [:]
         pomodoroMinutes  = try container.decodeIfPresent(Int.self,                  forKey: .pomodoroMinutes)  ?? 25
         petType          = try container.decodeIfPresent(PetType.self,              forKey: .petType)          ?? .slime
+        dailyCommitGoal  = try container.decodeIfPresent(Int.self,                  forKey: .dailyCommitGoal)  ?? 5
+        dailyPomodoroGoal = try container.decodeIfPresent(Int.self,                 forKey: .dailyPomodoroGoal) ?? 4
         if let rawNames = try container.decodeIfPresent([String: String].self, forKey: .petNames) {
             petNames = Dictionary(uniqueKeysWithValues: rawNames.compactMap { key, val in
                 PetType(rawValue: key).map { ($0, val) }
@@ -75,6 +79,8 @@ struct PetCustomization: Codable {
         try container.encode(accessories,     forKey: .accessories)
         try container.encode(pomodoroMinutes, forKey: .pomodoroMinutes)
         try container.encode(petType,         forKey: .petType)
+        try container.encode(dailyCommitGoal,  forKey: .dailyCommitGoal)
+        try container.encode(dailyPomodoroGoal, forKey: .dailyPomodoroGoal)
     }
 
     func save() {
