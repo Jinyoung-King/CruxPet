@@ -232,6 +232,7 @@ class PetModel {
         passiveTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
             Task { @MainActor [weak self] in
                 self?.gainPassiveExp()
+                self?.resetDailyCountsIfNeeded()
                 UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: "cruxpet.lastPassiveTime")
             }
         }
