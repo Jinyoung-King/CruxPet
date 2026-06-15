@@ -139,12 +139,14 @@ struct CruxPetApp: App {
         watcher.onCommit = {
             pet.gainCommitExp()
             Self.cancelStreakReminder()
+            self.checkGoalCompletion()
         }
         pomodoro.onComplete = {
             watcher.appendPomodoro()
             pet.gainPomodoroExp()
             sendPomodoroNotification()
             Self.cancelStreakReminder()
+            self.checkGoalCompletion()
         }
         pomodoro.breakComplete = {
             sendBreakCompleteNotification()
@@ -193,6 +195,14 @@ struct CruxPetApp: App {
 
     private static func cancelStreakReminder() {
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["streak.reminder"])
+    }
+
+    private func checkGoalCompletion() {
+        let goals = PetCustomization.load()
+        guard pet.todayCommitCount >= goals.dailyCommitGoal,
+              pet.todayPomodoroCount >= goals.dailyPomodoroGoal,
+              !pet.goalBonusAwardedToday else { return }
+        pet.awardGoalBonus()
     }
 
     private static func installGitHook() {
