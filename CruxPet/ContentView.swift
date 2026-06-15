@@ -916,4 +916,5 @@ private struct ParticleOverlayView: View {
         .environment(EventWatcher())
         .environment(EnvironmentModel())
         .environment(PetInteractionModel())
+        .environment(ActivityHistoryModel())
 }

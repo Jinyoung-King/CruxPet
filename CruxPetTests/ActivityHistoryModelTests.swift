@@ -77,5 +77,6 @@ final class ActivityHistoryModelTests: XCTestCase {
         let days = model.last7Days(todayCommits: 0, todayPomodoros: 0)
         let found = days.first(where: { $0.dateString == yesterday })
         XCTAssertEqual(found?.commits, 7)
+        model.clearAllForTesting()
     }
 }
