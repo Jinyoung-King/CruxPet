@@ -26,7 +26,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		3483333313C64B0AB018B0C5 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+		3483333313C64B0AB018B0C5 /* Exceptions for "CruxPet" folder in "CruxPet" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -39,7 +39,7 @@
 		300E65C72F87A36B007F9DEE /* CruxPet */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				3483333313C64B0AB018B0C5 /* PBXFileSystemSynchronizedBuildFileExceptionSet */,
+				3483333313C64B0AB018B0C5 /* Exceptions for "CruxPet" folder in "CruxPet" target */,
 			);
 			path = CruxPet;
 			sourceTree = "<group>";
