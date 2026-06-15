@@ -174,4 +174,42 @@ final class PetModelTests: XCTestCase {
         pet.gainTreatExp()
         XCTAssertEqual(pet.totalExp, before + 10)
     }
+
+    // MARK: - awardGoalBonus
+
+    @MainActor func testAwardGoalBonusAdds50Exp() {
+        UserDefaults.standard.removeObject(forKey: "cruxpet.totalExp")
+        UserDefaults.standard.removeObject(forKey: "cruxpet.goalBonusAwardedToday")
+        let pet = PetModel()
+        let before = pet.totalExp
+        pet.awardGoalBonus()
+        XCTAssertEqual(pet.totalExp, before + 50)
+        XCTAssertTrue(pet.goalBonusAwardedToday)
+        UserDefaults.standard.removeObject(forKey: "cruxpet.totalExp")
+        UserDefaults.standard.removeObject(forKey: "cruxpet.goalBonusAwardedToday")
+    }
+
+    @MainActor func testAwardGoalBonusIsIdempotent() {
+        UserDefaults.standard.removeObject(forKey: "cruxpet.totalExp")
+        UserDefaults.standard.removeObject(forKey: "cruxpet.goalBonusAwardedToday")
+        let pet = PetModel()
+        let before = pet.totalExp
+        pet.awardGoalBonus()
+        pet.awardGoalBonus()
+        XCTAssertEqual(pet.totalExp, before + 50)
+        UserDefaults.standard.removeObject(forKey: "cruxpet.totalExp")
+        UserDefaults.standard.removeObject(forKey: "cruxpet.goalBonusAwardedToday")
+    }
+
+    @MainActor func testGoalBonusResetsWithDailyCounts() {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let yesterday = formatter.string(from: Calendar.current.date(byAdding: .day, value: -1, to: Date())!)
+        UserDefaults.standard.set(yesterday, forKey: "cruxpet.todayDate")
+        UserDefaults.standard.set(true, forKey: "cruxpet.goalBonusAwardedToday")
+        let pet = PetModel()
+        XCTAssertFalse(pet.goalBonusAwardedToday)
+        UserDefaults.standard.removeObject(forKey: "cruxpet.todayDate")
+        UserDefaults.standard.removeObject(forKey: "cruxpet.goalBonusAwardedToday")
+    }
 }

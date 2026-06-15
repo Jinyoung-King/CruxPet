@@ -43,6 +43,7 @@ class PetModel {
     private(set) var totalPomodoroCount: Int = 0
     private(set) var questClearCount: Int = 0
     private(set) var hasNightOwlCommit: Bool = false
+    private(set) var goalBonusAwardedToday: Bool = false
     var pendingStreakMilestone: Int = 0
     private(set) var emotion: EmotionState = .normal
     private var lastActivityDate: Date = .distantPast
@@ -67,6 +68,7 @@ class PetModel {
         totalPomodoroCount = UserDefaults.standard.integer(forKey: "cruxpet.totalPomodoroCount")
         questClearCount   = UserDefaults.standard.integer(forKey: "cruxpet.questClearCount")
         hasNightOwlCommit = UserDefaults.standard.bool(forKey: "cruxpet.hasNightOwlCommit")
+        goalBonusAwardedToday = UserDefaults.standard.bool(forKey: "cruxpet.goalBonusAwardedToday")
         let savedActivity = UserDefaults.standard.double(forKey: "cruxpet.lastActivityTime")
         if savedActivity > 0 { lastActivityDate = Date(timeIntervalSince1970: savedActivity) }
         resetDailyCountsIfNeeded()
@@ -119,6 +121,14 @@ class PetModel {
     @MainActor func gainTreatExp() {
         totalExp += 10
         persist()
+    }
+
+    @MainActor func awardGoalBonus() {
+        guard !goalBonusAwardedToday else { return }
+        totalExp += 50
+        goalBonusAwardedToday = true
+        persist()
+        setTemporaryEmotion(.excited, duration: 5)
     }
 
     func setTemporaryEmotion(_ newEmotion: EmotionState, duration: Double) {
@@ -316,6 +326,7 @@ class PetModel {
         UserDefaults.standard.set(totalPomodoroCount, forKey: "cruxpet.totalPomodoroCount")
         UserDefaults.standard.set(questClearCount,    forKey: "cruxpet.questClearCount")
         UserDefaults.standard.set(hasNightOwlCommit,  forKey: "cruxpet.hasNightOwlCommit")
+        UserDefaults.standard.set(goalBonusAwardedToday, forKey: "cruxpet.goalBonusAwardedToday")
     }
 
     private func resetDailyCountsIfNeeded() {
@@ -326,6 +337,7 @@ class PetModel {
         if stored != today {
             todayCommitCount = 0
             todayPomodoroCount = 0
+            goalBonusAwardedToday = false
             UserDefaults.standard.set(String(today), forKey: "cruxpet.todayDate")
             persist()
         }
