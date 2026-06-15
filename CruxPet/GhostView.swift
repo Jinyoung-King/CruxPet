@@ -126,6 +126,10 @@ struct GhostView: View {
         // Accessories use original (non-rotated) context
         let bodyRect = CGRect(x: cx - ghostW / 2, y: topY, width: ghostW, height: ghostH)
         drawGhostAccessories(&ctx, bodyRect: bodyRect, topCenter: CGPoint(x: cx, y: topY))
+        if isPomodoroActive {
+            let tomato = ctx.resolve(Text("🍅").font(.system(size: bodySize * 0.3)))
+            ctx.draw(tomato, at: CGPoint(x: cx, y: topY), anchor: .bottom)
+        }
     }
 
     private func drawGhostEyes(_ ctx: inout GraphicsContext, x1: CGFloat, x2: CGFloat, y: CGFloat, r: CGFloat) {

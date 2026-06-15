@@ -114,6 +114,10 @@ struct CatView: View {
 
         drawWhiskers(&ctx, base: CGPoint(x: headCenter.x, y: headCenter.y + headR * 0.22), headR: headR)
         drawCatAccessories(&ctx, bodyRect: bodyRect, headCenter: headCenter, headR: headR)
+        if isPomodoroActive {
+            let tomato = ctx.resolve(Text("🍅").font(.system(size: headR * 0.6)))
+            ctx.draw(tomato, at: CGPoint(x: headCenter.x, y: headCenter.y - headR * 1.1), anchor: .bottom)
+        }
     }
 
     private func drawTriangleEar(_ ctx: inout GraphicsContext, cx: CGFloat, baseY: CGFloat, earW: CGFloat, earH: CGFloat, tilt: CGFloat, fill: Color) {

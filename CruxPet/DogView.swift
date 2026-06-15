@@ -136,6 +136,10 @@ struct DogView: View {
         }
 
         drawDogAccessories(&ctx, bodyRect: bodyRect, headCenter: headCenter, headR: headR)
+        if isPomodoroActive {
+            let tomato = ctx.resolve(Text("🍅").font(.system(size: headR * 0.6)))
+            ctx.draw(tomato, at: CGPoint(x: headCenter.x, y: headCenter.y - headR * 1.1), anchor: .bottom)
+        }
     }
 
     private func drawDogEyes(_ ctx: inout GraphicsContext, center: CGPoint, headR: CGFloat) {
