@@ -29,6 +29,15 @@ enum PetType: String, Codable, CaseIterable {
         case .ghost: return "👻"
         }
     }
+
+    var defaultName: String {
+        switch self {
+        case .slime: return "Crux"
+        case .cat:   return "냥이"
+        case .dog:   return "뭉치"
+        case .ghost: return "유령"
+        }
+    }
 }
 
 struct PetView: View {

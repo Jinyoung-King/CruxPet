@@ -82,7 +82,7 @@ struct CustomizeView: View {
                 // 이름
                 VStack(alignment: .leading, spacing: 4) {
                     Text("이름").font(.caption.bold()).foregroundStyle(.secondary)
-                    TextField("슬라임 이름", text: $draft.name)
+                    TextField(draft.petType.defaultName, text: $draft.name)
                         .textFieldStyle(.roundedBorder)
                         .font(.caption)
                         .onChange(of: draft.name) { _, new in
@@ -202,6 +202,6 @@ struct CustomizeView: View {
             }
             .padding(12)
         }
-        .frame(width: 220, height: 480)
+        .frame(width: 220, height: 580)
     }
 }
