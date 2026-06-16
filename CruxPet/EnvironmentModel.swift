@@ -137,7 +137,7 @@ class EnvironmentModel: NSObject, CLLocationManagerDelegate {
 
         switch locationManager.authorizationStatus {
         case .notDetermined:
-            locationManager.requestWhenInUseAuthorization()
+            locationManager.requestAlwaysAuthorization()
         case .authorized, .authorizedAlways:
             locationManager.requestLocation()
         default:

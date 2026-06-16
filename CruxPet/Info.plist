@@ -35,5 +35,7 @@
 	<integer>3600</integer>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>현재 날씨에 따라 슬라임이 달라져요.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>현재 날씨에 따라 슬라임이 달라져요.</string>
 </dict>
 </plist>
