@@ -9,7 +9,7 @@ struct SlimeView: View {
     var environmentAccessories: [EnvironmentAccessory] = []
 
     // 배회 시 캔버스를 확장해 클리핑 방지
-    private var wanderPad: CGFloat { appearance.size * 0.45 }
+    private var wanderPad: CGFloat { appearance.size * 0.60 }
     private var totalWidth:  CGFloat { appearance.size + 32 + wanderPad * 2 }
     private var totalHeight: CGFloat { appearance.size + 40 + wanderPad * 2 }
 
@@ -22,20 +22,35 @@ struct SlimeView: View {
                 let speedMult: Double = emotion == .sleepy ? 0.38 : emotion == .excited ? 1.3 : 1.0
                 let bobAmp:  CGFloat  = emotion == .sleepy ? 1.0  : emotion == .excited ? 2.2 : 1.6
 
-                // ── 배회 / 스쿼시 계산 ──────────────────────────────
+                // ── 수평 이동 ────────────────────────────────────────
                 let wanderAmp: CGFloat = isWandering ? appearance.size * 0.33 : 0
-                let wx: CGFloat = sin(t * 0.55 * speedMult + .pi / 2) * wanderAmp
-                let wy: CGFloat = sin(t * 1.10 * speedMult)            * wanderAmp * 0.38
+                let wx: CGFloat = sin(t * 0.45 * speedMult) * wanderAmp
+                let vxN: CGFloat = cos(t * 0.45 * speedMult)
 
-                // 정규화 속도 (-1…1)
-                let vxN: CGFloat = cos(t * 0.55 * speedMult + .pi / 2)
-                let vyN: CGFloat = cos(t * 1.10 * speedMult)
+                // ── 점프 ─────────────────────────────────────────────
+                let jumpPeriod: Double = 3.2 / speedMult
+                let jumpDuration: Double = 0.7
+                let jumpHeight: CGFloat = isWandering ? appearance.size * 0.55 : 0
+                let jumpPhase = t.truncatingRemainder(dividingBy: jumpPeriod)
+                let inAir = isWandering && emotion != .sleepy && jumpPhase < jumpDuration
+                let jumpFrac: Double = inAir ? jumpPhase / jumpDuration : 0
+                let jumpArc: CGFloat = inAir ? -sin(CGFloat(jumpFrac) * .pi) * jumpHeight : 0
 
-                let bobY: CGFloat = sin(t * 2.5 * speedMult) * bobAmp + wy
+                // 착지 직후 squash (0.3초간 페이드)
+                let afterLand: Double = inAir ? 0 : min(jumpPhase - jumpDuration, 0.3)
+                let landSquash: CGFloat = isWandering ? CGFloat(max(0, 1.0 - afterLand / 0.3)) : 0
 
-                // 이동 방향으로 가로 늘이기 / 세로 납작하기
-                let hStretch: CGFloat = 1 + abs(vxN) * (isWandering ? 0.10 : 0)
-                let vSquish:  CGFloat = 1 - abs(vxN) * (isWandering ? 0.065 : 0)
+                // 공중이 아닐 때만 bob
+                let bobY: CGFloat = (inAir ? 0 : sin(t * 2.5 * speedMult) * bobAmp) + jumpArc
+
+                // ── 스쿼시/스트레치 ──────────────────────────────────
+                let peakFrac: CGFloat = inAir ? CGFloat(sin(jumpFrac * .pi)) : 0
+                let hStretch: CGFloat = inAir
+                    ? 1 - peakFrac * 0.05
+                    : 1 + landSquash * 0.18 + abs(vxN) * (isWandering ? 0.06 : 0)
+                let vSquish: CGFloat = inAir
+                    ? 1 + peakFrac * 0.08
+                    : 1 - landSquash * 0.12 - abs(vxN) * (isWandering ? 0.04 : 0)
 
                 let bodyW = appearance.size * hStretch
                 let bodyH = appearance.size * vSquish
@@ -54,7 +69,7 @@ struct SlimeView: View {
                              radius: appearance.size * 0.7)
                 }
 
-                drawContactShadow(context: &context, rect: bodyRect)
+                drawContactShadow(context: &context, rect: bodyRect, jumpArc: jumpArc)
 
                 // ── 기울기 컨텍스트 (몸통+눈만 적용) ───────────────
                 var tiltCtx = context
@@ -66,14 +81,20 @@ struct SlimeView: View {
                 }
 
                 drawBody(context: &tiltCtx, rect: bodyRect, t: t)
+                drawDrip(context: &tiltCtx, bodyRect: bodyRect, t: t)
                 if emotion == .happy || emotion == .excited {
                     drawBlush(context: &tiltCtx, bodyRect: bodyRect,
                               strong: emotion == .excited)
                 }
+                let eyeLookY: CGFloat = (isWandering && inAir)
+                    ? -CGFloat(cos(jumpFrac * .pi)) * 0.12
+                    : 0
                 drawEyes(context: &tiltCtx, bodyRect: bodyRect,
                          lookX: isWandering ? vxN * 0.18 : 0,
-                         lookY: isWandering ? vyN * 0.10 : 0,
+                         lookY: eyeLookY,
                          emotion: emotion, t: t)
+                drawEyebrows(context: &tiltCtx, bodyRect: bodyRect, emotion: emotion)
+                drawMouth(context: &tiltCtx, bodyRect: bodyRect, emotion: emotion)
                 if emotion == .sleepy {
                     drawZzz(context: &context, bodyRect: bodyRect, t: t)
                 }
@@ -170,12 +191,15 @@ struct SlimeView: View {
 
     // MARK: - Contact Shadow
 
-    private func drawContactShadow(context: inout GraphicsContext, rect: CGRect) {
-        let cx = rect.midX, y = rect.maxY - 1
-        let w = rect.width * 0.82, h = rect.height * 0.14
+    private func drawContactShadow(context: inout GraphicsContext, rect: CGRect, jumpArc: CGFloat = 0) {
+        let cx = rect.midX
+        let groundY = rect.maxY - jumpArc - 1
+        let heightRatio: CGFloat = jumpArc != 0 ? max(0.3, 1 - abs(jumpArc) / (rect.height * 2.5)) : 1
+        let w = rect.width * 0.82 * heightRatio
+        let h = rect.height * 0.14
         for (ws, hs, op): (Double, Double, Double) in [(1.5,1.8,0.05),(1.1,1.3,0.08),(0.7,0.9,0.11)] {
-            let sr = CGRect(x: cx - w*ws/2, y: y - h*hs/2, width: w*ws, height: h*hs)
-            var ctx = context; ctx.opacity = op
+            let sr = CGRect(x: cx - w*ws/2, y: groundY - h*hs/2, width: w*ws, height: h*hs)
+            var ctx = context; ctx.opacity = op * Double(heightRatio)
             ctx.fill(Path(ellipseIn: sr), with: .color(.black))
         }
     }
@@ -282,6 +306,133 @@ struct SlimeView: View {
                         center: CGPoint(x: r.midX, y: r.midY),
                         startRadius: 0, endRadius: blushW * 0.6))
         }
+    }
+
+    // MARK: - Eyebrows
+
+    private func drawEyebrows(context: inout GraphicsContext, bodyRect: CGRect, emotion: EmotionState) {
+        guard !isPomodoroActive else { return }
+        let eyeY    = bodyRect.minY + bodyRect.height * 0.37
+        let spacing = bodyRect.width * 0.22
+        let browW   = bodyRect.width * 0.11
+        let sw      = max(1.0, bodyRect.width * 0.026)
+        let color   = Color(white: 0.18).opacity(0.55)
+        let s       = bodyRect.width
+
+        // (centerYOffset, leftEndDelta, rightEndDelta) for left brow, then right brow
+        let (lSpec, rSpec): ((CGFloat, CGFloat, CGFloat), (CGFloat, CGFloat, CGFloat))
+        switch emotion {
+        case .sleepy:
+            lSpec = ( s*0.03,  s*0.02, -s*0.01)
+            rSpec = ( s*0.03, -s*0.01,  s*0.02)
+        case .happy:
+            lSpec = (-s*0.09,  s*0.02, -s*0.03)
+            rSpec = (-s*0.09, -s*0.03,  s*0.02)
+        case .excited:
+            lSpec = (-s*0.13,  s*0.03, -s*0.05)
+            rSpec = (-s*0.13, -s*0.05,  s*0.03)
+        default:
+            // 왼쪽 눈썹만 더 올라가고 기울어짐 → 멍청한 의아한 표정
+            lSpec = (-s*0.11,  s*0.03, -s*0.05)
+            rSpec = (-s*0.04,  s*0.01,  s*0.01)
+        }
+
+        for (i, spec) in [lSpec, rSpec].enumerated() {
+            let (centerOff, leftDelta, rightDelta) = spec
+            let cx = bodyRect.midX + (i == 0 ? -spacing : spacing)
+            let cy = eyeY + centerOff
+            var path = Path()
+            path.move(to: CGPoint(x: cx - browW/2, y: cy + leftDelta))
+            path.addQuadCurve(
+                to:      CGPoint(x: cx + browW/2, y: cy + rightDelta),
+                control: CGPoint(x: cx,           y: cy - s * 0.012)
+            )
+            context.stroke(path, with: .color(color), lineWidth: sw)
+        }
+    }
+
+    // MARK: - Mouth
+
+    private func drawMouth(context: inout GraphicsContext, bodyRect: CGRect, emotion: EmotionState) {
+        guard !isPomodoroActive else { return }
+        let cx     = bodyRect.midX + bodyRect.width * 0.025
+        let mouthY = bodyRect.minY + bodyRect.height * 0.60
+        let sw     = max(1.0, bodyRect.width * 0.028)
+        let color  = Color(white: 0.12).opacity(0.70)
+
+        var path = Path()
+        switch emotion {
+        case .sleepy:
+            let w = bodyRect.width * 0.14
+            path.move(to: CGPoint(x: cx - w/2, y: mouthY))
+            path.addQuadCurve(
+                to:      CGPoint(x: cx + w/2, y: mouthY + w*0.09),
+                control: CGPoint(x: cx + w*0.1, y: mouthY + w*0.18)
+            )
+            context.stroke(path, with: .color(color), lineWidth: sw)
+
+        case .happy:
+            let w = bodyRect.width * 0.22
+            path.move(to: CGPoint(x: cx - w/2, y: mouthY - w*0.04))
+            path.addQuadCurve(
+                to:      CGPoint(x: cx + w/2, y: mouthY - w*0.04),
+                control: CGPoint(x: cx,       y: mouthY + w*0.40)
+            )
+            context.stroke(path, with: .color(color), lineWidth: sw)
+
+        case .excited:
+            let r = bodyRect.width * 0.12
+            path.addArc(center: CGPoint(x: cx, y: mouthY),
+                        radius: r,
+                        startAngle: .degrees(10),
+                        endAngle:   .degrees(170),
+                        clockwise:  false)
+            context.stroke(path, with: .color(color), lineWidth: sw * 1.15)
+
+        default:
+            // 멍청한 기본: 살짝 벌어진 반원
+            let r = bodyRect.width * 0.08
+            path.addArc(center: CGPoint(x: cx, y: mouthY),
+                        radius: r,
+                        startAngle: .degrees(15),
+                        endAngle:   .degrees(165),
+                        clockwise:  false)
+            context.stroke(path, with: .color(color), lineWidth: sw)
+        }
+    }
+
+    // MARK: - Drip
+
+    private func drawDrip(context: inout GraphicsContext, bodyRect: CGRect, t: Double) {
+        guard !isPomodoroActive else { return }
+        let dripX   = bodyRect.midX - bodyRect.width * 0.09
+        let dripTop = bodyRect.maxY - bodyRect.height * 0.09
+        let dripLen = bodyRect.height * 0.20 + sin(t * 1.1) * bodyRect.height * 0.04
+        let dripW   = bodyRect.width * 0.075
+
+        let tip   = CGPoint(x: dripX, y: dripTop + dripLen)
+        let left  = CGPoint(x: dripX - dripW/2, y: dripTop + dripLen * 0.28)
+        let right = CGPoint(x: dripX + dripW/2, y: dripTop + dripLen * 0.28)
+
+        var path = Path()
+        path.move(to: left)
+        path.addQuadCurve(to: right,
+                          control: CGPoint(x: dripX, y: dripTop - dripW * 0.15))
+        path.addQuadCurve(to: tip,
+                          control: CGPoint(x: dripX + dripW * 0.32, y: dripTop + dripLen * 0.82))
+        path.addQuadCurve(to: left,
+                          control: CGPoint(x: dripX - dripW * 0.32, y: dripTop + dripLen * 0.82))
+        path.closeSubpath()
+
+        let baseColor: Color = appearance.isRainbow
+            ? Color(hue: (t * 0.2).truncatingRemainder(dividingBy: 1.0), saturation: 0.75, brightness: 0.92)
+            : Color(hex: appearance.bodyHex)
+
+        context.fill(path, with: .color(baseColor))
+        var hlCtx = context; hlCtx.opacity = 0.42
+        let hlR = CGRect(x: dripX - dripW * 0.14, y: dripTop + dripLen * 0.10,
+                         width: dripW * 0.30, height: dripLen * 0.20)
+        hlCtx.fill(Path(ellipseIn: hlR), with: .color(.white))
     }
 
     // MARK: - Zzz
