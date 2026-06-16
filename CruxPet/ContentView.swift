@@ -39,6 +39,7 @@ private struct DailyGoalView: View {
     let todayPomodoros: Int
     let commitGoal: Int
     let pomodoroGoal: Int
+    var onTap: () -> Void
 
     var body: some View {
         VStack(spacing: 4) {
@@ -74,6 +75,7 @@ private struct DailyGoalView: View {
             }
             .frame(width: 36, alignment: .trailing)
         }
+        .onTapGesture { onTap() }
     }
 }
 
@@ -542,7 +544,8 @@ struct ContentView: View {
             todayCommits: pet.todayCommitCount,
             todayPomodoros: pet.todayPomodoroCount,
             commitGoal: customization.dailyCommitGoal,
-            pomodoroGoal: customization.dailyPomodoroGoal
+            pomodoroGoal: customization.dailyPomodoroGoal,
+            onTap: { withAnimation(.easeInOut(duration: 0.2)) { isStatsExpanded = true } }
         )
     }
 
