@@ -6,7 +6,7 @@ struct StatsView: View {
     let pet: PetModel
     let history: ActivityHistoryModel
 
-    @State private var isExpanded = false
+    @Binding var isExpanded: Bool
 
     private var last7: [DailyActivity] {
         history.last7Days(todayCommits: pet.todayCommitCount, todayPomodoros: pet.todayPomodoroCount)
@@ -114,7 +114,7 @@ struct StatsView: View {
 #Preview {
     let history = ActivityHistoryModel()
     let pet = PetModel()
-    return StatsView(pet: pet, history: history)
+    return StatsView(pet: pet, history: history, isExpanded: .constant(true))
         .padding()
         .frame(width: 220)
 }

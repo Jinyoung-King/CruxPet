@@ -184,6 +184,7 @@ struct ContentView: View {
     @State private var toast: ToastData? = nil
     @State private var questsModel = QuestModel()
     @State private var isQuestExpanded = false
+    @State private var isStatsExpanded = false
     @State private var achievementModel = AchievementModel()
     @State private var showAchievements = false
     @State private var activityDays: Set<String> = []
@@ -546,7 +547,7 @@ struct ContentView: View {
     }
 
     private var statsSection: some View {
-        StatsView(pet: pet, history: history)
+        StatsView(pet: pet, history: history, isExpanded: $isStatsExpanded)
     }
 
     private var questSection: some View {
