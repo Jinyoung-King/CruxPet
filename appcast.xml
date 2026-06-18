@@ -3,15 +3,15 @@
   <channel>
     <title>CruxPet</title>
     <item>
-      <title>Version 1.0.35</title>
-      <pubDate>Thu, 18 Jun 2026 00:30:56 +0000</pubDate>
-      <sparkle:version>103</sparkle:version>
-      <sparkle:shortVersionString>1.0.35</sparkle:shortVersionString>
+      <title>Version 1.0.36</title>
+      <pubDate>Thu, 18 Jun 2026 12:34:06 +0000</pubDate>
+      <sparkle:version>104</sparkle:version>
+      <sparkle:shortVersionString>1.0.36</sparkle:shortVersionString>
       <enclosure
-        url="https://github.com/Jinyoung-King/CruxPet/releases/download/v1.0.35/CruxPet-1.0.35.dmg"
-        length="2019125"
+        url="https://github.com/Jinyoung-King/CruxPet/releases/download/v1.0.36/CruxPet-1.0.36.dmg"
+        length="2029143"
         type="application/octet-stream"
-        sparkle:edSignature="iP54FICJf73IpQto2PMDcupXuyi86wFW/naXQFAtUa2DvSG0HlA6K0JSr6xZZerronKQOq6RQiuV+cJwYQtYBQ=="
+        sparkle:edSignature="7AUKYFy5HVAQ0MGniI9099OAZKACLMizGqRbiOihkZIg+mrOauuzXX2X0JDLQlnzsA3pcCwQMLxEw4HFN9ciDg=="
       />
     </item>
   </channel>
