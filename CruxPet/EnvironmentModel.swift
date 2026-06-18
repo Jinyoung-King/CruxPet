@@ -45,6 +45,8 @@ class EnvironmentModel: NSObject, CLLocationManagerDelegate {
     private let locationManager = CLLocationManager()
     private var cachedWMOCode: Int? = nil
     private var cachedTemp: Double? = nil
+    private var cachedLat: Double? = nil
+    private var cachedLon: Double? = nil
     private var updateTimer: Timer?
     private var weatherTimer: Timer?
     private var isFetching = false
@@ -98,6 +100,13 @@ class EnvironmentModel: NSObject, CLLocationManagerDelegate {
     // MARK: - Cache persistence
 
     private func restoreCache() {
+        // 좌표는 만료 없이 영구 복원 (위치 권한 팝업 방지)
+        if let lat = UserDefaults.standard.object(forKey: "cruxpet.env.lat") as? Double,
+           let lon = UserDefaults.standard.object(forKey: "cruxpet.env.lon") as? Double {
+            cachedLat = lat
+            cachedLon = lon
+        }
+        // 날씨 데이터는 30분 이내만 복원
         let lastFetch = UserDefaults.standard.double(forKey: "cruxpet.env.lastFetch")
         guard lastFetch > 0, Date().timeIntervalSince1970 - lastFetch < 30 * 60 else { return }
         if let wmo = UserDefaults.standard.object(forKey: "cruxpet.env.wmoCode") as? Int {
@@ -107,10 +116,12 @@ class EnvironmentModel: NSObject, CLLocationManagerDelegate {
         updateAccessories()
     }
 
-    private func saveCache(wmo: Int, temp: Double) {
+    private func saveCache(wmo: Int, temp: Double, lat: Double, lon: Double) {
         UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: "cruxpet.env.lastFetch")
         UserDefaults.standard.set(wmo, forKey: "cruxpet.env.wmoCode")
         UserDefaults.standard.set(temp, forKey: "cruxpet.env.temp")
+        UserDefaults.standard.set(lat, forKey: "cruxpet.env.lat")
+        UserDefaults.standard.set(lon, forKey: "cruxpet.env.lon")
     }
 
     // MARK: - Updating
@@ -134,6 +145,12 @@ class EnvironmentModel: NSObject, CLLocationManagerDelegate {
         let lastFetch = UserDefaults.standard.double(forKey: "cruxpet.env.lastFetch")
         let elapsed = Date().timeIntervalSince1970 - lastFetch
         guard elapsed > 30 * 60 else { return }
+
+        // 좌표가 이미 있으면 위치 권한 요청 없이 날씨만 직접 갱신
+        if let lat = cachedLat, let lon = cachedLon {
+            Task { await fetchWeather(lat: lat, lon: lon) }
+            return
+        }
 
         switch locationManager.authorizationStatus {
         case .notDetermined:
@@ -185,9 +202,11 @@ class EnvironmentModel: NSObject, CLLocationManagerDelegate {
               let temp = current["temperature_2m"] as? Double
         else { return }
 
+        cachedLat = lat
+        cachedLon = lon
         cachedWMOCode = wmo
         cachedTemp = temp
-        saveCache(wmo: wmo, temp: temp)
+        saveCache(wmo: wmo, temp: temp, lat: lat, lon: lon)
         updateAccessories()
     }
 }
