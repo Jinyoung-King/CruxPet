@@ -3,7 +3,6 @@ import SwiftUI
 struct ShareCardView: View {
     let pet: PetModel
     let customization: PetCustomization
-    let environment: EnvironmentModel
 
     private var appearance: SlimeAppearance { pet.slimeAppearance.applying(customization) }
     private var tierColor: Color { Color(hex: appearance.isRainbow ? "#A8DADC" : appearance.bodyHex) }
@@ -137,7 +136,6 @@ struct ShareCardView: View {
                         appearance: appearance,
                         level: pet.level,
                         emotion: pet.emotion,
-                        environmentAccessories: environment.currentAccessories,
                         accessories: customization.accessories,
                         isPomodoroActive: false,
                         isWandering: false

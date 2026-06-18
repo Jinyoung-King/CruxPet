@@ -6,7 +6,6 @@ struct SlimeView: View {
     var accessories: [AccessorySlot: String] = [:]
     var isWandering: Bool = false
     var emotion: EmotionState = .normal
-    var environmentAccessories: [EnvironmentAccessory] = []
 
     // 배회 시 캔버스를 확장해 클리핑 방지
     private var wanderPad: CGFloat { appearance.size * 0.60 }
@@ -106,7 +105,6 @@ struct SlimeView: View {
                 drawSparkles(context: &context, bodyRect: bodyRect, t: t,
                              count: appearance.sparkleCount)
                 drawSlotAccessories(context: &context, bodyRect: bodyRect)
-                drawEnvironmentAccessories(context: &context, bodyRect: bodyRect)
             }
             .frame(width: totalWidth, height: totalHeight)
         }
@@ -515,49 +513,6 @@ struct SlimeView: View {
             let size = bodyRect.width * 0.35
             let r = context.resolve(Text(emoji).font(.system(size: size)))
             context.draw(r, at: CGPoint(x: bodyRect.minX, y: bodyRect.maxY), anchor: .bottomLeading)
-        }
-    }
-
-    private func drawEnvironmentAccessories(context: inout GraphicsContext, bodyRect: CGRect) {
-        for accessory in environmentAccessories {
-            let point: CGPoint
-            let fontSize: CGFloat
-            switch accessory {
-            case .moon:
-                point = CGPoint(x: bodyRect.minX - bodyRect.width * 0.15,
-                                y: bodyRect.minY + bodyRect.height * 0.05)
-                fontSize = bodyRect.width * 0.38
-            case .sun:
-                point = CGPoint(x: bodyRect.maxX + bodyRect.width * 0.12,
-                                y: bodyRect.minY)
-                fontSize = bodyRect.width * 0.38
-            case .sunset:
-                point = CGPoint(x: bodyRect.midX,
-                                y: bodyRect.minY - bodyRect.height * 0.45)
-                fontSize = bodyRect.width * 0.38
-            case .star:
-                point = CGPoint(x: bodyRect.minX - bodyRect.width * 0.15,
-                                y: bodyRect.minY + bodyRect.height * 0.05)
-                fontSize = bodyRect.width * 0.32
-            case .sunglasses:
-                point = CGPoint(x: bodyRect.midX,
-                                y: bodyRect.minY + bodyRect.height * 0.38)
-                fontSize = bodyRect.width * 0.38
-            case .umbrella:
-                point = CGPoint(x: bodyRect.midX - bodyRect.width * 0.1,
-                                y: bodyRect.minY - bodyRect.height * 0.55)
-                fontSize = bodyRect.width * 0.42
-            case .scarf:
-                point = CGPoint(x: bodyRect.maxX + bodyRect.width * 0.08,
-                                y: bodyRect.minY + bodyRect.height * 0.55)
-                fontSize = bodyRect.width * 0.30
-            case .coat:
-                point = CGPoint(x: bodyRect.maxX + bodyRect.width * 0.08,
-                                y: bodyRect.midY)
-                fontSize = bodyRect.width * 0.30
-            }
-            let resolved = context.resolve(Text(accessory.emoji).font(.system(size: fontSize)))
-            context.draw(resolved, at: point, anchor: .center)
         }
     }
 }

@@ -33,7 +33,6 @@ struct CustomizeView: View {
                     appearance: previewAppearance,
                     level: petLevel,
                     emotion: .normal,
-                    environmentAccessories: [],
                     accessories: draft.accessories,
                     isPomodoroActive: false,
                     isWandering: false

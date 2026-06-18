@@ -45,7 +45,6 @@ struct PetView: View {
     let appearance: SlimeAppearance
     let level: Int
     let emotion: EmotionState
-    let environmentAccessories: [EnvironmentAccessory]
     let accessories: [AccessorySlot: String]
     let isPomodoroActive: Bool
     let isWandering: Bool
@@ -59,7 +58,6 @@ struct PetView: View {
                 accessories: accessories,
                 isWandering: isWandering,
                 emotion: emotion,
-                environmentAccessories: environmentAccessories
             )
         case .cat:
             CatView(
@@ -84,7 +82,6 @@ struct PetView: View {
                 accessories: accessories,
                 isPomodoroActive: isPomodoroActive,
                 isWandering: isWandering,
-                environmentAccessories: environmentAccessories
             )
         }
     }

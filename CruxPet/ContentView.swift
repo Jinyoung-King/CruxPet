@@ -178,7 +178,6 @@ struct ContentView: View {
     @Environment(PetModel.self) private var pet
     @Environment(PomodoroTimer.self) private var pomodoro
     @Environment(EventWatcher.self) private var watcher
-    @Environment(EnvironmentModel.self) private var environment
     @Environment(PetInteractionModel.self) private var interaction
     @Environment(ActivityHistoryModel.self) private var history
     @State private var customization = PetCustomization.load()
@@ -368,7 +367,6 @@ struct ContentView: View {
                     appearance: pet.slimeAppearance.applying(customization),
                     level: pet.level,
                     emotion: pomodoro.state == .running ? .normal : pet.emotion,
-                    environmentAccessories: environment.currentAccessories,
                     accessories: customization.accessories,
                     isPomodoroActive: pomodoro.state == .running,
                     isWandering: pomodoro.state != .running
@@ -914,7 +912,7 @@ struct ContentView: View {
             .padding(.horizontal, 12)
             .padding(.top, 8)
 
-            ShareCardView(pet: pet, customization: customization, environment: environment)
+            ShareCardView(pet: pet, customization: customization)
                 .scaleEffect(scale, anchor: .top)
                 .frame(width: 300 * scale, height: 560 * scale)
                 .clipShape(RoundedRectangle(cornerRadius: 16))
@@ -934,7 +932,7 @@ struct ContentView: View {
     }
 
     private func shareCard() {
-        let card = ShareCardView(pet: pet, customization: customization, environment: environment)
+        let card = ShareCardView(pet: pet, customization: customization)
         let renderer = ImageRenderer(content: card)
         renderer.scale = 2.0
         guard let image = renderer.nsImage else { return }
@@ -971,7 +969,6 @@ private struct ParticleOverlayView: View {
         .environment(PetModel())
         .environment(PomodoroTimer())
         .environment(EventWatcher())
-        .environment(EnvironmentModel())
         .environment(PetInteractionModel())
         .environment(ActivityHistoryModel())
 }

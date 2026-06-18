@@ -6,8 +6,6 @@ struct GhostView: View {
     var accessories: [AccessorySlot: String] = [:]
     var isPomodoroActive: Bool = false
     var isWandering: Bool = false
-    var environmentAccessories: [EnvironmentAccessory] = []
-
     private var bodySize: CGFloat {
         switch level {
         case 1..<20:  return 32
@@ -15,10 +13,6 @@ struct GhostView: View {
         case 30..<40: return 40
         default:      return 44
         }
-    }
-
-    private var isNightTime: Bool {
-        environmentAccessories.contains(.moon) || environmentAccessories.contains(.star)
     }
 
     var body: some View {
@@ -38,7 +32,7 @@ struct GhostView: View {
         let cy = size.height / 2
 
         let floatY = CGFloat(sin(t * 0.7)) * 3.0
-        let opacityBase: Double = isNightTime ? 1.0 : 0.82
+        let opacityBase: Double = 0.82
         let opacity = opacityBase + sin(t * 1.2) * 0.08
 
         let ghostW = bodySize * 0.72
@@ -88,8 +82,7 @@ struct GhostView: View {
 
         drawCtx.fill(ghost, with: .color(baseColor.opacity(opacity)))
 
-        // Night glow overlay
-        if isNightTime || level >= 35 {
+        if level >= 35 {
             drawCtx.fill(ghost, with: .color(Color.cyan.opacity(0.10)))
         }
 
@@ -204,7 +197,7 @@ struct GhostView: View {
         }
         VStack(spacing: 4) {
             GhostView(level: 1, isPomodoroActive: true)
-            GhostView(level: 35, environmentAccessories: [.moon])
+            GhostView(level: 35)
         }
     }
     .padding()
