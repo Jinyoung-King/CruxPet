@@ -358,6 +358,9 @@ struct ContentView: View {
     private var characterSection: some View {
         VStack(spacing: 6) {
             ZStack {
+                PixelBackgroundView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
                 Circle()
                     .fill(Color.blue.opacity(0.06))
                     .frame(width: 90, height: 90)
