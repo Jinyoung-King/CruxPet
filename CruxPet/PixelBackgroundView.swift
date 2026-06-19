@@ -11,13 +11,12 @@ struct PixelBackgroundView: View {
     private let starPhases: [Double] = [0.0, 1.2, 2.4, 0.8, 1.9, 3.1, 0.4, 2.7]
 
     var body: some View {
-        TimelineView(.animation) { tl in
+        TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { tl in
             Canvas { context, size in
-                var ctx = context
-                let t    = tl.date.timeIntervalSinceReferenceDate
-                let hour = Calendar.current.component(.hour, from: tl.date)
+                let t       = tl.date.timeIntervalSinceReferenceDate
+                let hour    = Calendar.current.component(.hour, from: tl.date)
                 let isNight = hour >= 20 || hour < 6
-                draw(&ctx, size: size, t: t, isNight: isNight)
+                draw(&context, size: size, t: t, isNight: isNight)
             }
         }
     }
