@@ -384,7 +384,7 @@ struct ContentView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 8))
                 Circle()
                     .fill(Color.blue.opacity(0.06))
-                    .frame(width: 90, height: 90)
+                    .frame(width: 135, height: 135)
                     .blur(radius: 14)
                 PetView(
                     petType: customization.petType,
@@ -395,7 +395,7 @@ struct ContentView: View {
                     isPomodoroActive: pomodoro.state == .running,
                     isWandering: pomodoro.state != .running
                 )
-                .scaleEffect(interaction.isTapped ? 1.25 : 1.0)
+                .scaleEffect(interaction.isTapped ? 1.875 : 1.5)
                 .animation(.spring(response: 0.25, dampingFraction: 0.4), value: interaction.isTapped)
                 .onTapGesture { interaction.tap(pet: pet) }
                 if interaction.showParticles {
@@ -424,6 +424,7 @@ struct ContentView: View {
                         .transition(.scale.combined(with: .opacity))
                 }
             }
+            .frame(height: 180)
             .animation(.easeInOut(duration: 0.2), value: pet.showCritical)
             .animation(.spring(duration: 0.4), value: pet.showLevelUp)
             treatButton
