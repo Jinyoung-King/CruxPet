@@ -7,7 +7,7 @@ struct CompanionSlimeView: View {
     private var canvasSize: CGFloat { bodySize + 20 }
 
     var body: some View {
-        TimelineView(.animation) { timeline in
+        TimelineView(.animation) { (_ timeline: TimelineViewDefaultContext) in
             let t = timeline.date.timeIntervalSinceReferenceDate
             Canvas { context, size in
                 let bobY = CGFloat(sin(t * 1.1)) * 1.5
@@ -63,7 +63,9 @@ struct CompanionSlimeView: View {
 
                 // 아이콘 (슬라임 위)
                 let resolved = context.resolve(
-                    Text(Image(systemName: companion.sfSymbol)).font(.system(size: 8))
+                    Text(Image(systemName: companion.sfSymbol))
+                        .font(.system(size: 8))
+                        .foregroundStyle(Color.primary)
                 )
                 context.draw(resolved,
                              at: CGPoint(x: size.width / 2, y: bodyRect.minY - 1),
