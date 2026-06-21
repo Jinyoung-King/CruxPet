@@ -997,8 +997,9 @@ private struct LevelUpParticleView: View {
     var body: some View {
         ZStack {
             ForEach(xOffsets.indices, id: \.self) { i in
-                Text("✨")
+                Image(systemName: "sparkle")
                     .font(.system(size: 14))
+                    .foregroundStyle(.yellow)
                     .offset(x: floated ? xOffsets[i] : 0,
                             y: floated ? yOffsets[i] : 0)
                     .opacity(floated ? 0 : 1)
@@ -1018,8 +1019,9 @@ private struct ParticleOverlayView: View {
     var body: some View {
         ZStack {
             ForEach(0..<3, id: \.self) { i in
-                Text("❤️")
+                Image(systemName: "heart.fill")
                     .font(.system(size: 12))
+                    .foregroundStyle(.red)
                     .offset(x: CGFloat(i - 1) * 10, y: floated ? -40 : 0)
                     .opacity(floated ? 0 : 1)
                     .animation(.easeOut(duration: 0.8).delay(Double(i) * 0.1), value: floated)
