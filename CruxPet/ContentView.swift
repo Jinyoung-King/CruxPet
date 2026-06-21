@@ -216,15 +216,34 @@ struct ContentView: View {
                     onCancel: { showCustomize = false }
                 )
             } else {
-                VStack(spacing: 10) {
-                    characterSection
-                    goalSection
-                    expSection
-                    statsSection
-                    questSection
-                    achievementSection
-                    pomodoroSection
-                    activitySection
+                VStack(spacing: 0) {
+                    TabView {
+                        ScrollView {
+                            VStack(spacing: 10) {
+                                characterSection
+                                goalSection
+                            }
+                            .padding(12)
+                        }
+                        .tabItem { Label("홈", systemImage: "pawprint.fill") }
+
+                        pomodoroSection
+                            .padding(12)
+                            .tabItem { Label("포모도로", systemImage: "timer") }
+
+                        ScrollView {
+                            VStack(spacing: 10) {
+                                expSection
+                                statsSection
+                                questSection
+                                achievementSection
+                                activitySection
+                            }
+                            .padding(12)
+                        }
+                        .tabItem { Label("스탯", systemImage: "chart.bar.fill") }
+                    }
+
                     Divider()
                     HStack(spacing: 0) {
                         Button(action: { showSharePreview = true }) {
@@ -254,18 +273,17 @@ struct ContentView: View {
                         .foregroundStyle(.secondary)
                     }
                     .padding(.vertical, 2)
-                if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
-                    Text("v\(version)")
-                        .font(.system(size: 9))
-                        .foregroundStyle(.quaternary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.bottom, 2)
+                    if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
+                        Text("v\(version)")
+                            .font(.system(size: 9))
+                            .foregroundStyle(.quaternary)
+                            .frame(maxWidth: .infinity)
+                            .padding(.bottom, 2)
+                    }
                 }
-                }
-                .padding(12)
             }
         }
-        .frame(width: 220)
+        .frame(width: 280, height: 400)
         .background(.ultraThinMaterial)
         .animation(.easeInOut(duration: 0.15), value: showCustomize)
         .animation(.easeInOut(duration: 0.15), value: showSharePreview)
