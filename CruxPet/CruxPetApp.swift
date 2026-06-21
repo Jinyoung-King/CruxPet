@@ -43,13 +43,19 @@ class StatusItemRightClickHandler: NSObject {
 
     private func showContextMenu(at point: NSPoint) {
         let menu = NSMenu()
-        let item = NSMenuItem(
+        let updateItem = NSMenuItem(
             title: "업데이트 확인",
             action: #selector(SPUStandardUpdaterController.checkForUpdates(_:)),
             keyEquivalent: ""
         )
-        item.target = updaterController
-        menu.addItem(item)
+        updateItem.target = updaterController
+        menu.addItem(updateItem)
+        menu.addItem(NSMenuItem.separator())
+        menu.addItem(NSMenuItem(
+            title: "CruxPet 종료",
+            action: #selector(NSApplication.terminate(_:)),
+            keyEquivalent: ""
+        ))
         menu.popUp(positioning: nil, at: point, in: nil)
     }
 }
