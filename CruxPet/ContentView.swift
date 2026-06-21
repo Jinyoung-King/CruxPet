@@ -446,6 +446,7 @@ struct ContentView: View {
                 }
                 if pet.isIdleSleeping {
                     ZzzOverlayView()
+                        .id(pet.isIdleSleeping)
                         .transition(.opacity)
                 }
             }
@@ -1018,7 +1019,11 @@ private struct ZzzOverlayView: View {
                     )
             }
         }
-        .onAppear { floated = true }
+        .onAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                floated = true
+            }
+        }
     }
 }
 
