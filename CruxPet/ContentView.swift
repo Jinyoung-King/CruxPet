@@ -62,9 +62,10 @@ private struct DailyGoalView: View {
                     Capsule()
                         .fill(done ? Color.green.opacity(0.6) : Color.blue.opacity(0.5))
                         .frame(width: geo.size.width * ratio)
+                        .animation(.spring(response: 0.4, dampingFraction: 0.7), value: current)
                 }
             }
-            .frame(height: 6)
+            .frame(height: 8)
             HStack(spacing: 2) {
                 Text("\(current)/\(goal)")
                     .font(.system(size: 9))
@@ -75,6 +76,13 @@ private struct DailyGoalView: View {
             }
             .frame(width: 36, alignment: .trailing)
         }
+        .padding(.horizontal, 4)
+        .padding(.vertical, 3)
+        .background(
+            RoundedRectangle(cornerRadius: 5)
+                .fill(done ? Color.green.opacity(0.07) : Color.clear)
+        )
+        .animation(.easeInOut(duration: 0.3), value: done)
         .onTapGesture { onTap() }
     }
 }
