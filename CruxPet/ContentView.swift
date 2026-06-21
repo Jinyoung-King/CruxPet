@@ -437,6 +437,8 @@ struct ContentView: View {
                 }
                 if pet.showLevelUp {
                     LevelUpParticleView()
+                        .id(pet.level)
+                        .transition(.opacity)
                 }
             }
             .frame(height: 220)
@@ -983,12 +985,12 @@ struct ContentView: View {
 private struct LevelUpParticleView: View {
     @State private var floated = false
 
-    private let xOffsets: [CGFloat] = [-55, -35, -15, 5, -5, 15, 35, 55]
+    private let xOffsets: [CGFloat] = [-55, -35, -15, -5, 5, 15, 35, 55]
     private let yOffsets: [CGFloat] = [-70, -80, -85, -88, -88, -85, -80, -70]
 
     var body: some View {
         ZStack {
-            ForEach(0..<8, id: \.self) { i in
+            ForEach(xOffsets.indices, id: \.self) { i in
                 Text("✨")
                     .font(.system(size: 14))
                     .offset(x: floated ? xOffsets[i] : 0,
