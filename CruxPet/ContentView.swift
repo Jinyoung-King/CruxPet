@@ -444,6 +444,10 @@ struct ContentView: View {
                         .id(pet.level)
                         .transition(.opacity)
                 }
+                if pet.isIdleSleeping {
+                    ZzzOverlayView()
+                        .transition(.opacity)
+                }
             }
             .frame(height: 220)
             .clipped()
@@ -986,6 +990,36 @@ struct ContentView: View {
         }
     }
 
+}
+
+private struct ZzzOverlayView: View {
+    @State private var floated = false
+
+    private let sizes: [CGFloat] = [8, 11, 14]
+    private let xTargets: [CGFloat] = [10, 20, 32]
+    private let yTargets: [CGFloat] = [-18, -32, -48]
+
+    var body: some View {
+        ZStack {
+            ForEach(0..<3, id: \.self) { i in
+                Text("z")
+                    .font(.system(size: sizes[i], weight: .bold, design: .rounded))
+                    .foregroundStyle(.indigo.opacity(0.7))
+                    .offset(
+                        x: floated ? xTargets[i] : 0,
+                        y: floated ? yTargets[i] : 0
+                    )
+                    .opacity(floated ? 0 : 0.85)
+                    .animation(
+                        .easeOut(duration: 1.4)
+                            .delay(Double(i) * 0.5)
+                            .repeatForever(autoreverses: false),
+                        value: floated
+                    )
+            }
+        }
+        .onAppear { floated = true }
+    }
 }
 
 private struct LevelUpParticleView: View {
