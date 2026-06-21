@@ -35,7 +35,7 @@ struct StatsView: View {
                 withAnimation(.easeInOut(duration: 0.2)) { isExpanded.toggle() }
             } label: {
                 HStack {
-                    Text("📊 주간 스탯").font(.caption.bold())
+                    Label("주간 스탯", systemImage: "chart.bar.fill").font(.caption.bold())
                     Spacer()
                     Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                         .font(.caption2).foregroundStyle(.secondary)

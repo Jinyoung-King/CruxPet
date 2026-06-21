@@ -55,7 +55,7 @@ struct ShareCardView: View {
         else if pet.todayPomodoroCount >= 3 { badges.append(("timer", "포모마스터")) }
         if pet.level >= 30                 { badges.append(("crown.fill", "고수")) }
         else if pet.level >= 10            { badges.append(("star.fill", "중수")) }
-        if Int(pet.totalExp) >= 10_000     { badges.append(("gem.fill", "만 EXP")) }
+        if Int(pet.totalExp) >= 10_000     { badges.append(("diamond.fill", "만 EXP")) }
         return Array(badges.prefix(3))
     }
 
@@ -208,8 +208,9 @@ struct ShareCardView: View {
                 // 스트릭
                 if pet.streakDays > 0 {
                     HStack(spacing: 5) {
-                        Text("🔥")
+                        Image(systemName: "flame.fill")
                             .font(.system(size: 13))
+                            .foregroundStyle(.orange)
                         Text("\(pet.streakDays)일 연속 활동 중")
                             .font(.system(size: 12, weight: .bold))
                             .foregroundStyle(streakColor)
