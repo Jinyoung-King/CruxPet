@@ -38,6 +38,7 @@ class PetModel {
     private(set) var showCritical: Bool = false
     private(set) var showLevelUp: Bool = false
     private(set) var showJump: Bool = false
+    private(set) var showPomoComplete: Bool = false
     var pendingLevelUp: Int = 0
     private(set) var streakDays: Int = 0
     private(set) var totalCommitCount: Int = 0
@@ -110,6 +111,7 @@ class PetModel {
         if level > prevLevel { triggerLevelUp(level) }
         updateStreak()
         triggerExcitement()
+        triggerPomoComplete()
         persist()
     }
 
@@ -270,6 +272,14 @@ class PetModel {
         Task { @MainActor [weak self] in
             try? await Task.sleep(for: .seconds(2))
             self?.showLevelUp = false
+        }
+    }
+
+    private func triggerPomoComplete() {
+        showPomoComplete = true
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .seconds(0.7))
+            self?.showPomoComplete = false
         }
     }
 
