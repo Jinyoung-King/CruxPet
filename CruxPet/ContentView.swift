@@ -719,7 +719,8 @@ struct ContentView: View {
             default:          return "포모도로"
             }
         }()
-        return VStack(spacing: 7) {
+        return VStack(spacing: 16) {
+            Spacer()
             HStack(spacing: 4) {
                 Image(systemName: headerIcon)
                     .font(.caption)
@@ -732,12 +733,12 @@ struct ContentView: View {
                 }
             }
             Text(pomodoro.displayTime)
-                .font(.system(size: 30, weight: .bold, design: .monospaced))
+                .font(.system(size: 48, weight: .bold, design: .monospaced))
                 .foregroundStyle(isRunning || isCompleted || isBreak ? .primary : .secondary)
                 .animation(.none, value: pomodoro.displayTime)
             if pomodoro.sessionCount > 0 {
                 Text("🍅 × \(pomodoro.sessionCount)")
-                    .font(.system(size: 10))
+                    .font(.system(size: 13))
                     .foregroundStyle(.secondary)
             }
             HStack(spacing: 8) {
@@ -746,48 +747,39 @@ struct ContentView: View {
                     case .idle:
                         Button("▶  시작") { pomodoro.start() }
                             .buttonStyle(.borderedProminent)
-                            .controlSize(.small)
+                            .controlSize(.regular)
                     case .running:
                         Button("⏸  일시정지") { pomodoro.pause() }
                             .buttonStyle(.bordered)
-                            .controlSize(.small)
+                            .controlSize(.regular)
                         Button("↺") { pomodoro.reset() }
                             .buttonStyle(.bordered)
-                            .controlSize(.small)
+                            .controlSize(.regular)
                     case .paused:
                         Button("▶  계속") { pomodoro.resume() }
                             .buttonStyle(.borderedProminent)
-                            .controlSize(.small)
+                            .controlSize(.regular)
                         Button("↺") { pomodoro.reset() }
                             .buttonStyle(.bordered)
-                            .controlSize(.small)
+                            .controlSize(.regular)
                     case .completed:
                         Button("☕  휴식 시작") { pomodoro.startBreak() }
                             .buttonStyle(.borderedProminent)
                             .tint(.green)
-                            .controlSize(.small)
+                            .controlSize(.regular)
                         Button("↺") { pomodoro.reset() }
                             .buttonStyle(.bordered)
-                            .controlSize(.small)
+                            .controlSize(.regular)
                     case .shortBreak, .longBreak:
                         Button("건너뛰기") { pomodoro.skipBreak() }
                             .buttonStyle(.bordered)
-                            .controlSize(.small)
+                            .controlSize(.regular)
                     }
                 }
             }
+            Spacer()
         }
-        .padding(.vertical, 10)
-        .padding(.horizontal, 12)
-        .frame(maxWidth: .infinity)
-        .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(accent.opacity(0.08))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .strokeBorder(accent.opacity(0.2), lineWidth: 1)
-                )
-        )
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .animation(.easeInOut(duration: 0.25), value: pomodoro.state)
     }
 
@@ -947,10 +939,10 @@ struct ContentView: View {
             HStack(spacing: 8) {
                 Button("취소") { showSharePreview = false }
                     .buttonStyle(.bordered)
-                    .controlSize(.small)
+                    .controlSize(.regular)
                 Button("공유하기") { shareCard(); showSharePreview = false }
                     .buttonStyle(.borderedProminent)
-                    .controlSize(.small)
+                    .controlSize(.regular)
             }
             .padding(.bottom, 12)
         }
