@@ -48,6 +48,7 @@ class PetModel {
     private(set) var goalBonusAwardedToday: Bool = false
     var pendingStreakMilestone: Int = 0
     private(set) var emotion: EmotionState = .normal
+    var isIdleSleeping: Bool { emotion == .sleepy }
     private var lastActivityDate: Date = .distantPast
     private var emotionTimer: Timer?
 
