@@ -424,7 +424,8 @@ struct ContentView: View {
                         .transition(.scale.combined(with: .opacity))
                 }
             }
-            .frame(height: 180)
+            .frame(height: 220)
+            .clipped()
             .animation(.easeInOut(duration: 0.2), value: pet.showCritical)
             .animation(.spring(duration: 0.4), value: pet.showLevelUp)
             treatButton
