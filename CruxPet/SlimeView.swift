@@ -3,7 +3,6 @@ import SwiftUI
 struct SlimeView: View {
     let appearance: SlimeAppearance
     var isPomodoroActive: Bool = false
-    var accessories: [AccessorySlot: String] = [:]
     var isWandering: Bool = false
     var emotion: EmotionState = .normal
 
@@ -104,7 +103,6 @@ struct SlimeView: View {
                 }
                 drawSparkles(context: &context, bodyRect: bodyRect, t: t,
                              count: appearance.sparkleCount)
-                drawSlotAccessories(context: &context, bodyRect: bodyRect)
             }
             .frame(width: totalWidth, height: totalHeight)
         }
@@ -491,30 +489,6 @@ struct SlimeView: View {
         }
     }
 
-    // MARK: - Accessories
-
-    private func drawSlotAccessories(context: inout GraphicsContext, bodyRect: CGRect) {
-        if let emoji = accessories[.head] {
-            let size = bodyRect.width * 0.40
-            let r = context.resolve(Text(emoji).font(.system(size: size)))
-            context.draw(r, at: CGPoint(x: bodyRect.midX, y: bodyRect.minY), anchor: .bottom)
-        }
-        if let emoji = accessories[.face] {
-            let size = bodyRect.width * 0.30
-            let r = context.resolve(Text(emoji).font(.system(size: size)))
-            context.draw(r, at: CGPoint(x: bodyRect.midX, y: bodyRect.minY + bodyRect.height * 0.5), anchor: .center)
-        }
-        if let emoji = accessories[.body] {
-            let size = bodyRect.width * 0.35
-            let r = context.resolve(Text(emoji).font(.system(size: size)))
-            context.draw(r, at: CGPoint(x: bodyRect.maxX, y: bodyRect.maxY), anchor: .bottomTrailing)
-        }
-        if let emoji = accessories[.aura] {
-            let size = bodyRect.width * 0.35
-            let r = context.resolve(Text(emoji).font(.system(size: size)))
-            context.draw(r, at: CGPoint(x: bodyRect.minX, y: bodyRect.maxY), anchor: .bottomLeading)
-        }
-    }
 }
 
 

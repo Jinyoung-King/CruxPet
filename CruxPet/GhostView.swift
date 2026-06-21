@@ -3,7 +3,6 @@ import SwiftUI
 struct GhostView: View {
     let level: Int
     var emotion: EmotionState = .normal
-    var accessories: [AccessorySlot: String] = [:]
     var isPomodoroActive: Bool = false
     var isWandering: Bool = false
     private var bodySize: CGFloat {
@@ -116,9 +115,6 @@ struct GhostView: View {
         let mouthY = eyeY + er * 2.0
         drawGhostMouth(&drawCtx, cx: cx, y: mouthY, r: er)
 
-        // Accessories use original (non-rotated) context
-        let bodyRect = CGRect(x: cx - ghostW / 2, y: topY, width: ghostW, height: ghostH)
-        drawGhostAccessories(&ctx, bodyRect: bodyRect, topCenter: CGPoint(x: cx, y: topY))
         if isPomodoroActive {
             let tomato = ctx.resolve(Text("🍅").font(.system(size: bodySize * 0.3)))
             ctx.draw(tomato, at: CGPoint(x: cx, y: topY), anchor: .bottom)
@@ -167,24 +163,6 @@ struct GhostView: View {
         }
     }
 
-    private func drawGhostAccessories(_ ctx: inout GraphicsContext, bodyRect: CGRect, topCenter: CGPoint) {
-        if let emoji = accessories[.head] {
-            let r = ctx.resolve(Text(emoji).font(.system(size: bodyRect.width * 0.4)))
-            ctx.draw(r, at: topCenter, anchor: .bottom)
-        }
-        if let emoji = accessories[.face] {
-            let r = ctx.resolve(Text(emoji).font(.system(size: bodyRect.width * 0.3)))
-            ctx.draw(r, at: CGPoint(x: bodyRect.midX, y: bodyRect.midY), anchor: .center)
-        }
-        if let emoji = accessories[.body] {
-            let r = ctx.resolve(Text(emoji).font(.system(size: bodyRect.width * 0.35)))
-            ctx.draw(r, at: CGPoint(x: bodyRect.maxX, y: bodyRect.maxY), anchor: .bottomTrailing)
-        }
-        if let emoji = accessories[.aura] {
-            let r = ctx.resolve(Text(emoji).font(.system(size: bodyRect.width * 0.35)))
-            ctx.draw(r, at: CGPoint(x: bodyRect.minX, y: bodyRect.maxY), anchor: .bottomLeading)
-        }
-    }
 }
 
 #Preview {

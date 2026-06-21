@@ -45,7 +45,6 @@ struct PetView: View {
     let appearance: SlimeAppearance
     let level: Int
     let emotion: EmotionState
-    let accessories: [AccessorySlot: String]
     let isPomodoroActive: Bool
     let isWandering: Bool
 
@@ -55,7 +54,6 @@ struct PetView: View {
             SlimeView(
                 appearance: appearance,
                 isPomodoroActive: isPomodoroActive,
-                accessories: accessories,
                 isWandering: isWandering,
                 emotion: emotion,
             )
@@ -63,7 +61,6 @@ struct PetView: View {
             CatView(
                 level: level,
                 emotion: emotion,
-                accessories: accessories,
                 isPomodoroActive: isPomodoroActive,
                 isWandering: isWandering
             )
@@ -71,7 +68,6 @@ struct PetView: View {
             DogView(
                 level: level,
                 emotion: emotion,
-                accessories: accessories,
                 isPomodoroActive: isPomodoroActive,
                 isWandering: isWandering
             )
@@ -79,7 +75,6 @@ struct PetView: View {
             GhostView(
                 level: level,
                 emotion: emotion,
-                accessories: accessories,
                 isPomodoroActive: isPomodoroActive,
                 isWandering: isWandering,
             )

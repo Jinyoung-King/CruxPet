@@ -8,7 +8,6 @@ struct CustomizeView: View {
 
     @Environment(\.checkForUpdates) private var checkForUpdates
     @State private var draft: PetCustomization
-    @State private var selectedSlot: AccessorySlot = .head
 
     init(current: PetCustomization, petLevel: Int,
          onSave: @escaping (PetCustomization) -> Void,
@@ -39,7 +38,6 @@ struct CustomizeView: View {
                         appearance: previewAppearance,
                         level: petLevel,
                         emotion: .normal,
-                        accessories: draft.accessories,
                         isPomodoroActive: false,
                         isWandering: false
                     )
@@ -123,55 +121,6 @@ struct CustomizeView: View {
                                     draft.useCustomColor = true
                                 }
                         }
-                    }
-                }
-                .padding(10)
-                .background(RoundedRectangle(cornerRadius: 8).fill(.primary.opacity(0.04)))
-
-                // 악세서리
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("악세서리").font(.caption.bold()).foregroundStyle(.secondary)
-
-                    // 슬롯 탭 바
-                    HStack(spacing: 4) {
-                        ForEach(AccessorySlot.allCases, id: \.self) { slot in
-                            Text(slot.label)
-                                .font(.system(size: 10))
-                                .lineLimit(1)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 4)
-                                .frame(maxWidth: .infinity)
-                                .background(selectedSlot == slot ? Color.blue.opacity(0.15) : Color.secondary.opacity(0.08),
-                                            in: RoundedRectangle(cornerRadius: 8))
-                                .overlay(RoundedRectangle(cornerRadius: 8)
-                                    .stroke(selectedSlot == slot ? Color.blue.opacity(0.4) : Color.clear, lineWidth: 1))
-                                .onTapGesture { selectedSlot = slot }
-                        }
-                    }
-
-                    // 선택된 슬롯의 아이템 그리드
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 5), spacing: 6) {
-                        ForEach(selectedSlot.items, id: \.self) { emoji in
-                            Text(emoji)
-                                .font(.title3)
-                                .frame(width: 32, height: 32)
-                                .background(draft.accessories[selectedSlot] == emoji ? Color.blue.opacity(0.2) : Color.secondary.opacity(0.1),
-                                            in: RoundedRectangle(cornerRadius: 8))
-                                .onTapGesture {
-                                    if draft.accessories[selectedSlot] == emoji {
-                                        draft.accessories.removeValue(forKey: selectedSlot)
-                                    } else {
-                                        draft.accessories[selectedSlot] = emoji
-                                    }
-                                }
-                        }
-                        Text("✕")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .frame(width: 32, height: 32)
-                            .background(draft.accessories[selectedSlot] == nil ? Color.blue.opacity(0.2) : Color.secondary.opacity(0.1),
-                                        in: RoundedRectangle(cornerRadius: 8))
-                            .onTapGesture { draft.accessories.removeValue(forKey: selectedSlot) }
                     }
                 }
                 .padding(10)

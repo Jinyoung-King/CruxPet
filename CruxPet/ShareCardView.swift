@@ -136,7 +136,6 @@ struct ShareCardView: View {
                         appearance: appearance,
                         level: pet.level,
                         emotion: pet.emotion,
-                        accessories: customization.accessories,
                         isPomodoroActive: false,
                         isWandering: false
                     )

@@ -3,7 +3,6 @@ import SwiftUI
 struct CatView: View {
     let level: Int
     var emotion: EmotionState = .normal
-    var accessories: [AccessorySlot: String] = [:]
     var isPomodoroActive: Bool = false
     var isWandering: Bool = false
 
@@ -113,7 +112,6 @@ struct CatView: View {
         )), with: .color(Color(hex: "#FF9999")))
 
         drawWhiskers(&ctx, base: CGPoint(x: headCenter.x, y: headCenter.y + headR * 0.22), headR: headR)
-        drawCatAccessories(&ctx, bodyRect: bodyRect, headCenter: headCenter, headR: headR)
         if isPomodoroActive {
             let tomato = ctx.resolve(Text("🍅").font(.system(size: headR * 0.6)))
             ctx.draw(tomato, at: CGPoint(x: headCenter.x, y: headCenter.y - headR * 1.1), anchor: .bottom)
@@ -177,24 +175,6 @@ struct CatView: View {
         }
     }
 
-    private func drawCatAccessories(_ ctx: inout GraphicsContext, bodyRect: CGRect, headCenter: CGPoint, headR: CGFloat) {
-        if let emoji = accessories[.head] {
-            let r = ctx.resolve(Text(emoji).font(.system(size: headR * 0.8)))
-            ctx.draw(r, at: CGPoint(x: headCenter.x, y: headCenter.y - headR), anchor: .bottom)
-        }
-        if let emoji = accessories[.face] {
-            let r = ctx.resolve(Text(emoji).font(.system(size: headR * 0.6)))
-            ctx.draw(r, at: CGPoint(x: headCenter.x, y: headCenter.y + headR * 0.2), anchor: .center)
-        }
-        if let emoji = accessories[.body] {
-            let r = ctx.resolve(Text(emoji).font(.system(size: bodyRect.width * 0.35)))
-            ctx.draw(r, at: CGPoint(x: bodyRect.maxX, y: bodyRect.maxY), anchor: .bottomTrailing)
-        }
-        if let emoji = accessories[.aura] {
-            let r = ctx.resolve(Text(emoji).font(.system(size: bodyRect.width * 0.35)))
-            ctx.draw(r, at: CGPoint(x: bodyRect.minX, y: bodyRect.maxY), anchor: .bottomLeading)
-        }
-    }
 }
 
 #Preview {

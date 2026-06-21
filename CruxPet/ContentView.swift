@@ -403,7 +403,6 @@ struct ContentView: View {
                     appearance: pet.slimeAppearance.applying(customization),
                     level: pet.level,
                     emotion: pomodoro.state == .running ? .normal : pet.emotion,
-                    accessories: customization.accessories,
                     isPomodoroActive: pomodoro.state == .running,
                     isWandering: pomodoro.state != .running
                 )
