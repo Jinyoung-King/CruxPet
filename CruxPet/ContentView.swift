@@ -119,7 +119,7 @@ private struct AchievementsView: View {
                 .padding(12)
             }
         }
-        .frame(width: 220, height: 360)
+        .frame(width: 280, height: 400)
     }
 
     private func achievementRow(_ achievement: Achievement) -> some View {
@@ -182,6 +182,7 @@ struct ContentView: View {
     @Environment(ActivityHistoryModel.self) private var history
     @State private var customization = PetCustomization.load()
     @State private var showCustomize = false
+    @State private var selectedTab = 0
     @State private var toast: ToastData? = nil
     @State private var questsModel = QuestModel()
     @State private var isQuestExpanded = false
@@ -217,7 +218,7 @@ struct ContentView: View {
                 )
             } else {
                 VStack(spacing: 0) {
-                    TabView {
+                    TabView(selection: $selectedTab) {
                         ScrollView {
                             VStack(spacing: 10) {
                                 characterSection
@@ -226,10 +227,11 @@ struct ContentView: View {
                             .padding(12)
                         }
                         .tabItem { Label("홈", systemImage: "pawprint.fill") }
+                        .tag(0)
 
                         pomodoroSection
-                            .padding(12)
                             .tabItem { Label("포모도로", systemImage: "timer") }
+                            .tag(1)
 
                         ScrollView {
                             VStack(spacing: 10) {
@@ -242,6 +244,7 @@ struct ContentView: View {
                             .padding(12)
                         }
                         .tabItem { Label("스탯", systemImage: "chart.bar.fill") }
+                        .tag(2)
                     }
 
                     Divider()
@@ -564,7 +567,7 @@ struct ContentView: View {
             todayPomodoros: pet.todayPomodoroCount,
             commitGoal: customization.dailyCommitGoal,
             pomodoroGoal: customization.dailyPomodoroGoal,
-            onTap: { withAnimation(.easeInOut(duration: 0.2)) { isStatsExpanded = true } }
+            onTap: { withAnimation(.easeInOut(duration: 0.2)) { isStatsExpanded = true; selectedTab = 2 } }
         )
     }
 
@@ -949,7 +952,7 @@ struct ContentView: View {
             }
             .padding(.bottom, 12)
         }
-        .frame(width: 220)
+        .frame(width: 280)
     }
 
     private func shareCard() {
