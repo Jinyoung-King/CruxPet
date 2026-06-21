@@ -28,16 +28,24 @@ struct CustomizeView: View {
         ScrollView {
             VStack(spacing: 12) {
                 // 실시간 미리보기
-                PetView(
-                    petType: draft.petType,
-                    appearance: previewAppearance,
-                    level: petLevel,
-                    emotion: .normal,
-                    accessories: draft.accessories,
-                    isPomodoroActive: false,
-                    isWandering: false
-                )
-                .frame(height: 80)
+                ZStack {
+                    PixelBackgroundView()
+                    Circle()
+                        .fill(Color.blue.opacity(0.06))
+                        .frame(width: 100, height: 100)
+                        .blur(radius: 14)
+                    PetView(
+                        petType: draft.petType,
+                        appearance: previewAppearance,
+                        level: petLevel,
+                        emotion: .normal,
+                        accessories: draft.accessories,
+                        isPomodoroActive: false,
+                        isWandering: false
+                    )
+                }
+                .frame(height: 130)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
 
                 Divider()
 
