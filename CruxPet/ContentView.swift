@@ -435,6 +435,9 @@ struct ContentView: View {
                         .offset(y: -pet.slimeAppearance.size * 1.1)
                         .transition(.scale.combined(with: .opacity))
                 }
+                if pet.showLevelUp {
+                    LevelUpParticleView()
+                }
             }
             .frame(height: 220)
             .clipped()
@@ -975,6 +978,30 @@ struct ContentView: View {
         }
     }
 
+}
+
+private struct LevelUpParticleView: View {
+    @State private var floated = false
+
+    private let xOffsets: [CGFloat] = [-55, -35, -15, 5, -5, 15, 35, 55]
+    private let yOffsets: [CGFloat] = [-70, -80, -85, -88, -88, -85, -80, -70]
+
+    var body: some View {
+        ZStack {
+            ForEach(0..<8, id: \.self) { i in
+                Text("✨")
+                    .font(.system(size: 14))
+                    .offset(x: floated ? xOffsets[i] : 0,
+                            y: floated ? yOffsets[i] : 0)
+                    .opacity(floated ? 0 : 1)
+                    .animation(
+                        .easeOut(duration: 0.9).delay(Double(i) * 0.07),
+                        value: floated
+                    )
+            }
+        }
+        .onAppear { floated = true }
+    }
 }
 
 private struct ParticleOverlayView: View {
