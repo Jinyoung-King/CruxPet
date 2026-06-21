@@ -21,7 +21,7 @@ private struct PomodoroInfoButton: View {
         .buttonStyle(.plain)
         .popover(isPresented: $showPopover, arrowEdge: .bottom) {
             VStack(alignment: .leading, spacing: 6) {
-                Text("🍅 포모도로 기법")
+                Label("포모도로 기법", systemImage: "timer")
                     .font(.caption.bold())
                 Text("25분 집중 → 5분 휴식을 반복하는\n시간 관리 방법.\n1980년대 Francesco Cirillo가\n토마토 모양 타이머로 개발했어요.")
                     .font(.caption)
@@ -43,19 +43,22 @@ private struct DailyGoalView: View {
 
     var body: some View {
         VStack(spacing: 4) {
-            goalRow("⚡", "커밋",  current: todayCommits,   goal: commitGoal)
-            goalRow("🍅", "포모", current: todayPomodoros, goal: pomodoroGoal)
+            goalRow("bolt.fill", "커밋",  current: todayCommits,   goal: commitGoal)
+            goalRow("timer", "포모", current: todayPomodoros, goal: pomodoroGoal)
         }
     }
 
-    private func goalRow(_ emoji: String, _ label: String, current: Int, goal: Int) -> some View {
+    private func goalRow(_ icon: String, _ label: String, current: Int, goal: Int) -> some View {
         let done = current >= goal
         let ratio: CGFloat = goal > 0 ? min(CGFloat(current) / CGFloat(goal), 1.0) : 0
         return HStack(spacing: 6) {
-            Text("\(emoji) \(label)")
-                .font(.system(size: 10))
-                .foregroundStyle(.secondary)
-                .frame(width: 40, alignment: .leading)
+            HStack(spacing: 3) {
+                Image(systemName: icon).font(.system(size: 9))
+                Text(label)
+            }
+            .font(.system(size: 10))
+            .foregroundStyle(.secondary)
+            .frame(width: 40, alignment: .leading)
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     Capsule().fill(Color.secondary.opacity(0.15))
@@ -71,7 +74,7 @@ private struct DailyGoalView: View {
                     .font(.system(size: 9))
                     .foregroundStyle(done ? .green : .secondary)
                 if done {
-                    Text("✓").font(.system(size: 9)).foregroundStyle(.green)
+                    Image(systemName: "checkmark").font(.system(size: 9)).foregroundStyle(.green)
                 }
             }
             .frame(width: 36, alignment: .trailing)
@@ -109,9 +112,9 @@ private struct AchievementsView: View {
                 Text("업적")
                     .font(.caption.weight(.semibold))
                 Spacer()
-                Text("✨ \(achievementModel.claimedCount)개 달성")
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
+                Label("\(achievementModel.claimedCount)개 달성", systemImage: "sparkles")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.secondary)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
@@ -143,7 +146,7 @@ private struct AchievementsView: View {
                     .font(.caption.weight(claimed ? .regular : .medium))
                     .foregroundStyle(claimed ? .secondary : .primary)
                 if claimed {
-                    Text("🎉 달성!")
+                    Label("달성!", systemImage: "checkmark.seal.fill")
                         .font(.system(size: 9))
                         .foregroundStyle(.green.opacity(0.7))
                 } else if case .special(let kind) = achievement.type {
@@ -415,14 +418,14 @@ struct ContentView: View {
                     ParticleOverlayView()
                 }
                 if pet.showCritical {
-                    Text("💥 CRITICAL!")
+                    Label("CRITICAL!", systemImage: "bolt.circle.fill")
                         .font(.system(size: 11, weight: .bold))
                         .foregroundStyle(.orange)
                         .offset(y: -pet.slimeAppearance.size * 0.8)
                         .transition(.opacity)
                 }
                 if pet.showLevelUp {
-                    Text("🎉 LEVEL UP!")
+                    Label("LEVEL UP!", systemImage: "party.popper")
                         .font(.system(size: 13, weight: .black, design: .rounded))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 10)
@@ -478,7 +481,7 @@ struct ContentView: View {
             interaction.feed(pet: pet)
         } label: {
             HStack(spacing: 3) {
-                Text(interaction.isEating ? "😋" : "🍬")
+                Image(systemName: interaction.isEating ? "face.smiling.fill" : "gift.fill")
                     .font(.system(size: 13))
                 if !interaction.canFeed {
                     Text("\(max(1, Int(interaction.cooldownRemaining / 60)))분")
@@ -494,8 +497,9 @@ struct ContentView: View {
 
     private var streakBadge: some View {
         HStack(spacing: 3) {
-            Text("🔥")
+            Image(systemName: "flame.fill")
                 .font(.system(size: 11))
+                .foregroundStyle(.orange)
             Text("\(pet.streakDays)일 연속")
                 .font(.system(size: 10, weight: .bold))
                 .foregroundStyle(streakColor)
@@ -608,9 +612,9 @@ struct ContentView: View {
                         .font(.caption.weight(.medium))
                         .foregroundStyle(.secondary)
                     Spacer()
-                    Text("✅ \(questsModel.claimedCount)/\(questsModel.todayQuests.count)")
+                    Label("\(questsModel.claimedCount)/\(questsModel.todayQuests.count)", systemImage: "checkmark.circle.fill")
                         .font(.caption2.monospacedDigit())
-                        .foregroundStyle(.tertiary)
+                        .foregroundStyle(.green)
                     Image(systemName: isQuestExpanded ? "chevron.down" : "chevron.right")
                         .font(.caption2)
                         .foregroundStyle(.tertiary)
@@ -643,7 +647,7 @@ struct ContentView: View {
                     .font(.caption.weight(.medium))
                     .foregroundStyle(.secondary)
                 Spacer()
-                Text("✨ \(achievementModel.claimedCount)개 달성")
+                Label("\(achievementModel.claimedCount)개 달성", systemImage: "sparkles")
                     .font(.caption2.monospacedDigit())
                     .foregroundStyle(.tertiary)
                 Image(systemName: "chevron.right")
@@ -755,7 +759,7 @@ struct ContentView: View {
                 .foregroundStyle(isRunning || isCompleted || isBreak ? .primary : .secondary)
                 .animation(.none, value: pomodoro.displayTime)
             if pomodoro.sessionCount > 0 {
-                Text("🍅 × \(pomodoro.sessionCount)")
+                Label("× \(pomodoro.sessionCount)", systemImage: "timer")
                     .font(.system(size: 13))
                     .foregroundStyle(.secondary)
             }
