@@ -20,7 +20,7 @@ enum SpecialKind: String {
 struct Achievement: Identifiable {
     let id: String
     let type: AchievementType
-    let emoji: String
+    let sfSymbol: String
     let title: String
     let unlocksItemId: String? = nil
 }
@@ -126,20 +126,20 @@ class AchievementModel {
     static func make(_ type: AchievementType) -> Achievement {
         switch type {
         case .commit(let n):
-            return Achievement(id: "commit_\(n)", type: type, emoji: "⚡", title: "커밋 \(n)회")
+            return Achievement(id: "commit_\(n)", type: type, sfSymbol: "bolt.fill", title: "커밋 \(n)회")
         case .pomodoro(let n):
-            return Achievement(id: "pomodoro_\(n)", type: type, emoji: "🍅", title: "포모도로 \(n)회")
+            return Achievement(id: "pomodoro_\(n)", type: type, sfSymbol: "timer", title: "포모도로 \(n)회")
         case .streak(let n):
-            return Achievement(id: "streak_\(n)", type: type, emoji: "🔥", title: "\(n)일 연속")
+            return Achievement(id: "streak_\(n)", type: type, sfSymbol: "flame.fill", title: "\(n)일 연속")
         case .level(let n):
-            return Achievement(id: "level_\(n)", type: type, emoji: "⭐", title: "레벨 \(n) 달성")
+            return Achievement(id: "level_\(n)", type: type, sfSymbol: "star.fill", title: "레벨 \(n) 달성")
         case .questClear(let n):
-            return Achievement(id: "questclear_\(n)", type: type, emoji: "📋", title: "퀘스트 올클리어 \(n)회")
+            return Achievement(id: "questclear_\(n)", type: type, sfSymbol: "checklist", title: "퀘스트 올클리어 \(n)회")
         case .special(let kind):
             switch kind {
-            case .nightOwl:  return Achievement(id: "special_nightOwl",  type: type, emoji: "🌙", title: "밤샘 코더")
-            case .sprinter:  return Achievement(id: "special_sprinter",   type: type, emoji: "⚡", title: "스프린터")
-            case .focusKing: return Achievement(id: "special_focusKing",  type: type, emoji: "🎯", title: "집중왕")
+            case .nightOwl:  return Achievement(id: "special_nightOwl",  type: type, sfSymbol: "moon.stars.fill", title: "밤샘 코더")
+            case .sprinter:  return Achievement(id: "special_sprinter",   type: type, sfSymbol: "bolt.fill", title: "스프린터")
+            case .focusKing: return Achievement(id: "special_focusKing",  type: type, sfSymbol: "target", title: "집중왕")
             }
         }
     }

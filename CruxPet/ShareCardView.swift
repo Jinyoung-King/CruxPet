@@ -47,15 +47,15 @@ struct ShareCardView: View {
     }
 
     // 조건 달성 뱃지 (최대 3개)
-    private var earnedBadges: [(emoji: String, label: String)] {
+    private var earnedBadges: [(sfSymbol: String, label: String)] {
         var badges: [(String, String)] = []
-        if pet.todayCommitCount >= 10      { badges.append(("💣", "커밋 폭탄")) }
-        else if pet.todayCommitCount >= 5  { badges.append(("⚡️", "커밋러")) }
-        if pet.todayPomodoroCount >= 5     { badges.append(("🧠", "집중 괴물")) }
-        else if pet.todayPomodoroCount >= 3 { badges.append(("🍅", "포모마스터")) }
-        if pet.level >= 30                 { badges.append(("👑", "고수")) }
-        else if pet.level >= 10            { badges.append(("🌟", "중수")) }
-        if Int(pet.totalExp) >= 10_000     { badges.append(("💎", "만 EXP")) }
+        if pet.todayCommitCount >= 10      { badges.append(("burst.fill", "커밋 폭탄")) }
+        else if pet.todayCommitCount >= 5  { badges.append(("bolt.fill", "커밋러")) }
+        if pet.todayPomodoroCount >= 5     { badges.append(("brain.fill", "집중 괴물")) }
+        else if pet.todayPomodoroCount >= 3 { badges.append(("timer", "포모마스터")) }
+        if pet.level >= 30                 { badges.append(("crown.fill", "고수")) }
+        else if pet.level >= 10            { badges.append(("star.fill", "중수")) }
+        if Int(pet.totalExp) >= 10_000     { badges.append(("gem.fill", "만 EXP")) }
         return Array(badges.prefix(3))
     }
 
@@ -225,8 +225,9 @@ struct ShareCardView: View {
                     HStack(spacing: 6) {
                         ForEach(earnedBadges.indices, id: \.self) { i in
                             HStack(spacing: 3) {
-                                Text(earnedBadges[i].emoji)
+                                Image(systemName: earnedBadges[i].sfSymbol)
                                     .font(.system(size: 11))
+                                    .symbolRenderingMode(.multicolor)
                                 Text(earnedBadges[i].label)
                                     .font(.system(size: 10, weight: .semibold))
                                     .foregroundStyle(.primary.opacity(0.75))

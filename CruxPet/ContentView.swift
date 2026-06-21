@@ -135,8 +135,9 @@ private struct AchievementsView: View {
         let (cur, total) = achievementModel.progress(for: achievement, pet: pet)
 
         return HStack(spacing: 8) {
-            Text(achievement.emoji)
+            Image(systemName: achievement.sfSymbol)
                 .font(.caption)
+                .symbolRenderingMode(.multicolor)
             VStack(alignment: .leading, spacing: 2) {
                 Text(achievement.title)
                     .font(.caption.weight(claimed ? .regular : .medium))
