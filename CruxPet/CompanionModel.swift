@@ -5,7 +5,7 @@ struct Companion: Identifiable, Equatable {
     let id: String
     let name: String
     let bodyHex: String
-    let emoji: String
+    let sfSymbol: String
 }
 
 @Observable
@@ -13,11 +13,11 @@ class CompanionModel {
     private(set) var unlockedIDs: Set<String> = []
 
     static let all: [Companion] = [
-        Companion(id: "baby",  name: "아기 슬라임",  bodyHex: "#7EC8E3", emoji: "🐣"),
-        Companion(id: "flame", name: "불꽃 슬라임", bodyHex: "#FF5722", emoji: "🔥"),
-        Companion(id: "star",  name: "별빛 슬라임",  bodyHex: "#FFD700", emoji: "✨"),
-        Companion(id: "night", name: "야왕 슬라임",  bodyHex: "#212121", emoji: "🌙"),
-        Companion(id: "pomo",  name: "포모 슬라임",  bodyHex: "#E53935", emoji: "🍅"),
+        Companion(id: "baby",  name: "아기 슬라임",  bodyHex: "#7EC8E3", sfSymbol: "bird"),
+        Companion(id: "flame", name: "불꽃 슬라임", bodyHex: "#FF5722", sfSymbol: "flame.fill"),
+        Companion(id: "star",  name: "별빛 슬라임",  bodyHex: "#FFD700", sfSymbol: "sparkles"),
+        Companion(id: "night", name: "야왕 슬라임",  bodyHex: "#212121", sfSymbol: "moon.stars.fill"),
+        Companion(id: "pomo",  name: "포모 슬라임",  bodyHex: "#E53935", sfSymbol: "timer"),
     ]
 
     var unlockedCompanions: [Companion] {

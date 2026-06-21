@@ -61,9 +61,9 @@ struct CompanionSlimeView: View {
                     context.fill(Path(ellipseIn: eyeRect), with: .color(.black.opacity(0.75)))
                 }
 
-                // 이모지 (슬라임 위)
+                // 아이콘 (슬라임 위)
                 let resolved = context.resolve(
-                    Text(companion.emoji).font(.system(size: 8))
+                    Text(Image(systemName: companion.sfSymbol)).font(.system(size: 8))
                 )
                 context.draw(resolved,
                              at: CGPoint(x: size.width / 2, y: bodyRect.minY - 1),
