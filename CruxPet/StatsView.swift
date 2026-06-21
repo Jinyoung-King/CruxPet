@@ -78,9 +78,9 @@ struct StatsView: View {
                 let weekPomodoros = last7.reduce(0) { $0 + $1.pomodoros }
 
                 HStack(spacing: 4) {
-                    summaryCell("🔥", "\(pet.streakDays)", "연속")
-                    summaryCell("⚡", "\(weekCommits)",   "커밋/주")
-                    summaryCell("🍅", "\(weekPomodoros)", "뽀모/주")
+                    summaryCell("flame.fill", "\(pet.streakDays)", "연속")
+                    summaryCell("bolt.fill", "\(weekCommits)",   "커밋/주")
+                    summaryCell("timer", "\(weekPomodoros)", "뽀모/주")
                 }
             }
         }
@@ -99,9 +99,9 @@ struct StatsView: View {
         }
     }
 
-    private func summaryCell(_ emoji: String, _ value: String, _ label: String) -> some View {
+    private func summaryCell(_ icon: String, _ value: String, _ label: String) -> some View {
         VStack(spacing: 2) {
-            Text(emoji).font(.system(size: 12))
+            Image(systemName: icon).font(.system(size: 12))
             Text(value).font(.system(size: 11, weight: .bold))
             Text(label).font(.system(size: 8)).foregroundStyle(.secondary)
         }
