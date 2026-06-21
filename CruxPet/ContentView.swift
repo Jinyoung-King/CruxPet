@@ -396,6 +396,8 @@ struct ContentView: View {
                     isWandering: pomodoro.state != .running
                 )
                 .scaleEffect(interaction.isTapped ? 1.875 : 1.5)
+                .offset(y: pet.showJump ? -22 : 0)
+                .animation(.spring(response: 0.3, dampingFraction: 0.4), value: pet.showJump)
                 .animation(.spring(response: 0.25, dampingFraction: 0.4), value: interaction.isTapped)
                 .onTapGesture { interaction.tap(pet: pet) }
                 if interaction.showParticles {
