@@ -454,6 +454,7 @@ struct ContentView: View {
             .clipped()
             .animation(.easeInOut(duration: 0.2), value: pet.showCritical)
             .animation(.spring(duration: 0.4), value: pet.showLevelUp)
+            .animation(.easeInOut(duration: 0.3), value: pet.isIdleSleeping)
             treatButton
             HStack(spacing: 5) {
                 Text("Lv.\(pet.level)")
