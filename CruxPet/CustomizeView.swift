@@ -47,8 +47,6 @@ struct CustomizeView: View {
                 .frame(height: 130)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
 
-                Divider()
-
                 // 펫 종류
                 VStack(alignment: .leading, spacing: 6) {
                     Text("펫 종류").font(.caption.bold()).foregroundStyle(.secondary)
@@ -69,9 +67,9 @@ struct CustomizeView: View {
                                 .padding(.vertical, 5)
                                 .background(isUnlocked && isSelected ? Color.blue : Color.clear)
                                 .foregroundStyle(isUnlocked && isSelected ? .white : (isUnlocked ? .primary : .secondary))
-                                .clipShape(RoundedRectangle(cornerRadius: 6))
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: 6)
+                                    RoundedRectangle(cornerRadius: 8)
                                         .stroke(
                                             isUnlocked && !isSelected ? Color.secondary.opacity(0.35) : Color.clear,
                                             lineWidth: 1
@@ -83,8 +81,8 @@ struct CustomizeView: View {
                         }
                     }
                 }
-
-                Divider()
+                .padding(10)
+                .background(RoundedRectangle(cornerRadius: 8).fill(.primary.opacity(0.04)))
 
                 // 이름
                 VStack(alignment: .leading, spacing: 4) {
@@ -96,6 +94,8 @@ struct CustomizeView: View {
                             if new.count > 10 { draft.name = String(new.prefix(10)) }
                         }
                 }
+                .padding(10)
+                .background(RoundedRectangle(cornerRadius: 8).fill(.primary.opacity(0.04)))
 
                 // 색상
                 VStack(alignment: .leading, spacing: 6) {
@@ -125,6 +125,8 @@ struct CustomizeView: View {
                         }
                     }
                 }
+                .padding(10)
+                .background(RoundedRectangle(cornerRadius: 8).fill(.primary.opacity(0.04)))
 
                 // 악세서리
                 VStack(alignment: .leading, spacing: 6) {
@@ -140,8 +142,8 @@ struct CustomizeView: View {
                                 .padding(.vertical, 4)
                                 .frame(maxWidth: .infinity)
                                 .background(selectedSlot == slot ? Color.blue.opacity(0.15) : Color.secondary.opacity(0.08),
-                                            in: RoundedRectangle(cornerRadius: 6))
-                                .overlay(RoundedRectangle(cornerRadius: 6)
+                                            in: RoundedRectangle(cornerRadius: 8))
+                                .overlay(RoundedRectangle(cornerRadius: 8)
                                     .stroke(selectedSlot == slot ? Color.blue.opacity(0.4) : Color.clear, lineWidth: 1))
                                 .onTapGesture { selectedSlot = slot }
                         }
@@ -154,7 +156,7 @@ struct CustomizeView: View {
                                 .font(.title3)
                                 .frame(width: 32, height: 32)
                                 .background(draft.accessories[selectedSlot] == emoji ? Color.blue.opacity(0.2) : Color.secondary.opacity(0.1),
-                                            in: RoundedRectangle(cornerRadius: 6))
+                                            in: RoundedRectangle(cornerRadius: 8))
                                 .onTapGesture {
                                     if draft.accessories[selectedSlot] == emoji {
                                         draft.accessories.removeValue(forKey: selectedSlot)
@@ -168,42 +170,47 @@ struct CustomizeView: View {
                             .foregroundStyle(.secondary)
                             .frame(width: 32, height: 32)
                             .background(draft.accessories[selectedSlot] == nil ? Color.blue.opacity(0.2) : Color.secondary.opacity(0.1),
-                                        in: RoundedRectangle(cornerRadius: 6))
+                                        in: RoundedRectangle(cornerRadius: 8))
                             .onTapGesture { draft.accessories.removeValue(forKey: selectedSlot) }
                     }
                 }
+                .padding(10)
+                .background(RoundedRectangle(cornerRadius: 8).fill(.primary.opacity(0.04)))
 
-                // 포모도로 시간
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("포모도로 시간").font(.caption.bold()).foregroundStyle(.secondary)
-                    HStack(spacing: 6) {
-                        ForEach([15, 25, 50], id: \.self) { min in
-                            Button("\(min)분") { draft.pomodoroMinutes = min }
-                                .buttonStyle(.bordered)
-                                .controlSize(.small)
-                                .tint(draft.pomodoroMinutes == min ? .blue : .secondary)
+                // 설정
+                VStack(alignment: .leading, spacing: 10) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("포모도로 시간").font(.caption.bold()).foregroundStyle(.secondary)
+                        HStack(spacing: 6) {
+                            ForEach([15, 25, 50], id: \.self) { min in
+                                Button("\(min)분") { draft.pomodoroMinutes = min }
+                                    .buttonStyle(.bordered)
+                                    .controlSize(.small)
+                                    .tint(draft.pomodoroMinutes == min ? .blue : .secondary)
+                            }
+                        }
+                    }
+                    Divider()
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("일일 목표").font(.caption.bold()).foregroundStyle(.secondary)
+                        HStack {
+                            Label("커밋", systemImage: "bolt.fill").font(.caption2).foregroundStyle(.secondary)
+                            Spacer()
+                            Stepper(value: $draft.dailyCommitGoal, in: 1...20) {
+                                Text("\(draft.dailyCommitGoal)회").font(.caption2)
+                            }
+                        }
+                        HStack {
+                            Label("포모도로", systemImage: "timer").font(.caption2).foregroundStyle(.secondary)
+                            Spacer()
+                            Stepper(value: $draft.dailyPomodoroGoal, in: 1...10) {
+                                Text("\(draft.dailyPomodoroGoal)회").font(.caption2)
+                            }
                         }
                     }
                 }
-
-                // 일일 목표
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("일일 목표").font(.caption.bold()).foregroundStyle(.secondary)
-                    HStack {
-                        Label("커밋", systemImage: "bolt.fill").font(.caption2).foregroundStyle(.secondary)
-                        Spacer()
-                        Stepper(value: $draft.dailyCommitGoal, in: 1...20) {
-                            Text("\(draft.dailyCommitGoal)회").font(.caption2)
-                        }
-                    }
-                    HStack {
-                        Label("포모도로", systemImage: "timer").font(.caption2).foregroundStyle(.secondary)
-                        Spacer()
-                        Stepper(value: $draft.dailyPomodoroGoal, in: 1...10) {
-                            Text("\(draft.dailyPomodoroGoal)회").font(.caption2)
-                        }
-                    }
-                }
+                .padding(10)
+                .background(RoundedRectangle(cornerRadius: 8).fill(.primary.opacity(0.04)))
 
                 // 버튼
                 HStack(spacing: 8) {
