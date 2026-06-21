@@ -2,7 +2,7 @@ import SwiftUI
 import Observation
 
 private struct ToastData: Equatable {
-    let emoji: String
+    let icon: String
     let title: String
     let subtitle: String
 }
@@ -316,34 +316,34 @@ struct ContentView: View {
         .onChange(of: watcher.pendingCommit) { _, hasPending in
             if hasPending {
                 watcher.pendingCommit = false
-                showToast(ToastData(emoji: "⚡️", title: "커밋 감지!", subtitle: "EXP를 획득했어요"))
+                showToast(ToastData(icon: "bolt.fill", title: "커밋 감지!", subtitle: "EXP를 획득했어요"))
             }
         }
         .onChange(of: pet.pendingLevelUp) { _, newLevel in
             guard newLevel > 0 else { return }
             pet.pendingLevelUp = 0
-            showToast(ToastData(emoji: "🎉", title: "레벨 업! Lv.\(newLevel)",
-                                subtitle: "슬라임이 성장했어요 ✨"))
+            showToast(ToastData(icon: "party.popper", title: "레벨 업! Lv.\(newLevel)",
+                                subtitle: "슬라임이 성장했어요"))
             checkAchievements()
         }
         .onChange(of: pet.pendingStreakMilestone) { _, milestone in
             guard milestone > 0 else { return }
             pet.pendingStreakMilestone = 0
-            let (emoji, subtitle) = streakMilestoneMessage(milestone)
-            showToast(ToastData(emoji: emoji, title: "\(milestone)일 연속 달성!", subtitle: subtitle))
+            let (icon, subtitle) = streakMilestoneMessage(milestone)
+            showToast(ToastData(icon: icon, title: "\(milestone)일 연속 달성!", subtitle: subtitle))
         }
         .onChange(of: pet.todayPomodoroCount) { old, new in
             if new > old {
-                showToast(ToastData(emoji: "🍅", title: "포모도로 완료!", subtitle: "EXP를 획득했어요 ✨"))
+                showToast(ToastData(icon: "timer", title: "포모도로 완료!", subtitle: "EXP를 획득했어요"))
             }
             if questsModel.claimCompleted(pet: pet) {
-                showToast(ToastData(emoji: "🎉", title: "퀘스트 올클리어!", subtitle: "+100 EXP 보너스 지급!"))
+                showToast(ToastData(icon: "party.popper", title: "퀘스트 올클리어!", subtitle: "+100 EXP 보너스 지급!"))
             }
             refreshActivityDays()
         }
         .onChange(of: pet.todayCommitCount) { _, _ in
             if questsModel.claimCompleted(pet: pet) {
-                showToast(ToastData(emoji: "🎉", title: "퀘스트 올클리어!", subtitle: "+100 EXP 보너스 지급!"))
+                showToast(ToastData(icon: "party.popper", title: "퀘스트 올클리어!", subtitle: "+100 EXP 보너스 지급!"))
             }
             refreshActivityDays()
         }
@@ -374,12 +374,12 @@ struct ContentView: View {
 
     private func streakMilestoneMessage(_ days: Int) -> (String, String) {
         switch days {
-        case 3:   return ("🔥", "3일 연속! 습관이 만들어지고 있어요")
-        case 7:   return ("🔥", "일주일 개근! 대단한데요?")
-        case 14:  return ("💪", "2주 연속! 이제 루틴이 됐네요")
-        case 30:  return ("👑", "한 달 연속!! 진짜 레전드")
-        case 60:  return ("💎", "두 달 연속... 미쳤다")
-        default:  return ("🌟", "무려 \(days)일 연속! 전설의 개발자")
+        case 3:   return ("flame.fill", "3일 연속! 습관이 만들어지고 있어요")
+        case 7:   return ("flame.fill", "일주일 개근! 대단한데요?")
+        case 14:  return ("figure.strengthtraining.traditional", "2주 연속! 이제 루틴이 됐네요")
+        case 30:  return ("crown.fill", "한 달 연속!! 진짜 레전드")
+        case 60:  return ("diamond.fill", "두 달 연속... 미쳤다")
+        default:  return ("star.fill", "무려 \(days)일 연속! 전설의 개발자")
         }
     }
 
@@ -832,8 +832,9 @@ struct ContentView: View {
 
     private func toastView(_ data: ToastData) -> some View {
         HStack(spacing: 8) {
-            Text(data.emoji)
+            Image(systemName: data.icon)
                 .font(.title3)
+                .symbolRenderingMode(.multicolor)
             VStack(alignment: .leading, spacing: 1) {
                 Text(data.title)
                     .font(.caption.weight(.bold))
@@ -860,9 +861,9 @@ struct ContentView: View {
         let newOnes = achievementModel.claimCompleted(pet: pet)
         guard !newOnes.isEmpty else { return }
         if newOnes.count == 1 {
-            showToast(ToastData(emoji: "🏆", title: "업적 달성! \(newOnes[0].title)", subtitle: "새 업적을 달성했어요"))
+            showToast(ToastData(icon: "trophy.fill", title: "업적 달성! \(newOnes[0].title)", subtitle: "새 업적을 달성했어요"))
         } else {
-            showToast(ToastData(emoji: "🏆", title: "업적 \(newOnes.count)개 달성!", subtitle: "새 업적을 달성했어요"))
+            showToast(ToastData(icon: "trophy.fill", title: "업적 \(newOnes.count)개 달성!", subtitle: "새 업적을 달성했어요"))
         }
     }
 
@@ -909,7 +910,7 @@ struct ContentView: View {
             totalPomodoroCount: pet.totalPomodoroCount
         )
         for companion in newOnes {
-            showToast(ToastData(emoji: "🐾", title: "\(companion.name) 등장!",
+            showToast(ToastData(icon: "pawprint.fill", title: "\(companion.name) 등장!",
                                 subtitle: "새 친구를 얻었어요"))
         }
     }
