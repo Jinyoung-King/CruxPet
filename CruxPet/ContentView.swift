@@ -398,6 +398,8 @@ struct ContentView: View {
                 .scaleEffect(interaction.isTapped ? 1.875 : 1.5)
                 .offset(y: pet.showJump ? -22 : 0)
                 .animation(.spring(response: 0.3, dampingFraction: 0.4), value: pet.showJump)
+                .offset(y: pet.showPomoComplete ? -28 : 0)
+                .animation(.spring(response: 0.35, dampingFraction: 0.3), value: pet.showPomoComplete)
                 .animation(.spring(response: 0.25, dampingFraction: 0.4), value: interaction.isTapped)
                 .onTapGesture { interaction.tap(pet: pet) }
                 if interaction.showParticles {
