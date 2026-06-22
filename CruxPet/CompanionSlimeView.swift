@@ -7,7 +7,7 @@ struct CompanionSlimeView: View {
     private var canvasSize: CGFloat { bodySize + 20 }
 
     var body: some View {
-        TimelineView(.animation) { (_ timeline: TimelineViewDefaultContext) in
+        TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { (_ timeline: TimelineViewDefaultContext) in
             let t = timeline.date.timeIntervalSinceReferenceDate
             Canvas { context, size in
                 let bobY = CGFloat(sin(t * 1.1)) * 1.5

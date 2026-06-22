@@ -110,6 +110,21 @@ class EventWatcher {
             default: break
             }
         }
+        trimEventsFile(content: content)
+    }
+
+    private func trimEventsFile(content: String) {
+        let cutoff = Date().timeIntervalSince1970 - 30 * 24 * 3600
+        let lines = content.split(separator: "\n", omittingEmptySubsequences: true)
+        let kept = lines.filter { line -> Bool in
+            guard let data = line.data(using: .utf8),
+                  let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let ts = obj["timestamp"] as? Double else { return false }
+            return ts >= cutoff
+        }
+        guard kept.count < lines.count else { return }
+        try? (kept.map(String.init).joined(separator: "\n") + "\n")
+            .write(to: eventsURL, atomically: true, encoding: .utf8)
     }
 
     private func sendCommitNotification() {

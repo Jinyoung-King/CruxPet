@@ -12,7 +12,7 @@ struct SlimeView: View {
     private var totalHeight: CGFloat { appearance.size + 40 + wanderPad * 2 }
 
     var body: some View {
-        TimelineView(.animation) { timeline in
+        TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { timeline in
             Canvas { context, size in
                 let t = timeline.date.timeIntervalSinceReferenceDate
 

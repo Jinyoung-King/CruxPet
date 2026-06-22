@@ -22,7 +22,7 @@ struct CatView: View {
     }
 
     var body: some View {
-        TimelineView(.animation) { tl in
+        TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { tl in
             Canvas { ctx, size in
                 let t = tl.date.timeIntervalSinceReferenceDate
                 drawCat(&ctx, size: size, t: t)

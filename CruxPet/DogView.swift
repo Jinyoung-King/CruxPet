@@ -19,7 +19,7 @@ struct DogView: View {
     private var earColor:  Color  { Color(hex: level >= 35 ? "#C9963F" : "#C49A6C") }
 
     var body: some View {
-        TimelineView(.animation) { tl in
+        TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { tl in
             Canvas { ctx, size in
                 let t = tl.date.timeIntervalSinceReferenceDate
                 drawDog(&ctx, size: size, t: t)
