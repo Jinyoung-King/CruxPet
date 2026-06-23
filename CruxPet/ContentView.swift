@@ -298,7 +298,7 @@ struct ContentView: View {
                 }
             }
         }
-        .frame(width: 280, height: 400)
+        .frame(width: 280, height: showCustomize ? nil : 400)
         .background(.ultraThinMaterial)
         .animation(.easeInOut(duration: 0.15), value: showCustomize)
         .animation(.easeInOut(duration: 0.15), value: showSharePreview)
