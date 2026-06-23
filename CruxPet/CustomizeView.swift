@@ -48,8 +48,7 @@ struct CustomizeView: View {
 
             Divider()
 
-            ScrollView {
-                VStack(spacing: 0) {
+            VStack(spacing: 0) {
                     // 펫 종류
                     VStack(alignment: .leading, spacing: 8) {
                         Text("펫 종류").font(.caption).foregroundStyle(.secondary)
@@ -171,7 +170,6 @@ struct CustomizeView: View {
                     }
                     .padding(.horizontal, 14)
                     .padding(.vertical, 12)
-                }
             }
 
             Divider()
@@ -189,6 +187,6 @@ struct CustomizeView: View {
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
         }
-        .frame(width: 220, height: 560)
+        .frame(width: 220)
     }
 }
